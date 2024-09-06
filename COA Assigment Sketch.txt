@@ -1,0 +1,18 @@
+Restaurant Order Kiosk - Noodle Shop
+
+Log in module
+Calc module
+Summary module
+
+- Login page
+- Home page
+	- Dine-in/take away
+	- pay at counter or here
+	- Level 1 - Food Menu
+		- Pan Mee
+		- Chili Pan Mee	 
+	- Level 2 - Food option
+		- set (+drink)/ala-carte
+- {calculation}
+- {summary}
+- {loop back)
