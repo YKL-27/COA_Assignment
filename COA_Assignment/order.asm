@@ -27,7 +27,7 @@ INCLUDE Irvine32.inc
     sideDishChoice DWORD ?
 
 .code
-main PROC
+selectFoodPage PROC
     ; display Mealmenu and get valid selection
     call DisplayMealMenu
     call GetValidMealSelection
@@ -37,7 +37,7 @@ main PROC
     call GetValidSideDishSelection
 
     exit
-main ENDP
+selectFoodPage ENDP
 
 ; function mealmenu
 DisplayMealMenu PROC
