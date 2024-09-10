@@ -6,25 +6,25 @@ ExitProcess proto,dwExitCode:dword
 
 
 .data
-;==============================COMMON USED
-;------------------------------------------DISPLAY MESSAGES
+;==============================DISPLAY MESSAGES
+;------------------------------------------COMMONLY USED
     dash_count      DWORD 30    ; Define the number of dashes to print
     dash            BYTE '-'    ; Define the dash character
-
-;==============================LOGIN
-;------------------------------------------DISPLAY MESSAGES
+;------------------------------------------LOGIN
     usernamePrompt  BYTE "Enter username: ", 0
     passwordPrompt  BYTE "Enter password: ", 0
     successMsg      BYTE "Login successful!", 0
     failMsg         BYTE "Invalid username or password!", 0
-;------------------------------------------VARIABLES
-    username        BYTE 20 DUP(0)   
-    password        BYTE 20 DUP(0)   
-    correctUsername BYTE "user123", 0  
-    correctPassword BYTE "pass123", 0 
-
-;==============================SELECT FOOD
-;------------------------------------------DISPLAY MESSAGES
+;------------------------------------------ENTER CUSTOMER INFO
+    welcomeMsg      BYTE "Welcome"
+    namePrompt      BYTE "Enter name:"
+    inputBuffer     BYTE 26 DUP(0)  ; 25 characters + NULL terminator
+    errorMsg        BYTE "Invalid input! Please enter only letters and spaces."
+    retryMsg        BYTE "Please try again:"
+    dineInPrompt    BYTE "Dine-in / takeaway (D/T):"
+    dineInErrorMsg  BYTE "Invalid choice! Please enter 'D' or 'T'."
+    dineInInput     BYTE ?
+;------------------------------------------SELECT FOOD
     menuTitle       BYTE "Select a meal:", 0
     foodA           BYTE "A - Food A", 0
     foodB           BYTE "B - Food B", 0
@@ -42,7 +42,15 @@ ExitProcess proto,dwExitCode:dword
     sideAOnlyMsg    BYTE "Set with A", 0
     sideBOnlyMsg    BYTE "Set with B", 0
     sideABMsg       BYTE "Set with A + B", 0
-;------------------------------------------VARIABLES
+
+;==============================VARIABLES
+;------------------------------------------LOGIN
+    username        BYTE 20 DUP(0)   
+    password        BYTE 20 DUP(0)   
+    correctUsername BYTE "user123", 0  
+    correctPassword BYTE "pass123", 0 
+;------------------------------------------ENTER CUSTOMER INFO
+;------------------------------------------SELECT FOOD
     mealChoice      BYTE ?
     sideDishChoice  DWORD ?
 
