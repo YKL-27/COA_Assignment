@@ -23,7 +23,7 @@ main PROC
     call Crlf
 
     ; Print dashes
-    call print_dash
+    call printDash
     call Crlf
 
     ; Input loop for name
@@ -103,7 +103,7 @@ DineInInputValid:
 
 main ENDP
 
-print_dash PROC
+printDash PROC
     mov al, dash
     mov ecx, 30
 print_loop:
@@ -111,7 +111,7 @@ print_loop:
     call WriteChar
     loop print_loop
     ret
-print_dash ENDP
+printDash ENDP
 
 ; Validate input for letters and spaces only
 ValidateNameInput PROC

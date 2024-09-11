@@ -2,7 +2,7 @@ INCLUDE Irvine32.inc
 
 .data
     ; display food menu message
-    dash_count DWORD 30     ; Define the number of dashes to print
+    dashAmount DWORD 30     ; Define the number of dashes to print
     dash BYTE '-'           ; Define the dash character
     menuTitle    BYTE "Select a meal:", 0
     foodA        BYTE "A - Food A", 0
@@ -41,7 +41,7 @@ selectFoodPage ENDP
 
 ; function mealmenu
 DisplayMealMenu PROC
-    call print_dash ; call function to print 30 dashes
+    call printDash ; call function to print 30 dashes
     call Crlf
 
     ; display menu title and food option
@@ -190,15 +190,15 @@ SideDishABSelected:
     ret
 GetValidSideDishSelection ENDP
 
-print_dash PROC
+printDash PROC
     ; Set up the loop counter and character
     mov al, dash                   ; Load the dash character into AL
-    mov ecx, dash_count            ; Load the dash count into ECX
+    mov ecx, dashAmount            ; Load the dash count into ECX
 
 print_loop:
     call WriteChar                 ; Call WriteChar to print the character
     loop print_loop                ; Decrement ECX and loop until ECX reaches 0
     ret                           ; Return to the calling procedure
-print_dash ENDP
+printDash ENDP
 
 END main
