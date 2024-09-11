@@ -14,8 +14,8 @@ ExitProcess proto,dwExitCode:dword
 ;------------------------------------------LOGIN
     usernamePrompt      BYTE "Enter username: ", 0
     passwordPrompt      BYTE "Enter password: ", 0
-    successMsg          BYTE "Login successful!", 0Dh, 0Ah, 0 
-    failMsg             BYTE "Invalid username or password!", 0Dh, 0Ah, 0 
+    successMsg          BYTE "Login successful!", 0 
+    failMsg             BYTE "Invalid username or password!", 0 
 ;------------------------------------------ENTER CUSTOMER INFO
     welcomeMsg          BYTE "Welcome", 0
     namePrompt          BYTE "Enter name:", 0
@@ -62,8 +62,7 @@ ExitProcess proto,dwExitCode:dword
 
 .code
 main PROC
-;==============================MAIN
-;------------------------------------------LOGIN PAGE
+;==============================PART 1: LOGIN
 login:
     ; Prompt input username display
     mov edx, OFFSET usernamePrompt
@@ -97,23 +96,24 @@ login:
     cmp eax, 0
     jne loginFailed 
 
-;------------------------------------------LOGIN SUCCESS
-    ; If both match, login successful & start ordering program
+    ;------------------------------------------LOGIN SUCCESS
     mov edx, OFFSET successMsg
     call WriteString
     call selectFoodPage 
 
-;------------------------------------------LOGIN FAILURE
-loginFailed:
-    ; Display failure message
-    mov edx, OFFSET failMsg
-    call WriteString
-    mov dl, 13
-    call WriteChar
-    jmp login
+    ;------------------------------------------LOGIN FAILURE
+    loginFailed:
+        mov edx, OFFSET failMsg
+        call WriteString
+        mov dl, 13
+        call WriteChar
+        jmp login
 
-;==============================SELECT FOOD PAGE
-;------------------------------------------MAIN FUNCTION
+;==============================PART 2: ENTER CUSTOMERS' INFO
+orderLoop PROC
+    orderLoop ENDP
+
+;==============================PART 3: SELECT FOOD PAGE
 selectFoodPage PROC
     ; display Mealmenu and get valid selection
     call DisplayMealMenu
@@ -148,6 +148,7 @@ DisplayMealMenu PROC
     DisplayMealMenu ENDP
 
 ;------------------------------------------DISPLAY SIDE DISH MENU
+;==============================PART 3.5: DISPLAY ORDER
 DisplaySideDishMenu PROC
     ; display sidedish title and set option
     mov edx, OFFSET sideDishTitle
@@ -277,7 +278,8 @@ GetValidSideDishSelection PROC
         ret
     GetValidSideDishSelection ENDP
 
-
+;==============================PART 4: CALCULATIONS
+;==============================PART 5: DISPLAY INVOICE (ALL ORDER)
 ;==============================CUSTOM FUNCTIONS
 ;------------------------------------------PRINT PAGE SEPERATION LINE
 printDash PROC
