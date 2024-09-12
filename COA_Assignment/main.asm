@@ -1,8 +1,8 @@
 INCLUDE Irvine32.inc
 .386
-.model flat,stdcall
+.model flat, stdcall
 .stack 4096
-ExitProcess proto,dwExitCode:dword
+ExitProcess proto, dwExitCode:dword
 
 
 .data
@@ -46,8 +46,9 @@ ExitProcess proto,dwExitCode:dword
 ;------------------------------------------CONSTANTS
     CORRECT_USERNAME    BYTE "user123", 0  
     CORRECT_PASSWORD    BYTE "pass123", 0 
-    FOOD_PRICE          DWORD 8, 10
-    SIDEDISH_PRICE      DWORD 0, 1.5, 2, 3
+    FOOD_PRICE          DWORD 8.50, 10.00
+    SIDEDISH_PRICE      DWORD 0.00, 1.20, 2.40, 3.00
+    DISCOUNT            DWORD 0.10
 ;------------------------------------------LOGIN
     username            BYTE 20 DUP(0)   
     password            BYTE 20 DUP(0)   
@@ -99,7 +100,7 @@ login:
     ;------------------------------------------LOGIN SUCCESS
     mov edx, OFFSET successMsg
     call WriteString
-    call selectFoodPage 
+    call orderLoop 
 
     ;------------------------------------------LOGIN FAILURE
     loginFailed:
@@ -110,10 +111,12 @@ login:
         jmp login
 
 ;==============================PART 2: ENTER CUSTOMERS' INFO
+;==============================PART 3: ORDERING
 orderLoop PROC
+    call selectFoodPage 
+    call orderLoop 
     orderLoop ENDP
 
-;==============================PART 3: SELECT FOOD PAGE
 selectFoodPage PROC
     ; display Mealmenu and get valid selection
     call DisplayMealMenu
@@ -123,7 +126,6 @@ selectFoodPage PROC
     call DisplaySideDishMenu
     call GetValidSideDishSelection
 
-    exit
     selectFoodPage ENDP
 
 ;------------------------------------------DISPLAY FOOD MENU
@@ -132,6 +134,8 @@ DisplayMealMenu PROC
     call Crlf
 
     ; display menu title and food option
+    mov edx, OFFSET newLine
+    call WriteString
     mov edx, OFFSET menuTitle
     call WriteString
     call Crlf
@@ -151,6 +155,8 @@ DisplayMealMenu PROC
 ;==============================PART 3.5: DISPLAY ORDER
 DisplaySideDishMenu PROC
     ; display sidedish title and set option
+    mov edx, OFFSET newLine
+    call WriteString
     mov edx, OFFSET sideDishTitle
     call WriteString
     call Crlf
@@ -183,7 +189,11 @@ GetValidMealSelection PROC
         ; check the user input is valid or not
         cmp mealChoice, 'A'
         je SelectFoodA
+        cmp mealChoice, 'a'
+        je SelectFoodA
         cmp mealChoice, 'B'
+        je SelectFoodB
+        cmp mealChoice, 'b'
         je SelectFoodB
 
         ; if user input is invalid
@@ -279,7 +289,7 @@ GetValidSideDishSelection PROC
     GetValidSideDishSelection ENDP
 
 ;==============================PART 4: CALCULATIONS
-;==============================PART 5: DISPLAY INVOICE (ALL ORDER)
+;==============================PART 5: DISPLAY INVOICE (ALL ORDERS)
 ;==============================CUSTOM FUNCTIONS
 ;------------------------------------------PRINT PAGE SEPERATION LINE
 printDash PROC
@@ -288,17 +298,17 @@ printDash PROC
     mov ecx, dashAmount         ; Load the dash count into ECX
 
     print_loop:
-        call WriteChar              ; Call WriteChar to print the character
-        loop print_loop             ; Decrement ECX and loop until ECX reaches 0
-        ret                         ; Return to the calling procedure
+        call WriteChar          ; Call WriteChar to print the character
+        loop print_loop         ; Decrement ECX and loop until ECX reaches 0
+        ret                     ; Return to the calling procedure
     printDash ENDP
 
-;------------------------------------------STRING COMPARISON (REGISTER)
+;------------------------------------------STRING COMPARISON (LOGIN)
 strCompare PROC
     ; Compares two strings pointed by ESI and EDI
     ; Returns 0 if strings are equal, 1 otherwise
     
-    push esi    ; 
+    push esi
     push edi
     compareLoop:
         mov al, [esi]    
