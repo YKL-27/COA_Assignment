@@ -4,15 +4,16 @@ INCLUDE Irvine32.inc
 ExitProcess proto, dwExitCode:dword
 
 .data
-welcomeMsg BYTE "Welcome"
-dash BYTE '-'       ; Define dash character
-namePrompt BYTE "Enter name:"
-inputBuffer BYTE 26 DUP(0)  ; 25 characters + NULL terminator
-errorMsg BYTE "Invalid input! Please enter only letters and spaces."
-retryMsg BYTE "Please try again:"
-dineInPrompt BYTE "Dine-in / takeaway (D/T):"
-dineInErrorMsg BYTE "Invalid choice! Please enter 'D' or 'T'."
-dineInInput BYTE ?
+welcomeMsg      BYTE "Welcome to Our Restaurant", 0
+dash            BYTE "------------------------------", 0    
+namePrompt      BYTE "Enter name (up to 25 characters): ", 0
+inputBuffer     BYTE 26 DUP(0)                              
+errorMsg        BYTE "Invalid input! Please enter only letters and spaces and no more than 25 characters.", 0
+retryMsg        BYTE "Please try again: ", 0
+dineInPrompt    BYTE "Dine-in / takeaway (D/T): ", 0
+dineInErrorMsg  BYTE "Invalid choice! Please enter 'D' or 'T'.", 0
+dineInInput     BYTE ?
+namelen         BYTE 0
 
 .code
 main PROC
@@ -21,151 +22,116 @@ main PROC
     mov edx, esi
     call WriteString
     call Crlf
-
-    ; Print dashes
-    call printDash
-    call Crlf
+    call print_dash
 
     ; Input loop for name
 InputNameLoop:
     ; Display the name prompt
+    call Crlf
     lea esi, namePrompt
     mov edx, esi
     call WriteString
 
     ; Read input
-    mov edx, OFFSET inputBuffer
-    mov ecx, 26
+    lea edx, inputBuffer
+    mov ecx, 25  ; 25 characters maximum
     call ReadString
 
-    ; Validate name input
-    call ValidateNameInput
+    ; Validate the name
+    xor esi, esi              ; Reset index to 0
+    mov ecx, 0                ; To count string length
 
-    ; Check if input is valid or not
-    cmp eax, 0  ; EAX will be 0 if input is valid
-    je NameInputValid
+CheckNameLoop:
+    mov al, [inputBuffer + esi] ; Load current character
+    cmp al, 0                   ; Null terminator reached?
+    je NameValid                ; Jump to valid if null found
 
-    ; If input is invalid, display error message and retry prompt
-    mov edx, OFFSET errorMsg
+    ; Check if it's a letter (A-Z or a-z) or space
+    cmp al, 'A'
+    jb InvalidName              ; Below 'A'
+    cmp al, 'Z'
+    jbe ValidChar               ; Valid if 'A' <= al <= 'Z'
+
+    cmp al, 'a'
+    jb InvalidName              ; Below 'a'
+    cmp al, 'z'
+    jbe ValidChar               ; Valid if 'a' <= al <= 'z'
+
+    cmp al, ' '
+    je ValidChar                ; Space is allowed
+    
+    inc namelen
+    cmp namelen, 25
+    jbe ValidChar
+
+InvalidName:
+    ; Display error message
+    call Crlf
+    lea edx, errorMsg
     call WriteString
     call Crlf
-    mov edx, OFFSET retryMsg
+    lea edx, retryMsg
     call WriteString
     call Crlf
 
     ; Clear input buffer
-    mov edi, OFFSET inputBuffer
+    lea edi, inputBuffer
     mov ecx, 26
     xor al, al
     rep stosb
+    jmp InputNameLoop           ; Restart input loop
 
-    ; Repeat input loop
-    jmp InputNameLoop
+ValidChar:
+    inc esi                     ; Move to next character
+    inc ecx                     ; Count the length
+    cmp ecx, 25                 ; Check if length exceeds 25
+    ja InvalidName              ; Too long
+    jmp CheckNameLoop           ; Continue checking
 
-NameInputValid:
-    ; Display the dine-in/takeaway prompt
+NameValid:
+    ; Dine-in/takeaway prompt
+    call Crlf
     lea esi, dineInPrompt
     mov edx, esi
     call WriteString
-    
 
     ; Input loop for dine-in/takeaway choice
 InputDineInLoop:
-    ; Read dine-in/takeaway choice
     call ReadChar
     mov dineInInput, al
 
     ; Validate dine-in/takeaway choice
-    call ValidateDineInInput
+    cmp dineInInput, 'D'
+    je DineInValid
+    cmp dineInInput, 'd'
+    je DineInValid
+    cmp dineInInput, 'T'
+    je DineInValid
+    cmp dineInInput, 't'
+    je DineInValid
 
-    ; Check if input is valid or not
-    cmp eax, 0  ; EAX will be 0 if input is valid
-    je DineInInputValid
-
-    ; If input is invalid, display error message and retry prompt
-    mov edx, OFFSET dineInErrorMsg
+DineInInvalid:
+    ; Invalid choice handling
+    call Crlf
+    lea edx, dineInErrorMsg
     call WriteString
     call Crlf
-
-    ; Prompt again
-    lea esi, dineInPrompt
-    mov edx, esi
-    call WriteString
-
-    ; Repeat input loop
     jmp InputDineInLoop
 
-DineInInputValid:
-    ; You can add code here to process the valid input
+DineInValid:
+    ; Final separator
+    call Crlf
+    call print_dash
 
     ; Exit program
     INVOKE ExitProcess, 0
 
+print_dash PROC
+    lea esi, dash
+    mov edx, esi
+    call WriteString
+    ret
+print_dash ENDP
+
 main ENDP
-
-printDash PROC
-    mov al, dash
-    mov ecx, 30
-print_loop:
-    mov edx, eax
-    call WriteChar
-    loop print_loop
-    ret
-printDash ENDP
-
-; Validate input for letters and spaces only
-ValidateNameInput PROC
-    mov esi, OFFSET inputBuffer
-    movzx ecx, BYTE PTR [esi]
-    mov eax, 0  ; Assume valid input
-
-CheckNameLoop:
-    cmp ecx, 0  ; Check if end of string
-    je DoneName
-
-    ; Check if character is a letter (A-Z or a-z) or space
-    cmp ecx, ' '
-    je ContinueName
-    cmp ecx, 'A'
-    jb InvalidNameInput
-    cmp ecx, 'Z'
-    jbe ContinueName
-    cmp ecx, 'a'
-    jb InvalidNameInput
-    cmp ecx, 'z'
-    jbe ContinueName
-    jmp InvalidNameInput
-
-ContinueName:
-    inc esi
-    movzx ecx, BYTE PTR [esi]
-    ; Check if length exceeds 25 characters
-    cmp esi, OFFSET inputBuffer + 25
-    jae InvalidNameInput
-    jmp CheckNameLoop
-
-InvalidNameInput:
-    mov eax, 1  ; Set EAX to 1 (invalid input)
-    ret
-
-DoneName:
-    mov eax, 0  ; Set EAX to 0 (valid input)
-    ret
-ValidateNameInput ENDP
-
-; Validate input for 'D' or 'T' only
-ValidateDineInInput PROC
-    cmp dineInInput, 'D'
-    je ValidDineIn
-    cmp dineInInput, 'T'
-    je ValidDineIn
-
-InvalidDineInInput:
-    mov eax, 1  ; Set EAX to 1 (invalid input)
-    ret
-
-ValidDineIn:
-    mov eax, 0  ; Set EAX to 0 (valid input)
-    ret
-ValidateDineInInput ENDP
 END main

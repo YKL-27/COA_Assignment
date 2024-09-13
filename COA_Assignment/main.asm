@@ -5,23 +5,23 @@ INCLUDE Irvine32.inc
 ExitProcess proto, dwExitCode:dword
 
 
-.data
+.data   ko
 ;==============================DISPLAY MESSAGES
 ;------------------------------------------COMMONLY USED
     dashAmount          DWORD 30
     dash                BYTE '-'
-    newLine             BYTE 0Dh, 0Ah, 0
 ;------------------------------------------LOGIN
     usernamePrompt      BYTE "Enter username: ", 0
     passwordPrompt      BYTE "Enter password: ", 0
     successMsg          BYTE "Login successful!", 0 
+    startupMsg          BYTE "Starting "
     failMsg             BYTE "Invalid username or password!", 0 
 ;------------------------------------------ENTER CUSTOMER INFO
-    welcomeMsg          BYTE "Welcome", 0
-    namePrompt          BYTE "Enter name:", 0
-    errorMsg            BYTE "Invalid input! Please enter only letters and spaces.", 0
-    retryMsg            BYTE "Please try again:", 0
-    dineInPrompt        BYTE "Dine-in / takeaway (D/T):", 0
+    welcomeMsg          BYTE "Welcome to Our Restaurant", 0
+    namePrompt          BYTE "Enter name (up to 25 characters): ", 0
+    errorMsg            BYTE "Invalid input! Please enter only letters and spaces and no more than 25 characters.", 0
+    retryMsg            BYTE "Please try again: ", 0
+    dineInPrompt        BYTE "Dine-in / takeaway (D/T): ", 0
     dineInErrorMsg      BYTE "Invalid choice! Please enter 'D' or 'T'.", 0
 ;------------------------------------------SELECT FOOD
     menuTitle           BYTE "Select a meal:", 0
@@ -111,6 +111,8 @@ login:
         jmp login
 
 ;==============================PART 2: ENTER CUSTOMERS' INFO
+InputNameLoop PROC
+InputNameLoop ENDP
 ;==============================PART 3: ORDERING
 orderLoop PROC
     call selectFoodPage 
@@ -134,8 +136,7 @@ DisplayMealMenu PROC
     call Crlf
 
     ; display menu title and food option
-    mov edx, OFFSET newLine
-    call WriteString
+    call Crlf
     mov edx, OFFSET menuTitle
     call WriteString
     call Crlf
@@ -155,8 +156,7 @@ DisplayMealMenu PROC
 ;==============================PART 3.5: DISPLAY ORDER
 DisplaySideDishMenu PROC
     ; display sidedish title and set option
-    mov edx, OFFSET newLine
-    call WriteString
+    call Crlf
     mov edx, OFFSET sideDishTitle
     call WriteString
     call Crlf
