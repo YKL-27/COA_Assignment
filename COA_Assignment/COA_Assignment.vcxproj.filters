@@ -24,5 +24,8 @@
     <MASM Include="cust.asm">
       <Filter>Source Files</Filter>
     </MASM>
+    <MASM Include="cust_new.asm">
+      <Filter>Source Files</Filter>
+    </MASM>
   </ItemGroup>
 </Project>

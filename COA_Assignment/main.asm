@@ -5,7 +5,7 @@ INCLUDE Irvine32.inc
 ExitProcess proto, dwExitCode:dword
 
 
-.data   ko
+.data
 ;==============================DISPLAY MESSAGES
 ;------------------------------------------COMMONLY USED
     dashAmount          DWORD 30
@@ -323,12 +323,12 @@ strCompare PROC
 
     notEqual:
         mov eax, 1       
-        jmp done
+        jmp doneCompare
 
     equal:
         mov eax, 0       
 
-    done:
+    doneCompare:
         pop edi          
         pop esi
         ret
