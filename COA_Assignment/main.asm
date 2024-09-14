@@ -20,19 +20,19 @@ ExitProcess proto, dwExitCode:dword
 ;------------------------------------------ENTER CUSTOMER INFO
     welcomeMsg          BYTE "Welcome to Our Restaurant", 0
 ;~~~ENTER NAME
-    inputMsg            BYTE "Enter name (up to 128 characters):", 0
+    inputMsg            BYTE "Enter name (up to 128 characters):     ", 0
     errorMsg            BYTE "Invalid input. Too long or invalid character.", 0
     tooLongMsg          BYTE "Input too long. Max length is 128 characters.", 0
     largeLenMsg         BYTE "Length between 50 and 128 characters. Number of characters entered: ", 0
     reenterMsg          BYTE "Please re-enter", 0
 ;~~~ENTER MODE
-    dineOrTakeMsg       BYTE "Dine-in or Takeaway? Enter 'D' or 'T':", 0
+    dineOrTakeMsg       BYTE "Dine-in or Takeaway? Enter 'D' or 'T': ", 0
     invalidDineTakeMsg  BYTE "Invalid input. Please enter 'D' or 'T'.", 0
 ;~~~ENTER PROMO CODE (OPTIONAL)
     promoMsg            BYTE "Do you have promo code to enter? (Y/N): ", 0
     invalidPromoMsg     BYTE "Invalid input. Please enter 'Y' or 'N'.", 0
     promoCodeMsg        BYTE "Promo Code: ", 0
-    invalidPromoCodeMsg BYTE "Invalid promo code. Do you wish to retry? (Y/N)", 0
+    invalidPromoCodeMsg BYTE "Invalid promo code. Do you wish to retry? (Y/N): ", 0
 ;------------------------------------------SELECT FOOD
 ;~~~SELECT MEAL
     menuTitle           BYTE "Select A Meal:", 0
@@ -68,13 +68,16 @@ ExitProcess proto, dwExitCode:dword
     username            BYTE 20 DUP(0)   
     password            BYTE 20 DUP(0)   
 ;------------------------------------------ENTER CUSTOMER INFO
-    inputCustName       BYTE 129 DUP(0)  ; Buffer to hold input (128 characters + null terminator)
-    inputPromoCode      BYTE 10 DUP(0)   ; Buffer for promo code input (maximum 10 characters)
+    inputCustName       BYTE 129 DUP(0) ; Buffer to hold input (128 characters + null terminator)
+    inputDT             BYTE 2 DUP(?)   ; D / T
+    inputYN             BYTE 2 DUP(?)   ; Y / N
+    inputPromoCode      BYTE 10 DUP(0)  ; Buffer for promo code input (maximum 10 characters)
 ;------------------------------------------SELECT FOOD
-    inputMeal           BYTE 8 DUP(?)   ; Define a buffer of 5 bytes (for user input)
+    inputOrder          BYTE 2 DUP(?)   ; Define a buffer of 5 bytes (for user input)
     mealChoice          BYTE ?
     sideDishChoice      DWORD ?
 ;------------------------------------------CALCULATION
+    usingPromo          BYTE 0
 
 
 .code
@@ -102,14 +105,14 @@ login:
     ; Compare the entered username with the correct username
     mov esi, OFFSET username
     mov edi, OFFSET CORRECT_USERNAME
-    call strCompare
+    call StrCompare
     cmp eax, 0
     jne loginFailed 
     
     ; Compare the entered password with the correct one
     mov esi, OFFSET password
     mov edi, OFFSET CORRECT_PASSWORD
-    call strCompare
+    call StrCompare
     cmp eax, 0
     jne loginFailed 
 
@@ -168,6 +171,7 @@ inputCustInfoLoop PROC
     done:
         ; End the program
         call WaitMsg
+        call Crlf
         call orderLoop
     inputCustInfoLoop ENDP
 
@@ -232,6 +236,8 @@ CheckNameCharacters PROC
         lodsb               ; Load the next character into AL
         cmp al, 0           ; Check if it's the end of the string (null terminator)
         je valid_input      ; If it's the end, input is valid
+        cmp al, 'z'
+        jbe check_loop      ; If it's a space character, continue checking
         cmp al, 'A'         
         jb invalid_input    ; If less than 'A', it's invalid
         cmp al, 'Z'         
@@ -269,7 +275,7 @@ dine_or_takeaway_check PROC
         call WriteString
 
         ; Read the input (expecting 1 character)
-        mov edx, OFFSET inputCustName
+        mov edx, OFFSET inputDT
         mov ecx, 2      ; Read only one character plus null terminator
         call ReadString
 
@@ -285,7 +291,7 @@ dine_or_takeaway_check PROC
 
 ; Check if input is 'D', 'd', 'T', or 't'
 CheckDineTake PROC
-    mov esi, OFFSET inputCustName
+    mov esi, OFFSET inputDT
     lodsb           ; Load the first character from the buffer into AL
 
     ; Check for 'D', 'd', 'T', 't'
@@ -313,7 +319,6 @@ CheckDineTake PROC
         ret
     CheckDineTake ENDP
 
-
 ; Promo code check function
 promo_code_check PROC
     promo_input_loop:
@@ -322,37 +327,36 @@ promo_code_check PROC
         call WriteString
 
         ; Read input (expecting Y/N)
-        mov edx, OFFSET inputCustName
+        mov edx, OFFSET inputYN
         mov ecx, 2      ; Read one character plus null terminator
         call ReadString
 
         ; Check if input is 'Y' or 'N'
-        mov al, inputCustName
+        mov al, inputYN
         cmp al, 'Y'
         je promo_code_entry
         cmp al, 'y'
         je promo_code_entry
-        cmp al, 'N'
-        je no_promo_code
-        cmp al, 'n'
-        je no_promo_code
+        jmp no_promo_code
+        ; cmp al, 'N'
+        ; je no_promo_code
+        ; cmp al, 'n'
+        ; je no_promo_code
 
         ; Invalid input, re-enter loop
-        mov edx, OFFSET invalidPromoMsg
-        call WriteString
-        call Crlf
-        jmp promo_input_loop
+        ; mov edx, OFFSET invalidPromoMsg
+        ; call WriteString
+        ; call Crlf
+        ; jmp promo_input_loop
 
     promo_code_entry:
         ; Ask for promo code
         call check_promo_code
         
-
     no_promo_code:
         ; No promo code, continue
-    ret
+        ret
     promo_code_check ENDP
-
 
 ; Check promo code validity
 check_promo_code PROC
@@ -379,7 +383,16 @@ check_promo_code PROC
         mov edx, OFFSET invalidPromoCodeMsg
         call WriteString
         call Crlf
-        jmp promo_code_loop
+        ; Read input (expecting Y/N)
+        mov edx, OFFSET inputYN
+        mov ecx, 2      ; Read one character plus null terminator
+        call ReadString
+        mov al, inputYN
+        cmp al, 'Y'
+        je promo_code_loop
+        cmp al, 'y'
+        je promo_code_loop
+        ret
 
     valid_promo_code:
         ; Promo code is valid, continue
@@ -458,9 +471,9 @@ DisplaySideDishMenu PROC
 GetValidMealSelection PROC
     ; Display the meal selection prompt again
     GetValidMealLoop:
-        mov ecx, DWORD PTR [inputMeal]
+        mov ecx, DWORD PTR [inputOrder]
         call ReadChar              ; Read a single character input
-        mov al, inputMeal          ; Move the character to `al`
+        mov al, inputOrder          ; Move the character to `al`
         cmp al, 0                  ; Check if empty (unlikely with ReadChar)
         je InvalidInput
 
@@ -615,8 +628,8 @@ printDash PROC
         ret                     ; Return to the calling procedure
     printDash ENDP
 
-;------------------------------------------STRING COMPARISON (LOGIN)
-strCompare PROC
+;------------------------------------------STRING COMPARISON
+StrCompare PROC
     ; Compares two strings pointed by ESI and EDI
     ; Returns 0 if strings are equal, 1 otherwise
     
@@ -645,7 +658,7 @@ strCompare PROC
         pop esi
         ret
 
-    strCompare ENDP
+    StrCompare ENDP
 
 invoke ExitProcess, 0
 main ENDP
