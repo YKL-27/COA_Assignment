@@ -121,7 +121,7 @@ login:
     call WriteString
     call Crlf
     call Crlf
-    call inputCustInfoLoop 
+    call inputCustInfo 
 
     ;------------------------------------------LOGIN FAILURE
     loginFailed:
@@ -132,7 +132,7 @@ login:
         jmp login
 
 ;==============================PART 2: ENTER CUSTOMERS' INFO
-inputCustInfoLoop PROC
+inputCustInfo PROC
     input_loop_start:
         mov edx, offset welcomeMsg
         call WriteString
@@ -169,11 +169,10 @@ inputCustInfoLoop PROC
         jmp done
 
     done:
-        ; End the program
-        call WaitMsg
+        ;call WaitMsg
         call Crlf
         call orderLoop
-    inputCustInfoLoop ENDP
+    inputCustInfo ENDP
 
 
 ; Length check function
@@ -405,7 +404,6 @@ check_promo_code PROC
 orderLoop PROC
     call selectFoodPage 
     call orderLoop 
-    call ReadChar
     orderLoop ENDP
 
 selectFoodPage PROC
@@ -469,15 +467,16 @@ DisplaySideDishMenu PROC
 
 ;------------------------------------------FOOD MENU (mealchoice) INPUT & VALIDATION
 GetValidMealSelection PROC
-    ; Display the meal selection prompt again
     GetValidMealLoop:
-        mov ecx, DWORD PTR [inputOrder]
-        call ReadChar              ; Read a single character input
-        mov al, inputOrder          ; Move the character to `al`
-        cmp al, 0                  ; Check if empty (unlikely with ReadChar)
-        je InvalidInput
-
-        ; Validate the input (check if 'A', 'a', 'B', or 'b')
+        ; Display the meal selection prompt again
+        mov edx, OFFSET inputOrder  ; Set the buffer to store the input
+        mov ecx, 2                  ; Limit to 1 character + null terminator
+        call ReadString              ; Read the string input from the user
+        
+        ; Get the first character from the input buffer
+        mov al, inputOrder           ; Move the first character to AL
+        
+        ; Validate the input (check if it's 'A', 'a', 'B', or 'b')
         cmp al, 'A'
         je ValidInput
         cmp al, 'a'
@@ -492,12 +491,14 @@ GetValidMealSelection PROC
         mov edx, OFFSET invalidInputMsg
         call WriteString
         call Crlf
+        call DisplayMealMenu
         jmp GetValidMealLoop        ; Loop again if input is invalid
 
     ValidInput:
         mov mealChoice, al          ; Store valid input in mealChoice
         ret
 GetValidMealSelection ENDP
+
 
 
 ;------------------------------------------SIDE DISH MENU (sideDishchoice) INPUT & VALIDATION
@@ -598,7 +599,7 @@ displaySelection PROC
         ; Print a newline at the end
         call Crlf
         call Crlf
-        call WaitMsg
+
         ;call FlushInput    ; Flush Enter key from the buffer
         call Crlf
         ret

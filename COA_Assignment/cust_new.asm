@@ -20,7 +20,7 @@ INCLUDE Irvine32.inc
 
 .code
 main PROC
-inputCustInfoLoop PROC:
+inputCustInfo PROC:
 
     mov edx, offset welcomeMsg
     call WriteString
@@ -40,12 +40,12 @@ inputCustInfoLoop PROC:
     ; Check the length of the input
     call CheckCustNameLength
     cmp eax, 1
-    call inputCustInfoLoop    ; If length check fails, re-enter the loop
+    call inputCustInfo    ; If length check fails, re-enter the loop
 
     ; Check the characters of the input
     call CheckNameCharacters
     cmp eax, 1
-    call inputCustInfoLoop    ; If character check fails, re-enter the loop
+    call inputCustInfo    ; If character check fails, re-enter the loop
 
     ; If name is valid, ask for dining preference
     call dine_or_takeaway_check
@@ -60,7 +60,7 @@ done:
     ; End the program
     call WaitMsg
     exit
-inputCustInfoLoop ENDP
+inputCustInfo ENDP
 main ENDP
 
 
