@@ -10,12 +10,13 @@ ExitProcess proto, dwExitCode:dword
 ;------------------------------------------COMMONLY USED
     dashAmount          DWORD 30
     dash                BYTE '-'
+    pauseEnter          BYTE 'Press "Enter" key to continue...'
 ;------------------------------------------LOGIN
     usernamePrompt      BYTE "Enter username: ", 0
     passwordPrompt      BYTE "Enter password: ", 0
     successMsg          BYTE "Login successful!", 0 
     startupMsg          BYTE "Starting "
-    failMsg             BYTE "Invalid username or password!", 0 
+    failMsg             BYTE "Invalid credentials!", 0 
 ;------------------------------------------ENTER CUSTOMER INFO
     welcomeMsg          BYTE "Welcome to Our Restaurant", 0
     namePrompt          BYTE "Enter name (up to 25 characters): ", 0
@@ -24,23 +25,27 @@ ExitProcess proto, dwExitCode:dword
     dineInPrompt        BYTE "Dine-in / takeaway (D/T): ", 0
     dineInErrorMsg      BYTE "Invalid choice! Please enter 'D' or 'T'.", 0
 ;------------------------------------------SELECT FOOD
-    menuTitle           BYTE "Select a meal:", 0
+;~~~SELECT MEAL
+    menuTitle           BYTE "Select A Meal:", 0
     foodA               BYTE "A - Pan Mee", 0
     foodB               BYTE "B - Chilli Pan Mee", 0
-    sideDishTitle       BYTE "Select a side dish:", 0
-    noSideDish          BYTE "1 - No side dish (Ala-carte)", 0
+;~~~SELECT ADDON
+    sideDishTitle       BYTE "Select An Add-On:", 0
+    noSideDish          BYTE "1 - No add-on (Ala-carte)", 0
     setWithA            BYTE "2 - Set with Soya Milk", 0
     setWithB            BYTE "3 - Set with Dumplings", 0
     setWithAB           BYTE "4 - Set with Dumplings & Soya Milk", 0
+;~~~SELECTION PROMPT
     selectionPrompt     BYTE ">> Selection: ", 0
     invalidInputMsg     BYTE "Invalid selection, please try again.", 0
+;~~~SELECTED RESULT
     resultMsg           BYTE "You selected: ", 0
-    foodAMsg            BYTE "Pan Mee", 0
-    foodBMsg            BYTE "Chilli Pan Mee", 0
-    noSideDishMsg       BYTE "No side dish", 0
-    sideAOnlyMsg        BYTE "Set with Soya Milk", 0
-    sideBOnlyMsg        BYTE "Set with Dumplings", 0
-    sideABMsg           BYTE "Set with Dumplings & Soya Milk", 0
+    setMsg              BYTE "Set ", 0
+    foodAMsg            BYTE "Pan Mee ", 0
+    foodBMsg            BYTE "Chilli Pan Mee ", 0
+    sideAOnlyMsg        BYTE "with Soya Milk", 0
+    sideBOnlyMsg        BYTE "with Dumplings", 0
+    sideABMsg           BYTE "with Dumplings & Soya Milk", 0
 
 ;==============================VARIABLES
 ;------------------------------------------CONSTANTS
@@ -53,9 +58,10 @@ ExitProcess proto, dwExitCode:dword
     username            BYTE 20 DUP(0)   
     password            BYTE 20 DUP(0)   
 ;------------------------------------------ENTER CUSTOMER INFO
-    inputBuffer         BYTE 26 DUP(0)  ; 25 characters + NULL terminator
+    inputCustName       BYTE 26 DUP(0)  ; 25 characters + NULL terminator
     dineInInput         BYTE ?
 ;------------------------------------------SELECT FOOD
+    inputMeal           BYTE 5 DUP(?)   ; Define a buffer of 5 bytes (for user input)
     mealChoice          BYTE ?
     sideDishChoice      DWORD ?
 ;------------------------------------------CALCULATION
@@ -100,34 +106,36 @@ login:
     ;------------------------------------------LOGIN SUCCESS
     mov edx, OFFSET successMsg
     call WriteString
+    call Crlf
+    call Crlf
     call orderLoop 
 
     ;------------------------------------------LOGIN FAILURE
     loginFailed:
         mov edx, OFFSET failMsg
         call WriteString
-        mov dl, 13
-        call WriteChar
+        call Crlf
+        call Crlf
         jmp login
 
 ;==============================PART 2: ENTER CUSTOMERS' INFO
 InputNameLoop PROC
-InputNameLoop ENDP
+    InputNameLoop ENDP
 ;==============================PART 3: ORDERING
 orderLoop PROC
     call selectFoodPage 
     call orderLoop 
+    call ReadChar
     orderLoop ENDP
 
 selectFoodPage PROC
     ; display Mealmenu and get valid selection
     call DisplayMealMenu
     call GetValidMealSelection
-
     ; display SideDishMenu and get valid selection
     call DisplaySideDishMenu
     call GetValidSideDishSelection
-
+    call displaySelection
     selectFoodPage ENDP
 
 ;------------------------------------------DISPLAY FOOD MENU
@@ -157,6 +165,7 @@ DisplayMealMenu PROC
 DisplaySideDishMenu PROC
     ; display sidedish title and set option
     call Crlf
+    call Crlf
     mov edx, OFFSET sideDishTitle
     call WriteString
     call Crlf
@@ -180,49 +189,36 @@ DisplaySideDishMenu PROC
 
 ;------------------------------------------FOOD MENU (mealchoice) INPUT & VALIDATION
 GetValidMealSelection PROC
-    ; loop until user input valid selection
-    mov ecx, 1      ; initialize count of loop (count loop is 1)
+    ; Display the meal selection prompt again
     GetValidMealLoop:
-        call ReadChar   
-        mov mealChoice, al
+        mov ecx, inputMeal
+        call ReadChar              ; Read a single character input
+        mov al, inputMeal          ; Move the character to `al`
+        cmp al, 0                  ; Check if empty (unlikely with ReadChar)
+        je InvalidInput
 
-        ; check the user input is valid or not
-        cmp mealChoice, 'A'
-        je SelectFoodA
-        cmp mealChoice, 'a'
-        je SelectFoodA
-        cmp mealChoice, 'B'
-        je SelectFoodB
-        cmp mealChoice, 'b'
-        je SelectFoodB
+        ; Validate the input (check if 'A', 'a', 'B', or 'b')
+        cmp al, 'A'
+        je ValidInput
+        cmp al, 'a'
+        je ValidInput
+        cmp al, 'B'
+        je ValidInput
+        cmp al, 'b'
+        je ValidInput
 
-        ; if user input is invalid
+    InvalidInput:
+        ; Handle invalid input
         mov edx, OFFSET invalidInputMsg
         call WriteString
         call Crlf
-        call DisplayMealMenu
+        jmp GetValidMealLoop        ; Loop again if input is invalid
 
-        mov ecx, 1      ; set count loop by 1 again when input is invalid
-        jmp GetValidMealLoop
-
-    ;------------------------------------------DISPLAY MESSAGE IF mealchoice = 'A'
-    SelectFoodA:
-        mov edx, OFFSET resultMsg
-        call WriteString
-        mov edx, OFFSET foodAMsg
-        call WriteString
-        call Crlf
+    ValidInput:
+        mov mealChoice, al          ; Store valid input in mealChoice
         ret
+GetValidMealSelection ENDP
 
-    ;------------------------------------------DISPLAY MESSAGE IF mealchoice = 'B'
-    SelectFoodB:
-        mov edx, OFFSET resultMsg
-        call WriteString
-        mov edx, OFFSET foodBMsg
-        call WriteString
-        call Crlf
-        ret
-    GetValidMealSelection ENDP
 
 ;------------------------------------------SIDE DISH MENU (sideDishchoice) INPUT & VALIDATION
 GetValidSideDishSelection PROC
@@ -234,7 +230,63 @@ GetValidSideDishSelection PROC
 
         ; check the user input is valid or not
         cmp sideDishChoice, 1
-        je NoSideDishSelected
+        ret
+        cmp sideDishChoice, 2
+        ret
+        cmp sideDishChoice, 3
+        ret
+        cmp sideDishChoice, 4
+        ret
+
+        ; if user input is invalid
+        mov edx, OFFSET invalidInputMsg
+        call WriteString
+        call Crlf
+        call DisplaySideDishMenu
+        mov ecx, 1          ; set count loop by 1 again when input is invalid
+        jmp GetValidSideDishLoop
+    GetValidSideDishSelection ENDP
+
+displaySelection PROC
+    ; Print "You selected: "
+    mov edx, OFFSET resultMsg
+    call WriteString
+
+    cmp sideDishChoice, 1
+    je notSetMeal
+    ; Display "Set " if it is not ala-carte
+        mov edx, OFFSET setMsg
+        call WriteString
+
+    notSetMeal:
+
+    ; Check for meal selection and print the corresponding message
+    cmp mealChoice, 'A'
+    je SelectFoodA
+    cmp mealChoice, 'a'
+    je SelectFoodA
+    cmp mealChoice, 'B'
+    je SelectFoodB
+    cmp mealChoice, 'b'
+    je SelectFoodB
+
+    SelectFoodA:
+        ; If mealChoice is 'A' or 'a', print "Pan Mee"
+        mov edx, OFFSET foodAMsg
+        call WriteString
+        jmp DisplayAddon
+
+    SelectFoodB:
+        ; If mealChoice is 'B' or 'b', print "Chilli Pan Mee"
+        mov edx, OFFSET foodBMsg
+        call WriteString
+        jmp DisplayAddon
+
+    DisplayAddon:
+        ; Check for side dish selection and print corresponding message
+
+        cmp sideDishChoice, 1
+        je NoAddon
         cmp sideDishChoice, 2
         je SideDishASelected
         cmp sideDishChoice, 3
@@ -242,55 +294,47 @@ GetValidSideDishSelection PROC
         cmp sideDishChoice, 4
         je SideDishABSelected
 
-        ; if user input is invalid
-        mov edx, OFFSET invalidInputMsg
-        call WriteString
-        call Crlf
-        call DisplaySideDishMenu
+    NoAddon:
+        jmp EndDisplay
 
-        mov ecx, 1          ; set count loop by 1 again when input is invalid
-        jmp GetValidSideDishLoop
-
-    ;------------------------------------------DISPLAY MESSAGE IF sideDishchoice = 1
-    NoSideDishSelected:
-        mov edx, OFFSET resultMsg
-        call WriteString
-        mov edx, OFFSET noSideDishMsg
-        call WriteString
-        call Crlf
-        ret
-
-    ;------------------------------------------DISPLAY MESSAGE IF sideDishchoice = 2
     SideDishASelected:
-        mov edx, OFFSET resultMsg
-        call WriteString
+        ; If sideDishChoice is 2, print " with Soya Milk"
         mov edx, OFFSET sideAOnlyMsg
         call WriteString
-        call Crlf
-        ret
+        jmp EndDisplay
 
-    ;------------------------------------------DISPLAY MESSAGE IF sideDishchoice = 3
     SideDishBSelected:
-        mov edx, OFFSET resultMsg
-        call WriteString
+        ; If sideDishChoice is 3, print " with Dumplings"
         mov edx, OFFSET sideBOnlyMsg
         call WriteString
-        call Crlf
-        ret
+        jmp EndDisplay
 
-    ;------------------------------------------DISPLAY MESSAGE IF sideDishchoice = 4
     SideDishABSelected:
-        mov edx, OFFSET resultMsg
-        call WriteString
+        ; If sideDishChoice is 4, print " with Dumplings & Soya Milk"
         mov edx, OFFSET sideABMsg
         call WriteString
+
+    EndDisplay:
+        ; Print a newline at the end
+        call Crlf
+        call Crlf
+        call WaitMsg
+        ;call FlushInput    ; Flush Enter key from the buffer
         call Crlf
         ret
-    GetValidSideDishSelection ENDP
-
+    displaySelection ENDP
 ;==============================PART 4: CALCULATIONS
 ;==============================PART 5: DISPLAY INVOICE (ALL ORDERS)
 ;==============================CUSTOM FUNCTIONS
+
+FlushInput PROC
+    ; Continue reading characters until we find a newline (Enter key)
+    FlushLoop:
+        call ReadChar           ; Read a single character
+        cmp al, 0Dh             ; Compare with newline (Enter key)
+        jne FlushLoop           ; Keep reading until Enter is found
+    ret
+    FlushInput ENDP
 ;------------------------------------------PRINT PAGE SEPERATION LINE
 printDash PROC
     ; Set up the loop counter and character

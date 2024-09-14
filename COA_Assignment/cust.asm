@@ -7,7 +7,7 @@ ExitProcess proto, dwExitCode:dword
 welcomeMsg      BYTE "Welcome to Our Restaurant", 0
 dash            BYTE "------------------------------", 0    
 namePrompt      BYTE "Enter name (up to 25 characters): ", 0
-inputBuffer     BYTE 26 DUP(0)                              
+inputCustName     BYTE 26 DUP(0)                              
 errorMsg        BYTE "Invalid input! Please enter only letters and spaces and no more than 25 characters.", 0
 retryMsg        BYTE "Please try again: ", 0
 dineInPrompt    BYTE "Dine-in / takeaway (D/T): ", 0
@@ -33,7 +33,7 @@ InputNameLoop:
     call WriteString
 
     ; Read input
-    lea edx, inputBuffer
+    lea edx, inputCustName
     mov ecx, 25  ; 25 characters maximum
     call ReadString
 
@@ -42,7 +42,7 @@ InputNameLoop:
     mov ecx, 0                ; To count string length
 
 CheckNameLoop:
-    mov al, [inputBuffer + esi] ; Load current character
+    mov al, [inputCustName + esi] ; Load current character
     cmp al, 0                   ; Null terminator reached?
     je NameValid                ; Jump to valid if null found
 
@@ -75,7 +75,7 @@ InvalidName:
     call Crlf
 
     ; Clear input buffer
-    lea edi, inputBuffer
+    lea edi, inputCustName
     mov ecx, 26
     xor al, al
     rep stosb
