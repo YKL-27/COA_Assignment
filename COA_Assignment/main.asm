@@ -3,88 +3,94 @@ INCLUDE Irvine32.inc
 ExitProcess proto, dwExitCode:dword
 .stack 4096
 
-
 .data
 ;==============================DISPLAY MESSAGES
 ;------------------------------------------COMMONLY USED
     dashAmount          DWORD 30
-    dash                BYTE '-'
-    pauseEnter          BYTE 'Press "Enter" key to continue...'
+    dash                BYTE  '-'
+    pauseEnter          BYTE  'Press "Enter" key to continue...'
 ;------------------------------------------LOGIN
-    usernamePrompt      BYTE "Enter username: ", 0
-    passwordPrompt      BYTE "Enter password: ", 0
-    successMsg          BYTE "Login successful!", 0 
-    startupMsg          BYTE "Starting "
-    failMsg             BYTE "Invalid credentials!", 0 
+    usernamePrompt      BYTE  "Enter username: ", 0
+    passwordPrompt      BYTE  "Enter password: ", 0
+    successMsg          BYTE  "Login successful!", 0 
+    startupMsg          BYTE  "Starting "
+    failMsg             BYTE  "Invalid credentials!", 0 
 ;------------------------------------------ENTER CUSTOMER INFO
-    welcomeMsg          BYTE "Welcome to Our Restaurant", 0
+    welcomeMsg          BYTE  "Welcome to Our Restaurant", 0
 ;~~~ENTER NAME
-    inputMsg            BYTE "Enter name (up to 128 characters):     ", 0
-    errorMsg            BYTE "Invalid input. Too long or invalid character.", 0
-    tooLongMsg          BYTE "Input too long. Max length is 128 characters.", 0
-    largeLenMsg         BYTE "Length between 50 and 128 characters. Number of characters entered: ", 0
-    reenterMsg          BYTE "Please re-enter", 0
+    inputMsg            BYTE  "Enter name (up to 128 characters):     ", 0
+    errorMsg            BYTE  "Invalid input. Too long or invalid character.", 0
+    tooLongMsg          BYTE  "Input too long. Max length is 128 characters.", 0
+    largeLenMsg         BYTE  "Length between 50 and 128 characters. Number of characters entered: ", 0
+    reenterMsg          BYTE  "Please re-enter", 0
 ;~~~ENTER MODE
-    dineOrTakeMsg       BYTE "Dine-in or Takeaway? Enter 'D' or 'T': ", 0
-    invalidDineTakeMsg  BYTE "Invalid input. Please enter 'D' or 'T'.", 0
+    dineOrTakeMsg       BYTE  "Dine-in or Takeaway? Enter 'D' or 'T': ", 0
+    invalidDineTakeMsg  BYTE  "Invalid input. Please enter 'D' or 'T'.", 0
 ;~~~ENTER PROMO CODE (OPTIONAL)
-    promoMsg            BYTE "Do you have promo code to enter? (Y/N): ", 0
-    invalidPromoMsg     BYTE "Invalid input. Please enter 'Y' or 'N'.", 0
-    promoCodeMsg        BYTE "Promo Code: ", 0
-    invalidPromoCodeMsg BYTE "Invalid promo code. Do you wish to retry? (Y/N): ", 0
+    promoMsg            BYTE  "Do you have promo code to enter? (Y/N): ", 0
+    invalidPromoMsg     BYTE  "Invalid input. Please enter 'Y' or 'N'.", 0
+    promoCodeMsg        BYTE  "Promo Code: ", 0
+    invalidPromoCodeMsg BYTE  "Invalid promo code. Do you wish to retry? (Y/N): ", 0
 ;------------------------------------------SELECT FOOD
 ;~~~SELECT MEAL
-    menuTitle           BYTE "Select A Meal:", 0
-    foodA               BYTE "A - Pan Mee", 0
-    foodB               BYTE "B - Chilli Pan Mee", 0
+    menuTitle           BYTE  "Select A Meal:", 0
+    foodA               BYTE  "A - Pan Mee", 0
+    foodB               BYTE  "B - Chilli Pan Mee", 0
 ;~~~SELECT ADDON
-    sideDishTitle       BYTE "Select An Add-On:", 0
-    noSideDish          BYTE "1 - No add-on (Ala-carte)", 0
-    setWithA            BYTE "2 - Set with Soya Milk", 0
-    setWithB            BYTE "3 - Set with Dumplings", 0
-    setWithAB           BYTE "4 - Set with Dumplings & Soya Milk", 0
+    sideDishTitle       BYTE  "Select An Add-On:", 0
+    noSideDish          BYTE  "1 - No add-on (Ala-carte)", 0
+    setWithA            BYTE  "2 - Set with Soya Milk", 0
+    setWithB            BYTE  "3 - Set with Dumplings", 0
+    setWithAB           BYTE  "4 - Set with Dumplings & Soya Milk", 0
 ;~~~SELECTION PROMPT
-    selectionPrompt     BYTE ">> Selection: ", 0
-    invalidInputMsg     BYTE "Invalid selection, please try again.", 0
+    selectionPrompt     BYTE  ">> Selection: ", 0
+    invalidInputMsg     BYTE  "Invalid selection, please try again.", 0
 ;~~~SELECTED RESULT
-    resultMsg           BYTE "You selected: ", 0
-    setMsg              BYTE "Set ", 0
-    foodAMsg            BYTE "Pan Mee ", 0
-    foodBMsg            BYTE "Chilli Pan Mee ", 0
-    sideAOnlyMsg        BYTE "with Soya Milk", 0
-    sideBOnlyMsg        BYTE "with Dumplings", 0
-    sideABMsg           BYTE "with Dumplings & Soya Milk", 0
+    resultMsg           BYTE  "You selected: ", 0
+    setMsg              BYTE  "Set ", 0
+    foodAMsg            BYTE  "Pan Mee ", 0
+    foodBMsg            BYTE  "Chilli Pan Mee ", 0
+    sideAOnlyMsg        BYTE  "with Soya Milk", 0
+    sideBOnlyMsg        BYTE  "with Dumplings", 0
+    sideABMsg           BYTE  "with Dumplings & Soya Milk", 0
 ;~~~CONFIRM ORDER AND LOOP ORDER
-    confirmOrderMsg     BYTE "Do you want to confirm this order (Y/N): ", 0
-    contOrderMsg        BYTE "Do you want to keep ordering? (Y/N): "
+    confirmOrderMsg     BYTE  "Do you want to confirm this order (Y/N): ", 0
+    contOrderMsg        BYTE  "Do you want to keep ordering? (Y/N): ", 0
 ;==============================VARIABLES
-    inputYN             BYTE 2 DUP(?)   ; Y / N
+    inputYN             BYTE  2 DUP(?)   ; Y / N
 ;------------------------------------------CONSTANTS
-    CORRECT_USERNAME    BYTE "user123", 0  
-    CORRECT_PASSWORD    BYTE "pass123", 0 
-    CORRECT_PROMO_CODE  BYTE "eat2024", 0
+    CORRECT_USERNAME    BYTE  "user123", 0  
+    CORRECT_PASSWORD    BYTE  "pass123", 0 
+    CORRECT_PROMO_CODE  BYTE  "eat2024", 0
     FOOD_PRICE          DWORD 8.50, 10.00               ; Food A, Food B
     SIDEDISH_PRICE      DWORD 0.00, 1.20, 2.40, 3.00    ; Nothing, SideA, SideB, SideA+B
     DISCOUNT            DWORD 0.10                      ; Discount % in decimals
 ;------------------------------------------LOGIN
-    username            BYTE 20 DUP(?)   
-    password            BYTE 20 DUP(?)   
+    username            BYTE  20 DUP(?)   
+    password            BYTE  20 DUP(?)   
 ;------------------------------------------ENTER CUSTOMER INFO
-    inputCustName       BYTE 129 DUP(?) ; Buffer to hold input (128 characters + null terminator)
-    inputDT             BYTE 2 DUP(?)   ; DineIn / TakeAway
-    inputPromoCode      BYTE 10 DUP(?)  ; Buffer for promo code input (maximum 10 characters)
+    inputCustName       BYTE  129 DUP(?) ; Buffer to hold input (128 characters + null terminator)
+    inputDT             BYTE  2 DUP(?)   ; DineIn / TakeAway
+    inputPromoCode      BYTE  10 DUP(?)  ; Buffer for promo code input (maximum 10 characters)
 ;------------------------------------------SELECT FOOD
-    inputOrder          BYTE 2 DUP(?)   ; Define a buffer of 5 bytes (for user input)
-    inputConfirmOrder   BYTE 2 DUP(?) 
-    inputContOrder      BYTE 2 DUP(?)
-    mealChoice          BYTE ?
-    sideDishChoice      BYTE ?
+    inputOrder          BYTE  2 DUP(?)   ; Define a buffer of 5 bytes (for user input)
+    inputConfirmOrder   BYTE  2 DUP(?) 
+    inputContOrder      BYTE  2 DUP(?)
+    mealChoice          BYTE  ?
+    sideDishChoice      BYTE  ?
 ;------------------------------------------CALCULATION
 ;~~~ORDER LIST
-    orderList           BYTE 100 DUP(0)
-    orderCounter        DWORD 0
+    foodList            BYTE  100 DUP(0)
+    sideList            BYTE  100 DUP(0)
+    priceLIST           DWORD 100 DUP(0)
+    orderListLen        DWORD 0
 ;~~~PRICE CALCULATION
-    usingPromo          BYTE 0
+    usingPromo          BYTE  0 ; bool
+    currFoodPrice       DWORD 0
+    totalPrice          DWORD 0
+    discountedPrice     DWORD 0
+    finalPrice          DWORD 0
+;------------------------------------------FINAL INVOICE
 
 .code
 main PROC
@@ -409,14 +415,15 @@ check_promo_code PROC
 
 ;==============================PART 3: ORDERING
 orderLoop PROC
-;----------------------------------------------display Mealmenu and get valid selection
+    mov ebx, 0
+    ;----------------------------------------------display Mealmenu and get valid selection
     orderLoopStart:
         call DisplayMealMenu
         ; Display the meal selection prompt again
         mov edx, OFFSET inputOrder  ; Set the buffer to store the input
         mov ecx, 2                  ; Limit to 1 character + null terminator
         call ReadString              ; Read the string input from the user
-        call ClearInputBuffer        ; Clear the input buffer after reading input
+        ;call ClearInputBuffer        ; Clear the input buffer after reading input
         
         ; Get the first character from the input buffer
         mov al, inputOrder           ; Move the first character to AL
@@ -441,7 +448,7 @@ orderLoop PROC
     ValidMealInput:
         mov mealChoice, al          ; Store valid input in mealChoice
 
-;----------------------------------------------display SideDishMenu and get valid selection
+    ;----------------------------------------------display SideDishMenu and get valid selection
     GetSideDishSelection:
         call DisplaySideDishMenu
         ; Display the meal selection prompt again
@@ -471,7 +478,7 @@ orderLoop PROC
     ValidSideDishInput:
         mov sideDishChoice, al          ; Store valid input in mealChoice
 
-;----------------------------------------------display selection & confirm
+    ;----------------------------------------------display selection & confirm
     call displaySelection
 
     call Crlf
@@ -493,27 +500,20 @@ orderLoop PROC
     confirmOrder:
         ; Store the meal choice in the order list
         mov al, mealChoice
-        mov ebx, [orderCounter]      ; Load the DWORD counter into ebx
-        mov [orderList + ebx], al    ; Store the meal choice in the order list
-        inc dword ptr [orderCounter] ; Increment the DWORD counter
+        ;mov ebx, [orderListIndex]      ; Load the DWORD counter into ebx
+        ;mov [orderList + ebx], al      ; Store the meal choice in the order list
+        ;inc dword ptr [orderListIndex] ; Increment the DWORD counter
+        mov [foodList + ebx], al 
+        
 
-        ; Ask to continue ordering
-        call Crlf
-        mov edx, OFFSET contOrderMsg
-        call WriteString
-
-        ; Read input (expecting Y/N)
-        mov edx, OFFSET inputYN
-        mov ecx, 2  ; Read one character plus null terminator
-        call ReadString
-        mov al, inputYN
-        cmp al, 'Y'
-        je orderLoopStart
-        cmp al, 'y'
-        je orderLoopStart
-        ret
-
-
+        mov al, sideDishChoice
+        ;mov ebx, [orderListIndex]      ; Load the DWORD counter into ebx
+        ;mov [orderList + ebx], al      ; Store the meal choice in the order list
+        ;inc dword ptr [orderListIndex] ; Increment the DWORD counter
+        ;inc dword ptr [orderListIndex] ; Increment the DWORD counter (reserved to store calculated cost)
+        mov [sideList + ebx], al 
+        add ebx, 2
+        inc orderListLen
 
     discardOrder:
         ; You can decide what should happen when the order is discarded.
@@ -550,7 +550,7 @@ DisplayMealMenu PROC
     mov edx, OFFSET foodB
     call WriteString
     call Crlf
-    mov edx, OFFSET selectionPrompt ;get a selection from user
+    mov edx, OFFSET selectionPrompt ; get a selection from user
     call WriteString
 
     ret
@@ -656,6 +656,58 @@ displaySelection PROC
         ret
     displaySelection ENDP
 ;==============================PART 4: CALCULATIONS
+; calcTotalPrice PROC
+;     ; loop through every food
+;     ; array: each record have 3 attributes, Food (A/B), Side(1/2/3/4), Price  (waiting to be calculated)
+;     mov ecx, orderListLen
+;     mov esi, 0
+;     calcEachFood:  
+;         mov currFoodPrice, 0
+;         ; Get the price of the food
+;         mov al, [orderList+esi]
+;         cmp al, 'A'
+;         je foodAPrice
+
+;         foodBPrice:
+;             mov di, 2
+;             jmp addFoodPrice
+;         foodAPrice:
+;             mov di, 0
+;         addFoodPrice:
+;             mov currFoodPrice, [FOOD_PRICE+di]
+;         add esi, 2
+
+;         ; Get the price of the side dish
+;                 mov al, [orderList+esi]
+;         cmp al, '1'
+;         je sideNonePrice
+;         cmp al, '2'
+;         je sideAPrice
+;         cmp al, '3'
+;         je sideBPrice
+        
+;         sideABPrice:
+
+;         foodBPrice:
+;             mov di, 2
+;             jmp addFoodPrice
+;         foodAPrice:
+;             mov di, 0
+;         addSidePrice:
+;             mov currFoodPrice, [FOOD_PRICE+di]
+;         add esi, 2
+
+;         ; Calculate total price and store in array
+
+
+
+
+
+;     loop calcEachFood
+;     calcTotalPrice ENDP
+
+; getFoodPrice PROC
+;     getFoodPrice ENDP
 ;==============================PART 5: DISPLAY INVOICE (ALL ORDERS)
 ;==============================CUSTOM FUNCTIONS
 ;------------------------------------------PRINT PAGE SEPERATION LINE
@@ -683,7 +735,7 @@ ClearInputBuffer PROC
 
     DoneClearing:
         ret
-ClearInputBuffer ENDP
+    ClearInputBuffer ENDP
 
 ;------------------------------------------STRING COMPARISON
 StrCompare PROC
