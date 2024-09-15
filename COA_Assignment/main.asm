@@ -1,8 +1,7 @@
 INCLUDE Irvine32.inc
-.386
 .model flat, stdcall
-.stack 4096
 ExitProcess proto, dwExitCode:dword
+.stack 4096
 
 
 .data
@@ -55,30 +54,37 @@ ExitProcess proto, dwExitCode:dword
     sideAOnlyMsg        BYTE "with Soya Milk", 0
     sideBOnlyMsg        BYTE "with Dumplings", 0
     sideABMsg           BYTE "with Dumplings & Soya Milk", 0
-
+;~~~CONFIRM ORDER AND LOOP ORDER
+    confirmOrderMsg     BYTE "Do you want to confirm this order (Y/N): ", 0
+    contOrderMsg        BYTE "Do you want to keep ordering? (Y/N): "
 ;==============================VARIABLES
+    inputYN             BYTE 2 DUP(?)   ; Y / N
 ;------------------------------------------CONSTANTS
     CORRECT_USERNAME    BYTE "user123", 0  
     CORRECT_PASSWORD    BYTE "pass123", 0 
     CORRECT_PROMO_CODE  BYTE "eat2024", 0
-    FOOD_PRICE          DWORD 8.50, 10.00
-    SIDEDISH_PRICE      DWORD 0.00, 1.20, 2.40, 3.00
-    DISCOUNT            DWORD 0.10
+    FOOD_PRICE          DWORD 8.50, 10.00               ; Food A, Food B
+    SIDEDISH_PRICE      DWORD 0.00, 1.20, 2.40, 3.00    ; Nothing, SideA, SideB, SideA+B
+    DISCOUNT            DWORD 0.10                      ; Discount % in decimals
 ;------------------------------------------LOGIN
-    username            BYTE 20 DUP(0)   
-    password            BYTE 20 DUP(0)   
+    username            BYTE 20 DUP(?)   
+    password            BYTE 20 DUP(?)   
 ;------------------------------------------ENTER CUSTOMER INFO
-    inputCustName       BYTE 129 DUP(0) ; Buffer to hold input (128 characters + null terminator)
-    inputDT             BYTE 2 DUP(?)   ; D / T
-    inputYN             BYTE 2 DUP(?)   ; Y / N
-    inputPromoCode      BYTE 10 DUP(0)  ; Buffer for promo code input (maximum 10 characters)
+    inputCustName       BYTE 129 DUP(?) ; Buffer to hold input (128 characters + null terminator)
+    inputDT             BYTE 2 DUP(?)   ; DineIn / TakeAway
+    inputPromoCode      BYTE 10 DUP(?)  ; Buffer for promo code input (maximum 10 characters)
 ;------------------------------------------SELECT FOOD
     inputOrder          BYTE 2 DUP(?)   ; Define a buffer of 5 bytes (for user input)
+    inputConfirmOrder   BYTE 2 DUP(?) 
+    inputContOrder      BYTE 2 DUP(?)
     mealChoice          BYTE ?
-    sideDishChoice      DWORD ?
+    sideDishChoice      BYTE ?
 ;------------------------------------------CALCULATION
+;~~~ORDER LIST
+    orderList           BYTE 100 DUP(0)
+    orderCounter        DWORD 0
+;~~~PRICE CALCULATION
     usingPromo          BYTE 0
-
 
 .code
 main PROC
@@ -395,6 +401,7 @@ check_promo_code PROC
 
     valid_promo_code:
         ; Promo code is valid, continue
+        mov usingPromo, 1
         call Crlf
         ret
     check_promo_code ENDP
@@ -402,19 +409,130 @@ check_promo_code PROC
 
 ;==============================PART 3: ORDERING
 orderLoop PROC
-    call selectFoodPage 
-    call orderLoop 
-    orderLoop ENDP
+;----------------------------------------------display Mealmenu and get valid selection
+    orderLoopStart:
+        call DisplayMealMenu
+        ; Display the meal selection prompt again
+        mov edx, OFFSET inputOrder  ; Set the buffer to store the input
+        mov ecx, 2                  ; Limit to 1 character + null terminator
+        call ReadString              ; Read the string input from the user
+        call ClearInputBuffer        ; Clear the input buffer after reading input
+        
+        ; Get the first character from the input buffer
+        mov al, inputOrder           ; Move the first character to AL
+        
+        ; Validate the input (check if it's 'A', 'a', 'B', or 'b')
+        cmp al, 'A'
+        je ValidMealInput
+        cmp al, 'a'
+        je ValidMealInput
+        cmp al, 'B'
+        je ValidMealInput
+        cmp al, 'b'
+        je ValidMealInput
 
-selectFoodPage PROC
-    ; display Mealmenu and get valid selection
-    call DisplayMealMenu
-    call GetValidMealSelection
-    ; display SideDishMenu and get valid selection
-    call DisplaySideDishMenu
-    call GetValidSideDishSelection
+    InvalidMealInput:
+        ; Handle invalid input
+        mov edx, OFFSET invalidInputMsg
+        call WriteString
+        call Crlf
+        jmp orderLoopStart        ; Loop again if input is invalid
+
+    ValidMealInput:
+        mov mealChoice, al          ; Store valid input in mealChoice
+
+;----------------------------------------------display SideDishMenu and get valid selection
+    GetSideDishSelection:
+        call DisplaySideDishMenu
+        ; Display the meal selection prompt again
+        mov edx, OFFSET inputOrder  ; Set the buffer to store the input
+        mov ecx, 2                  ; Limit to 1 character + null terminator
+        call ReadString              ; Read the string input from the user
+        ;call ClearInputBuffer
+        ; Get the first character from the input buffer
+        mov al, inputOrder           ; Move the first character to AL
+
+        ; Validate the input (check if it's '1', '2', '3', or '4')
+        cmp al, '1'
+        je ValidSideDishInput
+        cmp al, '2'
+        je ValidSideDishInput
+        cmp al, '3'
+        je ValidSideDishInput
+        cmp al, '4'
+        je ValidSideDishInput
+
+    InvalidSideDishInput:
+        mov edx, OFFSET invalidInputMsg
+        call WriteString
+        call Crlf
+        jmp GetSideDishSelection
+
+    ValidSideDishInput:
+        mov sideDishChoice, al          ; Store valid input in mealChoice
+
+;----------------------------------------------display selection & confirm
     call displaySelection
-    selectFoodPage ENDP
+
+    call Crlf
+    mov edx, OFFSET confirmOrderMsg
+    call WriteString
+    ; Read input (expecting Y/N)
+    mov edx, OFFSET inputYN
+    mov ecx, 2      ; Read one character plus null terminator
+    call ReadString
+
+    ; Check if input is 'Y' or 'N'
+    mov al, inputYN
+    cmp al, 'Y'
+    je confirmOrder
+    cmp al, 'y'
+    je confirmOrder
+    jmp discardOrder
+
+    confirmOrder:
+        ; Store the meal choice in the order list
+        mov al, mealChoice
+        mov ebx, [orderCounter]      ; Load the DWORD counter into ebx
+        mov [orderList + ebx], al    ; Store the meal choice in the order list
+        inc dword ptr [orderCounter] ; Increment the DWORD counter
+
+        ; Ask to continue ordering
+        call Crlf
+        mov edx, OFFSET contOrderMsg
+        call WriteString
+
+        ; Read input (expecting Y/N)
+        mov edx, OFFSET inputYN
+        mov ecx, 2  ; Read one character plus null terminator
+        call ReadString
+        mov al, inputYN
+        cmp al, 'Y'
+        je orderLoopStart
+        cmp al, 'y'
+        je orderLoopStart
+        ret
+
+
+
+    discardOrder:
+        ; You can decide what should happen when the order is discarded.
+        ; For example, you might want to loop back to ask the user to order again:
+        call Crlf
+        mov edx, OFFSET contOrderMsg
+        call WriteString
+        ; Read input (expecting Y/N)
+        mov edx, OFFSET inputYN
+        mov ecx, 2      ; Read one character plus null terminator
+        call ReadString
+        mov al, inputYN
+        cmp al, 'Y'
+        je orderLoopStart
+        cmp al, 'y'
+        je orderLoopStart
+        ret
+
+    orderLoop ENDP
 
 ;------------------------------------------DISPLAY FOOD MENU
 DisplayMealMenu PROC
@@ -439,7 +557,6 @@ DisplayMealMenu PROC
     DisplayMealMenu ENDP
 
 ;------------------------------------------DISPLAY SIDE DISH MENU
-;==============================PART 3.5: DISPLAY ORDER
 DisplaySideDishMenu PROC
     ; display sidedish title and set option
     call Crlf
@@ -465,75 +582,13 @@ DisplaySideDishMenu PROC
     ret
     DisplaySideDishMenu ENDP
 
-;------------------------------------------FOOD MENU (mealchoice) INPUT & VALIDATION
-GetValidMealSelection PROC
-    GetValidMealLoop:
-        ; Display the meal selection prompt again
-        mov edx, OFFSET inputOrder  ; Set the buffer to store the input
-        mov ecx, 2                  ; Limit to 1 character + null terminator
-        call ReadString              ; Read the string input from the user
-        
-        ; Get the first character from the input buffer
-        mov al, inputOrder           ; Move the first character to AL
-        
-        ; Validate the input (check if it's 'A', 'a', 'B', or 'b')
-        cmp al, 'A'
-        je ValidInput
-        cmp al, 'a'
-        je ValidInput
-        cmp al, 'B'
-        je ValidInput
-        cmp al, 'b'
-        je ValidInput
-
-    InvalidInput:
-        ; Handle invalid input
-        mov edx, OFFSET invalidInputMsg
-        call WriteString
-        call Crlf
-        call DisplayMealMenu
-        jmp GetValidMealLoop        ; Loop again if input is invalid
-
-    ValidInput:
-        mov mealChoice, al          ; Store valid input in mealChoice
-        ret
-GetValidMealSelection ENDP
-
-
-
-;------------------------------------------SIDE DISH MENU (sideDishchoice) INPUT & VALIDATION
-GetValidSideDishSelection PROC
-    ; loop until user input valid selection
-    mov ecx, 1          ; initialize count of loop (count loop is 1)
-    GetValidSideDishLoop:
-        call ReadInt
-        mov sideDishChoice, eax
-
-        ; check the user input is valid or not
-        cmp sideDishChoice, 1
-        ret
-        cmp sideDishChoice, 2
-        ret
-        cmp sideDishChoice, 3
-        ret
-        cmp sideDishChoice, 4
-        ret
-
-        ; if user input is invalid
-        mov edx, OFFSET invalidInputMsg
-        call WriteString
-        call Crlf
-        call DisplaySideDishMenu
-        mov ecx, 1          ; set count loop by 1 again when input is invalid
-        jmp GetValidSideDishLoop
-    GetValidSideDishSelection ENDP
 
 displaySelection PROC
     ; Print "You selected: "
     mov edx, OFFSET resultMsg
     call WriteString
 
-    cmp sideDishChoice, 1
+    cmp sideDishChoice, '1'
     je notSetMeal
     ; Display "Set " if it is not ala-carte
         mov edx, OFFSET setMsg
@@ -566,13 +621,13 @@ displaySelection PROC
     DisplayAddon:
         ; Check for side dish selection and print corresponding message
 
-        cmp sideDishChoice, 1
+        cmp sideDishChoice, '1'
         je NoAddon
-        cmp sideDishChoice, 2
+        cmp sideDishChoice, '2'
         je SideDishASelected
-        cmp sideDishChoice, 3
+        cmp sideDishChoice, '3'
         je SideDishBSelected
-        cmp sideDishChoice, 4
+        cmp sideDishChoice, '4'
         je SideDishABSelected
 
     NoAddon:
@@ -598,25 +653,11 @@ displaySelection PROC
     EndDisplay:
         ; Print a newline at the end
         call Crlf
-        call Crlf
-
-        ;call FlushInput    ; Flush Enter key from the buffer
-        call Crlf
         ret
     displaySelection ENDP
 ;==============================PART 4: CALCULATIONS
 ;==============================PART 5: DISPLAY INVOICE (ALL ORDERS)
 ;==============================CUSTOM FUNCTIONS
-
-FlushInput PROC
-    ; Continue reading characters until we find a newline (Enter key)
-    FlushLoop:
-        call ReadChar           ; Read a single character
-        cmp al, 0Dh             ; Compare with newline (Enter key)
-        jne FlushLoop           ; Keep reading until Enter is found
-    ret
-    FlushInput ENDP
-
 ;------------------------------------------PRINT PAGE SEPERATION LINE
 printDash PROC
     ; Set up the loop counter and character
@@ -628,6 +669,21 @@ printDash PROC
         loop print_loop         ; Decrement ECX and loop until ECX reaches 0
         ret                     ; Return to the calling procedure
     printDash ENDP
+
+;------------------------------------------ CLEAR INPUT BUFFER
+ClearInputBuffer PROC
+    ; This procedure will read and discard any newline or extra characters 
+    ; left in the input buffer after ReadString.
+
+    ClearLoop:
+        call ReadChar        ; Read a single character from the input buffer
+        cmp al, 0Dh          ; Check if it's the Enter key (carriage return '\r')
+        je DoneClearing      ; If Enter is detected, exit the loop
+        jmp ClearLoop        ; Otherwise, keep reading (discard characters)
+
+    DoneClearing:
+        ret
+ClearInputBuffer ENDP
 
 ;------------------------------------------STRING COMPARISON
 StrCompare PROC
