@@ -530,7 +530,7 @@ orderLoop PROC
         je orderLoopStart
         cmp al, 'y'
         je orderLoopStart
-        ret
+        call calcTotalPrice
 
     orderLoop ENDP
 
@@ -656,59 +656,78 @@ displaySelection PROC
         ret
     displaySelection ENDP
 ;==============================PART 4: CALCULATIONS
-; calcTotalPrice PROC
-;     ; loop through every food
-;     ; array: each record have 3 attributes, Food (A/B), Side(1/2/3/4), Price  (waiting to be calculated)
-;     mov ecx, orderListLen
-;     mov esi, 0
-;     calcEachFood:  
-;         mov currFoodPrice, 0
-;         ; Get the price of the food
-;         mov al, [orderList+esi]
-;         cmp al, 'A'
-;         je foodAPrice
+calcTotalPrice PROC
+    ; loop through every food
+    ; array: each record have 3 attributes, Food (A/B), Side(1/2/3/4), Price  (waiting to be calculated)
+    mov ecx, orderListLen
+    mov esi, 0
+    calcEachFood:  
+        mov currFoodPrice, 0
+        ; Get the price of the food
+        mov al, [FoodList+esi]
+        cmp al, 'A'
+        je foodAPrice
 
-;         foodBPrice:
-;             mov di, 2
-;             jmp addFoodPrice
-;         foodAPrice:
-;             mov di, 0
-;         addFoodPrice:
-;             mov currFoodPrice, [FOOD_PRICE+di]
-;         add esi, 2
+        foodBPrice:
+            mov edi, 2
+            jmp addFoodPrice
+        foodAPrice:
+            mov edi, 0
+        addFoodPrice:
+            mov ebx, [FOOD_PRICE+edi]
+            mov currFoodPrice, ebx
 
-;         ; Get the price of the side dish
-;                 mov al, [orderList+esi]
-;         cmp al, '1'
-;         je sideNonePrice
-;         cmp al, '2'
-;         je sideAPrice
-;         cmp al, '3'
-;         je sideBPrice
+        ; Get the price of the side dish
+        mov al, [SideList+esi]
+        cmp al, '1'
+        je sideNonePrice
+        cmp al, '2'
+        je sideAPrice
+        cmp al, '3'
+        je sideBPrice
         
-;         sideABPrice:
+        sideABPrice:
+            mov edi, 6
+            jmp addSidePrice
+        sideBPrice:
+            mov edi, 4
+            jmp addSidePrice
+        sideAPrice:
+            mov edi, 2
+            jmp addSidePrice
+        sideNonePrice:
+            mov edi, 0
 
-;         foodBPrice:
-;             mov di, 2
-;             jmp addFoodPrice
-;         foodAPrice:
-;             mov di, 0
-;         addSidePrice:
-;             mov currFoodPrice, [FOOD_PRICE+di]
-;         add esi, 2
+        addSidePrice:
+            mov ebx, [SIDEDISH_PRICE+edi]
+            ; Calculate total price
+            add currFoodPrice, ebx
+        
+        ;Store calculated price into array
+        ;multiply esi by 2 because priceList is in DWORD instead of BYTE
+        mov eax, esi
+        mov ebx, 2
+        mul ebx
+        mov edi, eax
+        mov eax, currFoodPrice
+        mov [priceList + edi], eax 
 
-;         ; Calculate total price and store in array
+        inc esi
+    loop calcEachFood
+    call displayInvoice
+    calcTotalPrice ENDP
 
-
-
-
-
-;     loop calcEachFood
-;     calcTotalPrice ENDP
-
-; getFoodPrice PROC
-;     getFoodPrice ENDP
 ;==============================PART 5: DISPLAY INVOICE (ALL ORDERS)
+displayInvoice PROC
+    mov ecx, orderListLen
+    mov esi, 0
+    displayEachFood:  
+        mov al, [FoodList+esi]
+        call WriteString
+        mov al, [SideList+esi]
+        call WriteString
+    loop displayEachFood
+    displayInvoice ENDP
 ;==============================CUSTOM FUNCTIONS
 ;------------------------------------------PRINT PAGE SEPERATION LINE
 printDash PROC
