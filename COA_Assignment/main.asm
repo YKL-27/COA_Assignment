@@ -826,6 +826,7 @@ calcFinalPrice PROC
 displayInvoice PROC
     ; Check if there are any orders
     cmp orderListLen, 0
+
     je endDisplayInvoice          ; If no orders, exit
 
     mov ecx, orderListLen         ; Set up loop counter (number of orders)
@@ -833,7 +834,7 @@ displayInvoice PROC
 
     displayEachOrder:
         mov loopNo, ecx                ; Store loop counter
-        mov loopIndex, esi             ; Store loop index
+        mov loopIndex, esi             ; store loop index
 
         ; Get and display the current order's meal and side dish
         call getFood                   ; Set mealChoice from foodList
@@ -846,26 +847,25 @@ displayInvoice PROC
         call displayOrderPrice         ; Display price from priceList after displaying the meal and side dish
 
         ; Move to the next order
+
         mov ecx, loopNo                ; Restore loop counter
         mov esi, loopIndex             ; Restore loop index
         inc esi                        ; Increment index for next order
         call Crlf
         loop displayEachOrder          ; Repeat for the next order
-
-    ; Display total takeaway charge
-    call Crlf
-    mov eax, totalTakeAway             ; Load totalTakeAway value into EAX
-    call printPriceStr                 ; Display total takeaway price
-
-    ; Display final price
-    call Crlf
-    mov eax, finalPrice                ; Load finalPrice value into EAX
-    call printPriceStr                 ; Display final price
+        
+        call Crlf
+        mov eax, totalTakeAway
+        mov edi, OFFSET totalTakeAway 
+        call printPriceStr
+        call Crlf
+        mov eax, finalPrice
+        mov edi, OFFSET finalPrice 
+        call printPriceStr
 
     endDisplayInvoice:
         ret
     displayInvoice ENDP
-
 
 ;------------------------------------------DISPLAY FOOD
 getFood PROC
