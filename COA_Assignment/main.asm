@@ -100,6 +100,20 @@ ExitProcess proto, dwExitCode:dword
 ;------------------------------------------FINAL INVOICE
 
 .code
+
+main PROC
+    ; Initialize once and avoid re-execution
+    call login
+    call inputCustInfo
+    call orderLoop
+
+    ; Now proceed to calculations and display
+    mov eax, orderlistlen
+    call calcTotalPrice
+    call displayInvoice
+
+    ; Exit cleanly
+    invoke ExitProcess, 0
 ;==============================PART 1: LOGIN
 login PROC
     startlogin:
@@ -719,13 +733,6 @@ calcTotalPrice PROC
     jmp doneCalc
 
     noOrders:
-        ; Handle the case where there are no orders
-        ; Optional: You can print a message or handle this differently
-        call Crlf
-        mov edx, OFFSET zeroPriceMsg
-        call WriteString
-        call Crlf
-
     doneCalc:
     ret
 calcTotalPrice ENDP
@@ -748,9 +755,6 @@ getFoodPrice PROC
     setFoodPrice:
         mov ebx, [FOOD_PRICE + edi]
         jo priceOverflow           ; Check for overflow
-
-        ; Debug: Print all registers to check the food price is being loaded correctly
-        call DumpRegs
         mov currFoodPrice, ebx    ; Store the food price in currFoodPrice (fixed-point cents)
     ret
 
@@ -761,42 +765,39 @@ getFoodPrice PROC
     getFoodPrice ENDP
 
 
-    getSidePrice PROC
-        ; Get the price of the side dish in cents
-        mov al, [sideList + esi]     ; Load the side dish choice from sideList
-        cmp al, '1'
-        je setSideNonePrice           ; No add-on
+getSidePrice PROC
+    ; Get the price of the side dish in cents
+    mov al, [sideList + esi]     ; Load the side dish choice from sideList
+    cmp al, '1'
+    je setSideNonePrice           ; No add-on
     
-        cmp al, '2'
-        je setSideAPrice              ; Soya Milk
+    cmp al, '2'
+    je setSideAPrice              ; Soya Milk
     
-        cmp al, '3'
-        je setSideBPrice              ; Dumplings
+    cmp al, '3'
+    je setSideBPrice              ; Dumplings
 
-        setSideABPrice:
-            mov edi, 12               ; Set index for Dumplings & Soya Milk (AB)
-            jmp setSidePrice
+    setSideABPrice:
+        mov edi, 12               ; Set index for Dumplings & Soya Milk (AB)
+        jmp setSidePrice
 
-        setSideBPrice:
-            mov edi, 8                ; Set index for Dumplings
-            jmp setSidePrice
+    setSideBPrice:
+        mov edi, 8                ; Set index for Dumplings
+        jmp setSidePrice
 
-        setSideAPrice:
-            mov edi, 4                ; Set index for Soya Milk
-            jmp setSidePrice
+    setSideAPrice:
+        mov edi, 4                ; Set index for Soya Milk
+        jmp setSidePrice
 
-        setSideNonePrice:
-            mov edi, 0                ; No add-on, price is 0
-            jmp setSidePrice
+    setSideNonePrice:
+        mov edi, 0                ; No add-on, price is 0
+        jmp setSidePrice
 
-        setSidePrice:
-            mov ebx, [SIDEDISH_PRICE + edi]
-            add currFoodPrice, ebx    ; Add side dish price to the food price
-        ret
+    setSidePrice:
+        mov ebx, [SIDEDISH_PRICE + edi]
+        add currFoodPrice, ebx    ; Add side dish price to the food price
+    ret
     getSidePrice ENDP
-
-
-
 
 
 ;==============================PART 5: DISPLAY INVOICE (ALL ORDERS)
@@ -836,6 +837,7 @@ getFood PROC
     ; Get and display food selection
     mov al, [foodList + esi]       ; Get food selection from list
     mov mealChoice, al
+    ret
     getFood ENDP
 
 ;------------------------------------------DISPLAY SIDE DISH
@@ -843,6 +845,7 @@ getSide PROC
     ; Get and display side dish selection
     mov al, [sideList + esi]
     mov sideDishChoice, al  
+    ret
     getSide ENDP
 
 ;------------------------------------------DISPLAY PRICE
@@ -946,18 +949,6 @@ StrCompare PROC
     StrCompare ENDP
 
 
-main PROC
-    ; Initialize once and avoid re-execution
-    call login
-    call inputCustInfo
-    call orderLoop
 
-    ; Now proceed to calculations and display
-    mov eax, orderlistlen
-    call calcTotalPrice
-    call displayInvoice
-
-    ; Exit cleanly
-    invoke ExitProcess, 0
 main ENDP
 END main
