@@ -56,15 +56,22 @@ ExitProcess proto, dwExitCode:dword
 ;~~~CONFIRM ORDER AND LOOP ORDER
     confirmOrderMsg     BYTE  "Do you want to confirm this order (Y/N): ", 0
     contOrderMsg        BYTE  "Do you want to keep ordering? (Y/N): ", 0
+;~~~INVOICE
+    dotMsg              BYTE  ".", 0
+    zeroPriceMsg        BYTE  "NO PRICE", 0
+    overflowErrorMsg    BYTE  "PRICE OVERFLOW", 0
+    zeroPad             BYTE  "0", 0
+
 ;==============================VARIABLES
     inputYN             BYTE  2 DUP(?)   ; Y / N
 ;------------------------------------------CONSTANTS
     CORRECT_USERNAME    BYTE  "user123", 0  
     CORRECT_PASSWORD    BYTE  "pass123", 0 
     CORRECT_PROMO_CODE  BYTE  "eat2024", 0
-    FOOD_PRICE          DWORD 8.50, 10.00               ; Food A, Food B
-    SIDEDISH_PRICE      DWORD 0.00, 1.20, 2.40, 3.00    ; Nothing, SideA, SideB, SideA+B
-    DISCOUNT            DWORD 0.10                      ; Discount % in decimals
+    FOOD_PRICE          DWORD 850, 1000              ; Prices for Food A ($8.50), Food B ($10.00) in cents
+    SIDEDISH_PRICE      DWORD 0, 120, 240, 300       ; Prices for No Side ($0.00), Side A ($1.20), Side B ($2.40), Side A+B ($3.00) in cents
+    DISCOUNT            DWORD 10                     ; Discount percentage as a whole number (10%)
+
 ;------------------------------------------LOGIN
     username            BYTE  20 DUP(?)   
     password            BYTE  20 DUP(?)   
@@ -82,7 +89,7 @@ ExitProcess proto, dwExitCode:dword
 ;~~~ORDER LIST
     foodList            BYTE  100 DUP(0)
     sideList            BYTE  100 DUP(0)
-    priceLIST           DWORD 100 DUP(0)
+    priceList           DWORD 100 DUP(0)
     orderListLen        DWORD 0
 ;~~~PRICE CALCULATION
     usingPromo          BYTE  0 ; bool
@@ -657,77 +664,231 @@ displaySelection PROC
     displaySelection ENDP
 ;==============================PART 4: CALCULATIONS
 calcTotalPrice PROC
-    ; loop through every food
-    ; array: each record have 3 attributes, Food (A/B), Side(1/2/3/4), Price  (waiting to be calculated)
-    mov ecx, orderListLen
-    mov esi, 0
+    ; Print current orderListLen to verify its value
+    mov eax, orderListLen
+    call WriteDec
+    call Crlf
+
+    ; Ensure orderListLen is within valid bounds
+    cmp orderListLen, 100         ; Check if orderListLen exceeds array bounds
+    jae outOfBoundsError          ; If it exceeds, handle the error
+
+    ; Loop through each food order to calculate the total price
+    mov ecx, orderListLen         ; Set up loop counter
+    mov esi, 0                    ; Start from index 0
+
     calcEachFood:  
         mov currFoodPrice, 0
-        ; Get the price of the food
-        mov al, [FoodList+esi]
-        cmp al, 'A'
-        je foodAPrice
 
-        foodBPrice:
-            mov edi, 2
-            jmp addFoodPrice
-        foodAPrice:
-            mov edi, 0
-        addFoodPrice:
-            mov ebx, [FOOD_PRICE+edi]
-            mov currFoodPrice, ebx
+        ; Call procedure to get the price of the food
+        call getFoodPrice
 
-        ; Get the price of the side dish
-        mov al, [SideList+esi]
-        cmp al, '1'
-        je sideNonePrice
-        cmp al, '2'
-        je sideAPrice
-        cmp al, '3'
-        je sideBPrice
-        
-        sideABPrice:
-            mov edi, 6
-            jmp addSidePrice
-        sideBPrice:
-            mov edi, 4
-            jmp addSidePrice
-        sideAPrice:
-            mov edi, 2
-            jmp addSidePrice
-        sideNonePrice:
-            mov edi, 0
+        ; Call procedure to get the price of the side dish
+        call getSidePrice
 
-        addSidePrice:
-            mov ebx, [SIDEDISH_PRICE+edi]
-            ; Calculate total price
-            add currFoodPrice, ebx
-        
-        ;Store calculated price into array
-        ;multiply esi by 2 because priceList is in DWORD instead of BYTE
+        ; Store calculated price in priceList
         mov eax, esi
-        mov ebx, 2
+        mov ebx, 4                ; Multiply index by 4 (DWORD size)
         mul ebx
         mov edi, eax
         mov eax, currFoodPrice
-        mov [priceList + edi], eax 
+        mov [priceList + edi], eax
 
-        inc esi
+        inc esi                   ; Move to next order
     loop calcEachFood
-    call displayInvoice
-    calcTotalPrice ENDP
+
+    call displayInvoice           ; Display the invoice after calculation
+    ret
+
+outOfBoundsError:
+    ; Handle array bounds error (if orderListLen exceeds 100)
+    mov edx, OFFSET errorMsg
+    call WriteString
+    call Crlf
+    ret
+
+calcTotalPrice ENDP
+
+getFoodPrice PROC
+    ; Get the price of the food in cents
+    mov al, [foodList + esi]
+    cmp al, 'A'
+    je setFoodAPrice
+
+    ; Default to food B
+    setFoodBPrice:
+        mov edi, 4                ; Index for 'B' in FOOD_PRICE array (1000 = 10.00 dollars)
+        jmp setFoodPrice
+
+    setFoodAPrice:
+        mov edi, 0                ; Index for 'A' in FOOD_PRICE array (850 = 8.50 dollars)
+
+    setFoodPrice:
+        mov ebx, [FOOD_PRICE + edi]
+        jo priceOverflow           ; Check for overflow
+        mov currFoodPrice, ebx    ; Store the food price in currFoodPrice (fixed-point cents)
+    ret
+
+    priceOverflow:
+        ; Handle the overflow here, like printing an error or setting the price to a max value
+        mov currFoodPrice, 2147483647  ; Set to max 32-bit value in case of overflow
+        ret
+    getFoodPrice ENDP
+
+getSidePrice PROC
+    ; Get the price of the side dish in cents
+    mov al, [sideList + esi]
+    cmp al, '1'
+    je setSideNonePrice
+    cmp al, '2'
+    je setSideAPrice
+    cmp al, '3'
+    je setSideBPrice
+
+    setSideABPrice:
+        mov edi, 12               ; Index for 'AB' in SIDEDISH_PRICE (300 = 3.00 dollars)
+        jmp setSidePrice
+
+    setSideBPrice:
+        mov edi, 8                ; Index for 'B' in SIDEDISH_PRICE (240 = 2.40 dollars)
+        jmp setSidePrice
+
+    setSideAPrice:
+        mov edi, 4                ; Index for 'A' in SIDEDISH_PRICE (120 = 1.20 dollars)
+        jmp setSidePrice
+
+    setSideNonePrice:
+        mov edi, 0                ; No side dish, price is 0
+
+    setSidePrice:
+        mov ebx, [SIDEDISH_PRICE + edi]
+        jo priceOverflow           ; Check for overflow
+        add currFoodPrice, ebx    ; Add side dish price to the food price (in cents)
+    ret
+
+    priceOverflow:
+        ; Handle the overflow case here as well
+        mov currFoodPrice, 2147483647  ; Max value in case of overflow
+        ret
+    getSidePrice ENDP
+
+
 
 ;==============================PART 5: DISPLAY INVOICE (ALL ORDERS)
 displayInvoice PROC
-    mov ecx, orderListLen
-    mov esi, 0
-    displayEachFood:  
-        mov al, [FoodList+esi]
+    ; Print current orderListLen to verify its value
+    mov eax, orderListLen
+    call WriteDec
+    call Crlf
+
+    mov ecx, orderListLen         ; Set up loop counter
+    mov esi, 0                    ; Start from index 0
+
+    displayEachFood:
+        ; Get and display food selection
+        mov al, [foodList + esi]   ; Get food selection from list
+        cmp al, 'A'
+        je displayFoodA
+        cmp al, 'B'
+        je displayFoodB
+
+    displayFoodA:
+        mov edx, OFFSET foodAMsg   ; "Pan Mee"
         call WriteString
-        mov al, [SideList+esi]
+        jmp displaySideDish
+
+    displayFoodB:
+        mov edx, OFFSET foodBMsg   ; "Chilli Pan Mee"
         call WriteString
+        jmp displaySideDish
+
+    displaySideDish:
+        ; Get and display side dish selection
+        mov al, [sideList + esi]
+        cmp al, '1'
+        je displayNoSideDish
+        cmp al, '2'
+        je displaySideA
+        cmp al, '3'
+        je displaySideB
+        cmp al, '4'
+        je displaySideAB
+
+    displayNoSideDish:
+        jmp displayPrice
+
+    displaySideA:
+        mov edx, OFFSET sideAOnlyMsg
+        call WriteString
+        jmp displayPrice
+
+    displaySideB:
+        mov edx, OFFSET sideBOnlyMsg
+        call WriteString
+        jmp displayPrice
+
+    displaySideAB:
+        mov edx, OFFSET sideABMsg
+        call WriteString
+
+        call displayPrice
+    ; Move to next order
     loop displayEachFood
-    displayInvoice ENDP
+
+    exit
+displayInvoice ENDP
+
+displayPrice PROC
+    ; Calculate the correct index in priceList
+    mov eax, esi
+    mov ebx, 4
+    mul ebx                       ; Multiply index by 4 to get the correct offset in priceList
+    jo priceOverflow               ; Jump if multiplication caused an overflow
+
+    ; Load price from priceList (expecting price in cents)
+    mov eax, [priceList + eax]    
+    cmp eax, 0                    ; Ensure the price is not zero
+    je zeroPrice                   ; Handle zero price separately
+
+    xor edx, edx                  ; Clear EDX to avoid overflow during division
+    mov ecx, 100                  ; Divisor for separating dollars and cents
+    div ecx                       ; EAX = dollars, EDX = cents (no overflow should occur here)
+
+    ; Print dollars (EAX) and "." followed by cents (EDX)
+    call WriteDec                 ; Print the dollar amount (EAX)
+    mov edx, OFFSET dotMsg        ; Load the dot (".") message
+    call WriteString              ; Print the dot
+
+    ; Ensure cents are printed as two digits
+    mov eax, edx                  ; Move cents value into EAX
+    cmp eax, 10
+    jae printCents
+    ; If less than 10, pad with a leading zero
+    mov edx, OFFSET zeroPad
+    call WriteString
+
+    printCents:
+        call WriteDec                 ; Print the cents (EDX)
+
+        jmp endDisplayPrice            ; Jump to the end
+
+    zeroPrice:
+        ; Handle zero price case
+        mov edx, OFFSET zeroPriceMsg  ; Message for zero price
+        call WriteString
+        jmp endDisplayPrice
+
+    priceOverflow:
+        ; Handle the overflow error gracefully
+        mov edx, OFFSET overflowErrorMsg ; Message for overflow error
+        call WriteString
+
+    endDisplayPrice:
+        call Crlf                     ; New line after displaying the price
+        ret
+    displayPrice ENDP
+
+
 ;==============================CUSTOM FUNCTIONS
 ;------------------------------------------PRINT PAGE SEPERATION LINE
 printDash PROC
