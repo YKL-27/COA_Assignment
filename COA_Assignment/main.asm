@@ -61,7 +61,7 @@ ExitProcess proto, dwExitCode:dword
     zeroPriceMsg        BYTE  "NO PRICE", 0
     overflowErrorMsg    BYTE  "PRICE OVERFLOW", 0
     zeroPad             BYTE  "0", 0
-
+    loopNo              DWORD 0
 ;==============================VARIABLES
     inputYN             BYTE  2 DUP(?)   ; Y / N
 ;------------------------------------------CONSTANTS
@@ -102,37 +102,38 @@ ExitProcess proto, dwExitCode:dword
 .code
 ;==============================PART 1: LOGIN
 login PROC
-    ; Prompt input username display
-    mov edx, OFFSET usernamePrompt
-    call WriteString
+    startlogin:
+        ; Prompt input username display
+        mov edx, OFFSET usernamePrompt
+        call WriteString
     
-    ; Read username input
-    mov edx, OFFSET username
-    mov ecx, 20  ; Max length of input
-    call ReadString
+        ; Read username input
+        mov edx, OFFSET username
+        mov ecx, 20  ; Max length of input
+        call ReadString
     
-    ; Prompt password username display
-    mov edx, OFFSET passwordPrompt
-    call WriteString
+        ; Prompt password username display
+        mov edx, OFFSET passwordPrompt
+        call WriteString
     
-    ; Read password input
-    mov edx, OFFSET password
-    mov ecx, 20  
-    call ReadString
+        ; Read password input
+        mov edx, OFFSET password
+        mov ecx, 20  
+        call ReadString
 
-    ; Compare the entered username with the correct username
-    mov esi, OFFSET username
-    mov edi, OFFSET CORRECT_USERNAME
-    call StrCompare
-    cmp eax, 0
-    jne loginFailed 
+        ; Compare the entered username with the correct username
+        mov esi, OFFSET username
+        mov edi, OFFSET CORRECT_USERNAME
+        call StrCompare
+        cmp eax, 0
+        jne loginFailed 
     
-    ; Compare the entered password with the correct one
-    mov esi, OFFSET password
-    mov edi, OFFSET CORRECT_PASSWORD
-    call StrCompare
-    cmp eax, 0
-    jne loginFailed 
+        ; Compare the entered password with the correct one
+        mov esi, OFFSET password
+        mov edi, OFFSET CORRECT_PASSWORD
+        call StrCompare
+        cmp eax, 0
+        jne loginFailed 
 
     ;------------------------------------------LOGIN SUCCESS
     mov edx, OFFSET successMsg
@@ -147,7 +148,7 @@ login PROC
         call WriteString
         call Crlf
         call Crlf
-        call login
+        jmp startlogin
     login ENDP
 
 ;==============================PART 2: ENTER CUSTOMERS' INFO
@@ -484,6 +485,9 @@ orderLoop PROC
         mov sideDishChoice, al          ; Store valid input in mealChoice
 
     ;----------------------------------------------display selection & confirm
+    ; Print "You selected: "
+    mov edx, OFFSET resultMsg
+    call WriteString
     call displaySelection
 
     call Crlf
@@ -592,9 +596,6 @@ DisplaySideDishMenu PROC
 
 
 displaySelection PROC
-    ; Print "You selected: "
-    mov edx, OFFSET resultMsg
-    call WriteString
 
     cmp sideDishChoice, '1'
     je notSetMeal
@@ -663,6 +664,8 @@ displaySelection PROC
         call Crlf
         ret
     displaySelection ENDP
+
+
 ;==============================PART 4: CALCULATIONS
 calcTotalPrice PROC
     ; Ensure orderListLen is within valid bounds
@@ -670,7 +673,7 @@ calcTotalPrice PROC
     jae outOfBoundsError          ; If it exceeds, handle the error
 
     ; Loop through each food order to calculate the total price
-    mov ecx, orderListLen         ; Set up loop counter
+    mov ecx, orderListLen         ; Set up loop counter based on number of orders
     mov esi, 0                    ; Start from index 0
 
     calcEachFood:  
@@ -701,8 +704,7 @@ calcTotalPrice PROC
         call WriteString
         call Crlf
         ret
-    calcTotalPrice ENDP
-
+calcTotalPrice ENDP
 
 getFoodPrice PROC
     ; Get the price of the food in cents
@@ -730,36 +732,36 @@ getFoodPrice PROC
         ret
     getFoodPrice ENDP
 
-    getSidePrice PROC
-        ; Get the price of the side dish in cents
-        mov al, [sideList + esi]
-        cmp al, '1'
-        je setSideNonePrice
-        cmp al, '2'
-        je setSideAPrice
-        cmp al, '3'
-        je setSideBPrice
+getSidePrice PROC
+    ; Get the price of the side dish in cents
+    mov al, [sideList + esi]
+    cmp al, '1'
+    je setSideNonePrice
+    cmp al, '2'
+    je setSideAPrice
+    cmp al, '3'
+    je setSideBPrice
 
-        setSideABPrice:
-            mov edi, 12               ; Index for 'AB' in SIDEDISH_PRICE (300 = 3.00 dollars)
-            jmp setSidePrice
+    setSideABPrice:
+        mov edi, 12               ; Index for 'AB' in SIDEDISH_PRICE (300 = 3.00 dollars)
+        jmp setSidePrice
 
-        setSideBPrice:
-            mov edi, 8                ; Index for 'B' in SIDEDISH_PRICE (240 = 2.40 dollars)
-            jmp setSidePrice
+    setSideBPrice:
+        mov edi, 8                ; Index for 'B' in SIDEDISH_PRICE (240 = 2.40 dollars)
+        jmp setSidePrice
 
-        setSideAPrice:
-            mov edi, 4                ; Index for 'A' in SIDEDISH_PRICE (120 = 1.20 dollars)
-            jmp setSidePrice
+    setSideAPrice:
+        mov edi, 4                ; Index for 'A' in SIDEDISH_PRICE (120 = 1.20 dollars)
+        jmp setSidePrice
 
-        setSideNonePrice:
-            mov edi, 0                ; No side dish, price is 0
+    setSideNonePrice:
+        mov edi, 0                ; No side dish, price is 0
 
-        setSidePrice:
-            mov ebx, [SIDEDISH_PRICE + edi]
-            jo priceOverflow           ; Check for overflow
-            add currFoodPrice, ebx    ; Add side dish price to the food price (in cents)
-        ret
+    setSidePrice:
+        mov ebx, [SIDEDISH_PRICE + edi]
+        jo priceOverflow           ; Check for overflow
+        add currFoodPrice, ebx    ; Add side dish price to the food price (in cents)
+    ret
 
     priceOverflow:
         ; Handle the overflow case here as well
@@ -770,6 +772,7 @@ getFoodPrice PROC
 
 ;==============================PART 5: DISPLAY INVOICE (ALL ORDERS)
 displayInvoice PROC
+
     ; Check if there are any orders
     cmp orderListLen, 0
     je endDisplayInvoice          ; If no orders, exit
@@ -782,17 +785,21 @@ displayInvoice PROC
     mov esi, 0                    ; Start from index 0
 
     displayEachOrder:
+        ; Print the current value of ECX for debugging
+        mov loopNo, ecx                 ; store ecx to a var, because operations below need ecx
         cmp ecx, 0                    ; Check if we have finished processing all orders
         je endDisplayInvoice           ; If no more orders, exit
 
         ; Call separate procedures to display food and side dish
         call displayFood               ; Display food based on foodList
         call displaySideDish           ; Display side dish based on sideList
+        call displaySelection
         call displayPrice              ; Display the price for the order
 
         ; Move to next order
         inc esi                       ; Increment index for next order
-        loop displayEachOrder          ; Repeat for the next order
+        mov ecx, loopNo                ; put loop value back to ecx for loop operation
+    loop displayEachOrder          ; Repeat for the next order
 
     endDisplayInvoice:
         ret
@@ -802,54 +809,14 @@ displayInvoice PROC
 displayFood PROC
     ; Get and display food selection
     mov al, [foodList + esi]       ; Get food selection from list
-    cmp al, 'A'
-    je displayFoodA
-    cmp al, 'B'
-    je displayFoodB
-    ret
-
-    displayFoodA:
-        mov edx, OFFSET foodAMsg       ; "Pan Mee"
-        call WriteString
-        ret
-
-    displayFoodB:
-        mov edx, OFFSET foodBMsg       ; "Chilli Pan Mee"
-        call WriteString
-        ret
+    mov mealChoice, al
     displayFood ENDP
 
-    ;------------------------------------------DISPLAY SIDE DISH
-    displaySideDish PROC
-        ; Get and display side dish selection
-        mov al, [sideList + esi]
-        cmp al, '1'
-        je displayNoSideDish
-        cmp al, '2'
-        je displaySideA
-        cmp al, '3'
-        je displaySideB
-        cmp al, '4'
-        je displaySideAB
-        ret
-
-    displayNoSideDish:
-        ret
-
-    displaySideA:
-        mov edx, OFFSET sideAOnlyMsg
-        call WriteString
-        ret
-
-    displaySideB:
-        mov edx, OFFSET sideBOnlyMsg
-        call WriteString
-        ret
-
-    displaySideAB:
-        mov edx, OFFSET sideABMsg
-        call WriteString
-        ret
+;------------------------------------------DISPLAY SIDE DISH
+displaySideDish PROC
+    ; Get and display side dish selection
+    mov al, [sideList + esi]
+    mov sideDishChoice, al  
     displaySideDish ENDP
 
 ;------------------------------------------DISPLAY PRICE
