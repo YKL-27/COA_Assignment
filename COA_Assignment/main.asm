@@ -61,7 +61,7 @@ ExitProcess proto, dwExitCode:dword
     zeroPriceMsg        BYTE  "NO PRICE", 0
     overflowErrorMsg    BYTE  "PRICE OVERFLOW", 0
     zeroPad             BYTE  "0", 0
-    loopNo              DWORD 0
+
 ;==============================VARIABLES
     inputYN             BYTE  2 DUP(?)   ; Y / N
 ;------------------------------------------CONSTANTS
@@ -71,7 +71,6 @@ ExitProcess proto, dwExitCode:dword
     FOOD_PRICE          DWORD 850, 1000              ; Prices for Food A ($8.50), Food B ($10.00) in cents
     SIDEDISH_PRICE      DWORD 0, 120, 240, 300       ; Prices for No Side ($0.00), Side A ($1.20), Side B ($2.40), Side A+B ($3.00) in cents
     DISCOUNT            DWORD 10                     ; Discount percentage as a whole number (10%)
-
 ;------------------------------------------LOGIN
     username            BYTE  20 DUP(?)   
     password            BYTE  20 DUP(?)   
@@ -91,6 +90,7 @@ ExitProcess proto, dwExitCode:dword
     sideList            BYTE  100 DUP(0)
     priceList           DWORD 100 DUP(0)
     orderListLen        DWORD 0
+    loopNo              DWORD 0
 ;~~~PRICE CALCULATION
     usingPromo          BYTE  0 ; bool
     currFoodPrice       DWORD 0
@@ -219,7 +219,6 @@ CheckCustNameLength PROC
         mov edx, OFFSET largeLenMsg
         call WriteString
         mov eax, ebx        ; Move the string length (in EBX) to EAX
-        call WriteDec       ; Print the length of the input
         call Crlf           ; Move to the next line
 
         ; Print the invalid input message and prompt re-entry
@@ -304,7 +303,7 @@ dine_or_takeaway_check PROC
         cmp eax, 1
         jne dine_input_loop  ; If invalid, re-enter the loop
 
-    ret
+        ret
     dine_or_takeaway_check ENDP
 
 
@@ -506,8 +505,17 @@ orderLoop PROC
     je confirmOrder
     jmp contOrder
 
+    call DumpMem        ; Dump memory around orderListLen before confirmOrder
     confirmOrder:
+        ; Check if the user wants to confirm the order (Y)
+        mov al, inputYN
+        cmp al, 'Y'
+        je storeOrder
+        cmp al, 'y'
+        je storeOrder
+        jmp contOrder  ; If 'N', skip storing and go to next iteration
 
+    storeOrder:
         ; Store the meal choice in the order list
         mov al, mealChoice
         mov [foodList + ebx], al 
@@ -515,11 +523,14 @@ orderLoop PROC
         mov al, sideDishChoice
         mov [sideList + ebx], al
         add ebx, 2
+
         ; Ensure orderListLen does not exceed 100
         cmp orderListLen, 100
         jae orderListFull    ; Handle full order list scenario
-        inc orderListLen
+
+        inc orderListLen      ; Increment order count only when confirmed
         jmp contOrder
+
 
     orderListFull:
         ; Handle the case where the order list is full (optional message)
@@ -528,21 +539,24 @@ orderLoop PROC
         ret
 
     contOrder:
-        ; You can decide what should happen when the order is discarded.
-        ; For example, you might want to loop back to ask the user to order again:
         call Crlf
         mov edx, OFFSET contOrderMsg
         call WriteString
+        ; Reset EBX to prevent it from growing uncontrollably
+        mov ebx, 0
         ; Read input (expecting Y/N)
         mov edx, OFFSET inputYN
-        mov ecx, 2      ; Read one character plus null terminator
+        mov ecx, 2
         call ReadString
         mov al, inputYN
         cmp al, 'Y'
         je orderLoopStart
         cmp al, 'y'
         je orderLoopStart
+        ; If 'N' is selected, ensure it exits properly
         ret
+
+
 
     orderLoop ENDP
 
@@ -668,43 +682,54 @@ displaySelection PROC
 
 ;==============================PART 4: CALCULATIONS
 calcTotalPrice PROC
-    ; Ensure orderListLen is within valid bounds
-    cmp orderListLen, 100         ; Check if orderListLen exceeds array bounds
-    jae outOfBoundsError          ; If it exceeds, handle the error
+    cmp orderListLen, 0         ; Check if orderListLen is 0
+    je noOrders                 ; If no orders, skip the calculations
 
     ; Loop through each food order to calculate the total price
-    mov ecx, orderListLen         ; Set up loop counter based on number of orders
-    mov esi, 0                    ; Start from index 0
+    mov ecx, orderListLen       ; Set up loop counter based on number of orders
+    mov esi, 0                  ; Start from index 0
 
     calcEachFood:  
-        mov currFoodPrice, 0       ; Clear current food price
+        mov loopNo, ecx
+        mov currFoodPrice, 0     ; Clear current food price
 
         ; Get the price of the food (store in currFoodPrice)
         call getFoodPrice
+
+        ; Debug: Print the food price
+        mov eax, currFoodPrice
+        call Crlf
 
         ; Get the price of the side dish (add to currFoodPrice)
         call getSidePrice
 
         ; Store the total price (currFoodPrice) in priceList
         mov eax, esi
-        mov ebx, 4                ; Multiply index by 4 (DWORD size)
+        mov ebx, 4               ; Multiply index by 4 (DWORD size)
         mul ebx
-        mov edi, eax              ; edi holds the correct offset in priceList
-        mov eax, currFoodPrice    ; eax holds the total price
+        mov edi, eax             ; edi holds the correct offset in priceList
+        mov eax, currFoodPrice   ; eax holds the total price
         mov [priceList + edi], eax
 
         ; Move to the next order
         inc esi
+        mov ecx, loopNo
     loop calcEachFood
-    ret
 
-    outOfBoundsError:
-        ; Handle array bounds error (if orderListLen exceeds 100)
-        mov edx, OFFSET errorMsg
+    jmp doneCalc
+
+    noOrders:
+        ; Handle the case where there are no orders
+        ; Optional: You can print a message or handle this differently
+        call Crlf
+        mov edx, OFFSET zeroPriceMsg
         call WriteString
         call Crlf
-        ret
+
+    doneCalc:
+    ret
 calcTotalPrice ENDP
+
 
 getFoodPrice PROC
     ; Get the price of the food in cents
@@ -723,121 +748,121 @@ getFoodPrice PROC
     setFoodPrice:
         mov ebx, [FOOD_PRICE + edi]
         jo priceOverflow           ; Check for overflow
+
+        ; Debug: Print all registers to check the food price is being loaded correctly
+        call DumpRegs
         mov currFoodPrice, ebx    ; Store the food price in currFoodPrice (fixed-point cents)
     ret
 
     priceOverflow:
-        ; Handle the overflow here, like printing an error or setting the price to a max value
+        ; Handle the overflow here
         mov currFoodPrice, 2147483647  ; Set to max 32-bit value in case of overflow
         ret
     getFoodPrice ENDP
 
-getSidePrice PROC
-    ; Get the price of the side dish in cents
-    mov al, [sideList + esi]
-    cmp al, '1'
-    je setSideNonePrice
-    cmp al, '2'
-    je setSideAPrice
-    cmp al, '3'
-    je setSideBPrice
 
-    setSideABPrice:
-        mov edi, 12               ; Index for 'AB' in SIDEDISH_PRICE (300 = 3.00 dollars)
-        jmp setSidePrice
+    getSidePrice PROC
+        ; Get the price of the side dish in cents
+        mov al, [sideList + esi]     ; Load the side dish choice from sideList
+        cmp al, '1'
+        je setSideNonePrice           ; No add-on
+    
+        cmp al, '2'
+        je setSideAPrice              ; Soya Milk
+    
+        cmp al, '3'
+        je setSideBPrice              ; Dumplings
 
-    setSideBPrice:
-        mov edi, 8                ; Index for 'B' in SIDEDISH_PRICE (240 = 2.40 dollars)
-        jmp setSidePrice
+        setSideABPrice:
+            mov edi, 12               ; Set index for Dumplings & Soya Milk (AB)
+            jmp setSidePrice
 
-    setSideAPrice:
-        mov edi, 4                ; Index for 'A' in SIDEDISH_PRICE (120 = 1.20 dollars)
-        jmp setSidePrice
+        setSideBPrice:
+            mov edi, 8                ; Set index for Dumplings
+            jmp setSidePrice
 
-    setSideNonePrice:
-        mov edi, 0                ; No side dish, price is 0
+        setSideAPrice:
+            mov edi, 4                ; Set index for Soya Milk
+            jmp setSidePrice
 
-    setSidePrice:
-        mov ebx, [SIDEDISH_PRICE + edi]
-        jo priceOverflow           ; Check for overflow
-        add currFoodPrice, ebx    ; Add side dish price to the food price (in cents)
-    ret
+        setSideNonePrice:
+            mov edi, 0                ; No add-on, price is 0
+            jmp setSidePrice
 
-    priceOverflow:
-        ; Handle the overflow case here as well
-        mov currFoodPrice, 2147483647  ; Max value in case of overflow
+        setSidePrice:
+            mov ebx, [SIDEDISH_PRICE + edi]
+            add currFoodPrice, ebx    ; Add side dish price to the food price
         ret
     getSidePrice ENDP
 
 
+
+
+
 ;==============================PART 5: DISPLAY INVOICE (ALL ORDERS)
 displayInvoice PROC
-
     ; Check if there are any orders
     cmp orderListLen, 0
-    je endDisplayInvoice          ; If no orders, exit
 
-    ; Ensure orderListLen does not exceed array bounds (100 in this case)
-    cmp orderListLen, 100
-    jae endDisplayInvoice          ; If out of bounds, exit
+    je endDisplayInvoice          ; If no orders, exit
 
     mov ecx, orderListLen         ; Set up loop counter (number of orders)
     mov esi, 0                    ; Start from index 0
 
     displayEachOrder:
-        ; Print the current value of ECX for debugging
-        mov loopNo, ecx                 ; store ecx to a var, because operations below need ecx
-        cmp ecx, 0                    ; Check if we have finished processing all orders
-        je endDisplayInvoice           ; If no more orders, exit
+         mov loopNo, ecx                ; Store loop counter
 
-        ; Call separate procedures to display food and side dish
-        call displayFood               ; Display food based on foodList
-        call displaySideDish           ; Display side dish based on sideList
-        call displaySelection
-        call displayPrice              ; Display the price for the order
+         ; Get and display the current order's meal and side dish
+         call getFood                   ; Set mealChoice from foodList
+         call getSide                   ; Set sideDishChoice from sideList
+         
+         ; Display the selected meal and side
+         call displaySelection          
 
-        ; Move to next order
-        inc esi                       ; Increment index for next order
-        mov ecx, loopNo                ; put loop value back to ecx for loop operation
-    loop displayEachOrder          ; Repeat for the next order
+         ; Now display the price for the order 
+         call displayOrderPrice         ; Display price from priceList after displaying the meal and side dish
+
+         ; Move to the next order
+         inc esi                        ; Increment index for next order
+         mov ecx, loopNo                ; Restore loop counter
+         loop displayEachOrder          ; Repeat for the next order
 
     endDisplayInvoice:
         ret
-    displayInvoice ENDP
+displayInvoice ENDP
 
 ;------------------------------------------DISPLAY FOOD
-displayFood PROC
+getFood PROC
     ; Get and display food selection
     mov al, [foodList + esi]       ; Get food selection from list
     mov mealChoice, al
-    displayFood ENDP
+    getFood ENDP
 
 ;------------------------------------------DISPLAY SIDE DISH
-displaySideDish PROC
+getSide PROC
     ; Get and display side dish selection
     mov al, [sideList + esi]
     mov sideDishChoice, al  
-    displaySideDish ENDP
+    getSide ENDP
 
 ;------------------------------------------DISPLAY PRICE
-displayPrice PROC
-    ; Calculate the correct index in priceList
+displayOrderPrice PROC
+    ; Calculate the correct index in priceList (esi is the order index)
     mov eax, esi
-    mov ebx, 4
-    mul ebx                       ; Multiply index by 4 to get the correct offset in priceList
-    jo priceOverflow               ; Jump if multiplication caused an overflow
+    shl eax, 2                     ; Multiply index by 4 (DWORD size) for priceList offset
+    jo priceOverflow               ; Jump if the shift caused an overflow
 
     ; Load price from priceList (expecting price in cents)
-    mov eax, [priceList + eax]    
-    cmp eax, 0                    ; Ensure the price is not zero
-    je zeroPrice                   ; Handle zero price separately
+    mov eax, [priceList + eax]     ; EAX now contains the price in cents
+    cmp eax, 0                     ; Ensure the price is not zero
+    je zeroPrice                   ; Handle zero price case separately
 
     ; Divide by 100 to get dollars and cents
-    xor edx, edx                  ; Clear EDX for division
-    mov ecx, 100                  ; Divisor for separating dollars and cents
-    div ecx                       ; EAX = dollars, EDX = cents
+    xor edx, edx                   ; Clear EDX for division
+    mov ecx, 100                   ; Divisor for separating dollars and cents
+    div ecx                        ; EAX = dollars, EDX = cents
 
-    ; Print the dollar amount (EAX)
+    ; Print the dollar amount (EAX contains dollars)
     call WriteDec
 
     ; Print the dot (".")
@@ -845,7 +870,7 @@ displayPrice PROC
     call WriteString
 
     ; Ensure cents are printed as two digits
-    mov eax, edx                  ; Move cents value into EAX
+    mov eax, edx                   ; Move cents (from EDX) into EAX
     cmp eax, 10
     jae printCents
 
@@ -853,25 +878,26 @@ displayPrice PROC
     mov edx, OFFSET zeroPad
     call WriteString
 
-printCents:
-    call WriteDec                 ; Print the cents (EDX)
-    jmp endDisplayPrice            ; Jump to the end
+    printCents:
+        mov eax, edx                   ; Move cents back into EAX
+        call WriteDec                  ; Print the cents (EDX)
+        call Crlf                      ; Print a newline after price
+        ret
 
-zeroPrice:
-    ; Handle zero price case
-    mov edx, OFFSET zeroPriceMsg  ; Message for zero price
-    call WriteString
-    jmp endDisplayPrice
+    zeroPrice:
+        ; Handle zero price case
+        mov edx, OFFSET zeroPriceMsg   ; Message for zero price
+        call WriteString
+        call Crlf
+        ret
 
-priceOverflow:
-    ; Handle the overflow error gracefully
-    mov edx, OFFSET overflowErrorMsg ; Message for overflow error
-    call WriteString
-
-endDisplayPrice:
-    call Crlf                     ; New line after displaying the price
-    ret
-displayPrice ENDP
+    priceOverflow:
+        ; Handle the overflow error gracefully
+        mov edx, OFFSET overflowErrorMsg ; Message for overflow error
+        call WriteString
+        call Crlf
+        ret
+    displayOrderPrice ENDP
 
 
 ;==============================CUSTOM FUNCTIONS
@@ -921,12 +947,17 @@ StrCompare PROC
 
 
 main PROC
+    ; Initialize once and avoid re-execution
     call login
     call inputCustInfo
     call orderLoop
+
+    ; Now proceed to calculations and display
+    mov eax, orderlistlen
     call calcTotalPrice
     call displayInvoice
 
+    ; Exit cleanly
     invoke ExitProcess, 0
-    main ENDP
-    END main
+main ENDP
+END main
