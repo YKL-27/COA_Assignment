@@ -52,9 +52,9 @@ ExitProcess proto, dwExitCode:dword
     setMsg              BYTE  "Set ", 0
     foodAMsg            BYTE  "Pan Mee ", 0
     foodBMsg            BYTE  "Chilli Pan Mee ", 0
-    sideAOnlyMsg        BYTE  "with Soya Milk", 0
-    sideBOnlyMsg        BYTE  "with Dumplings", 0
-    sideABMsg           BYTE  "with Dumplings & Soya Milk", 0
+    sideAOnlyMsg        BYTE  "with Soya Milk ", 0
+    sideBOnlyMsg        BYTE  "with Dumplings ", 0
+    sideABMsg           BYTE  "with Dumplings & Soya Milk ", 0
 ;~~~CONFIRM ORDER AND LOOP ORDER
     confirmOrderMsg     BYTE  "Do you want to confirm this order (Y/N): ", 0
     contOrderMsg        BYTE  "Do you want to keep ordering? (Y/N): ", 0
@@ -63,6 +63,7 @@ ExitProcess proto, dwExitCode:dword
     discountedAmountMsg BYTE  "Discount:              ", 0
     takeawayChargeMsg   BYTE  "Take Away Charge:      ", 0
     finalPriceMsg       BYTE  "Grand Total:           ", 0
+    RMMSG               BYTE  "RM ", 0
 
 ;==============================VARIABLES
 ;------------------------------------------CONSTANTS
@@ -518,7 +519,7 @@ orderLoop PROC
     mov edx, OFFSET resultMsg
     call WriteString
     call displaySelection
-
+    call Crlf
     call Crlf
     mov edx, OFFSET confirmOrderMsg
     call WriteString
@@ -552,7 +553,7 @@ orderLoop PROC
 
         mov al, sideDishChoice
         mov [sideList + ebx], al
-        add ebx, 2
+        inc ebx
 
         ; Ensure orderListLen does not exceed 100
         cmp orderListLen, 100
@@ -644,8 +645,8 @@ displaySelection PROC
     cmp sideDishChoice, '1'
     je notSetMeal
     ; Display "Set " if it is not ala-carte
-        mov edx, OFFSET setMsg
-        call WriteString
+    mov edx, OFFSET setMsg
+    call WriteString
 
     notSetMeal:
 
@@ -687,25 +688,20 @@ displaySelection PROC
         jmp EndDisplay
 
     SideDishASelected:
-        ; If sideDishChoice is 2, print " with Soya Milk"
         mov edx, OFFSET sideAOnlyMsg
         call WriteString
         jmp EndDisplay
 
     SideDishBSelected:
-        ; If sideDishChoice is 3, print " with Dumplings"
         mov edx, OFFSET sideBOnlyMsg
         call WriteString
         jmp EndDisplay
 
     SideDishABSelected:
-        ; If sideDishChoice is 4, print " with Dumplings & Soya Milk"
         mov edx, OFFSET sideABMsg
         call WriteString
 
     EndDisplay:
-        ; Print a newline at the end
-        call Crlf
         ret
     displaySelection ENDP
 
@@ -720,42 +716,34 @@ calcTotalPrice PROC
     mov esi, 0                  ; Start from index 0
 
     calcEachFood:  
-        mov loopNo, ecx
-        mov loopIndex, esi
         mov currFoodPrice, 0     ; Clear current food price
 
         ; Get the price of the food (store in currFoodPrice)
         call getFoodPrice
 
-        ; Debug: Print the food price
-        mov eax, currFoodPrice
-        call Crlf
-
         ; Get the price of the side dish (add to currFoodPrice)
         call getSidePrice
 
         ; Store the total price (currFoodPrice) in priceList
-        mov eax, esi
-        mov ebx, 4               ; Multiply index by 4 (DWORD size)
-        mul ebx
-        mov edi, eax             ; edi holds the correct offset in priceList
-        mov eax, currFoodPrice   ; eax holds the total price
-        mov [priceList + edi], eax
-        add totalPrice, eax     ; ADD PRICE INTO FINAL PRICE
+        mov eax, currFoodPrice   ; Move currFoodPrice into register
+        
+        mov edi, esi             ; Copy esi to edi for multiplication
+        shl edi, 2               ; Multiply edi by 4 (DWORD size)
+        mov [priceList + edi], eax  ; Store price at proper index
+
+        add totalPrice, eax      ; Add to total price
+
         mov al, isTakeAway
         cmp al, 1
         jne noTakeAwayCharge 
-        
+
+        ; Add takeaway charge if applicable
         mov eax, TAKEAWAY_CHARGE
         add totalTakeAway, eax
 
         noTakeAwayCharge:
-        ; Move to the next order
-        mov ecx, loopNo
-        mov esi, loopIndex
-        inc esi
-
-    loop calcEachFood
+        inc esi                    ; Move to next order index
+        loop calcEachFood
 
     jmp doneCalc
 
@@ -839,22 +827,21 @@ calcFinalPrice PROC
     ; Apply 10% discount
     mov eax, finalPrice   ; Load the final price
     mov ebx, DISCOUNT_PERCENT
-    mul ebx               
+    mul ebx               ; Multiply by discount percentage (in this case, 10)
     
-    ; Fix: Load 100 into a register and use it for division
     mov ecx, 100          
-    div ecx               
-    
-    mov discountedPrice, eax
-    sub finalPrice, eax   
-
-        ; Add takeaway charges (if any)
-    mov eax, totalTakeAway
-    add finalPrice, eax
+    div ecx               ; Divide by 100 to get the discounted amount
+    mov discountedPrice, eax  ; Save the discount value
+    sub finalPrice, eax    ; Subtract the discount from the final price
 
     skipDiscount:
-    ret
+        ; Add takeaway charges (if any)
+        mov eax, totalTakeAway
+        add finalPrice, eax
+
+        ret
     calcFinalPrice ENDP
+
 
 
 ;==============================PART 5: DISPLAY INVOICE (ALL ORDERS)
@@ -864,7 +851,7 @@ displayInvoice PROC
     je endDisplayInvoice          ; If no orders, exit
 
     mov ecx, orderListLen         ; Set up loop counter (number of orders)
-    mov esi, 0                    ; Start from index 0
+    mov esi, 0    ; Start from last index (LEO store last order at index 0)
 
     displayEachOrder:
         mov loopNo, ecx                ; Store loop counter
@@ -877,6 +864,7 @@ displayInvoice PROC
         ; Display the selected meal and side
         call displaySelection          
 
+        mov edx, OFFSET RMMsg
         ; Now display the price for the order 
         call displayOrderPrice         ; Display price from priceList after displaying the meal and side dish
 
@@ -935,14 +923,15 @@ getSide PROC
 ;------------------------------------------DISPLAY PRICE
 displayOrderPrice PROC
     ; Calculate the correct index in priceList (esi is the order index)
-    mov eax, esi                ; Get the current index (esi)
-    shl eax, 2                  ; Multiply index by 4 (DWORD size) for priceList offset
-    mov eax, [priceList + eax]  ; EAX now contains the price in cents
-    cmp eax, 0                  ; Ensure the price is not zero
-    je zeroPrice                ; Handle zero price case separately
+
+    mov edi, esi             ; edi holds the index in priceList
+    shl edi, 2               ; Multiply edi by 4 to scale the index for DWORD access (since each price is 4 bytes)
+    mov eax, [priceList + edi]  ; EAX now contains the price in cents
+    cmp eax, 0               ; Ensure the price is not zero
+    je zeroPrice             ; Handle zero price case separately
 
     mov edi, OFFSET displayPriceStr  ; Prepare the buffer
-    call printPriceStr          ; Convert the integer in EAX to a string and store in buffer
+    call printPriceStr        ; Convert the integer in EAX to a string and store in buffer
     ret
 
     zeroPrice:
