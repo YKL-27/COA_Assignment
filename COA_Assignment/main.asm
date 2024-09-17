@@ -31,6 +31,8 @@ ExitProcess proto, dwExitCode:dword
     invalidPromoMsg     BYTE  "Invalid input. Please enter 'Y' or 'N'.", 0
     promoCodeMsg        BYTE  "Promo Code: ", 0
     invalidPromoCodeMsg BYTE  "Invalid promo code. Do you wish to retry? (Y/N): ", 0
+    promoSuccessMsg BYTE "Promo Code used successfully!", 0
+
 ;------------------------------------------SELECT FOOD
 ;~~~SELECT MEAL
     menuTitle           BYTE  "Select A Meal:", 0
@@ -430,11 +432,14 @@ check_promo_code PROC
         ret
 
     valid_promo_code:
-        ; Promo code is valid, continue
+        ; Promo code is valid, display success message
         mov usingPromo, 1
+        mov edx, OFFSET promoSuccessMsg   ; Display "Promo Code used successfully"
+        call WriteString
         call Crlf
         ret
     check_promo_code ENDP
+
 
 
 ;==============================PART 3: ORDERING
@@ -815,13 +820,34 @@ getSidePrice PROC
     getSidePrice ENDP
 
 calcFinalPrice PROC
+    ; Initialize final price with the total price
     mov eax, totalPrice
     mov finalPrice, eax
+    
+    ; Add takeaway charges (if any)
     mov eax, totalTakeAway
     add finalPrice, eax
 
+    ; Check if the promo code was used (usingPromo == 1)
+    cmp usingPromo, 1
+    jne skipDiscount     ; If promo code wasn't used, skip the discount
+
+    ; Apply 10% discount
+    mov eax, finalPrice   ; Load the final price
+    mov ebx, DISCOUNT_PERCENT
+    mul ebx               
+    
+    ; Fix: Load 100 into a register and use it for division
+    mov ecx, 100          
+    div ecx               
+    
+    sub finalPrice, eax   
+
+    skipDiscount:
     ret
-    calcFinalPrice ENDP
+calcFinalPrice ENDP
+
+
 ;==============================PART 5: DISPLAY INVOICE (ALL ORDERS)
 displayInvoice PROC
     ; Check if there are any orders
