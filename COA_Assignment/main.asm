@@ -36,14 +36,14 @@ ExitProcess proto, dwExitCode:dword
 ;------------------------------------------SELECT FOOD
 ;~~~SELECT MEAL
     menuTitle           BYTE  "Select A Meal:", 0
-    foodA               BYTE  "A - Pan Mee", 0
-    foodB               BYTE  "B - Chilli Pan Mee", 0
+    foodA               BYTE  "A - Pan Mee                           RM  8.50", 0
+    foodB               BYTE  "B - Chilli Pan Mee                    RM 10.00", 0
 ;~~~SELECT ADDON
     sideDishTitle       BYTE  "Select An Add-On:", 0
-    noSideDish          BYTE  "1 - No add-on (Ala-carte)", 0
-    setWithA            BYTE  "2 - Set with Soya Milk", 0
-    setWithB            BYTE  "3 - Set with Dumplings", 0
-    setWithAB           BYTE  "4 - Set with Dumplings & Soya Milk", 0
+    noSideDish          BYTE  "1 - No add-on", 0
+    setWithA            BYTE  "2 - Set with Soya Milk                + RM 1.20", 0
+    setWithB            BYTE  "3 - Set with Dumplings                + RM 2.40", 0
+    setWithAB           BYTE  "4 - Set with Dumplings & Soya Milk    + RM 3.00", 0
 ;~~~SELECTION PROMPT
     selectionPrompt     BYTE  ">> Selection: ", 0
     invalidInputMsg     BYTE  "Invalid selection, please try again.", 0
@@ -59,8 +59,10 @@ ExitProcess proto, dwExitCode:dword
     confirmOrderMsg     BYTE  "Do you want to confirm this order (Y/N): ", 0
     contOrderMsg        BYTE  "Do you want to keep ordering? (Y/N): ", 0
 ;~~~INVOICE
-
-
+    totalPriceMsg       BYTE  "Total Price:           ", 0
+    discountedAmountMsg BYTE  "Discount:              ", 0
+    takeawayChargeMsg   BYTE  "Take Away Charge:      ", 0
+    finalPriceMsg       BYTE  "Grand Total:           ", 0
 
 ;==============================VARIABLES
 ;------------------------------------------CONSTANTS
@@ -103,9 +105,9 @@ ExitProcess proto, dwExitCode:dword
     totalTakeAway       DWORD 0
     discountedPrice     DWORD 0
     finalPrice          DWORD 0
-
+;~~~INVOICE 
+    charSpacing         BYTE  0 ; full invoice spacing = 75 chars wide
 .code
-
 main PROC
     ; Initialize once and avoid re-execution
     ;call login
@@ -329,17 +331,17 @@ CheckDineTake PROC
     mov esi, OFFSET inputDT
     lodsb           ; Load the first character from the buffer into AL
 
-    ; Check for 'D', 'd', 'T', 't'
+    ; Check for 'D', 'd'
     cmp al, 'D'
     je validDTInput
     cmp al, 'd'
     je validDTInput
+
+    ; Check for 'T', 't'
     cmp al, 'T'
-    mov isTakeAway, 1
-    je validDTInput
+    je setTakeAway
     cmp al, 't'
-    mov isTakeAway, 1
-    je validDTInput
+    je setTakeAway
 
     invalidDTInput:
         ; If input is invalid, output invalid message
@@ -351,10 +353,16 @@ CheckDineTake PROC
         mov eax, 0      ; Set return value to 0 (invalid)
         ret
 
+    setTakeAway:
+        ; Set takeaway flag
+        mov isTakeAway, 1
+        jmp validDTInput
+
     validDTInput:
         mov eax, 1      ; Set return value to 1 (valid)
         ret
     CheckDineTake ENDP
+
 
 ; Promo code check function
 promo_code_check PROC
@@ -823,10 +831,6 @@ calcFinalPrice PROC
     ; Initialize final price with the total price
     mov eax, totalPrice
     mov finalPrice, eax
-    
-    ; Add takeaway charges (if any)
-    mov eax, totalTakeAway
-    add finalPrice, eax
 
     ; Check if the promo code was used (usingPromo == 1)
     cmp usingPromo, 1
@@ -841,18 +845,22 @@ calcFinalPrice PROC
     mov ecx, 100          
     div ecx               
     
+    mov discountedPrice, eax
     sub finalPrice, eax   
+
+        ; Add takeaway charges (if any)
+    mov eax, totalTakeAway
+    add finalPrice, eax
 
     skipDiscount:
     ret
-calcFinalPrice ENDP
+    calcFinalPrice ENDP
 
 
 ;==============================PART 5: DISPLAY INVOICE (ALL ORDERS)
 displayInvoice PROC
     ; Check if there are any orders
     cmp orderListLen, 0
-
     je endDisplayInvoice          ; If no orders, exit
 
     mov ecx, orderListLen         ; Set up loop counter (number of orders)
@@ -878,16 +886,31 @@ displayInvoice PROC
         mov esi, loopIndex             ; Restore loop index
         inc esi                        ; Increment index for next order
         call Crlf
-        loop displayEachOrder          ; Repeat for the next order
-        
-        call Crlf
-        mov eax, totalTakeAway
-        mov edi, OFFSET totalTakeAway 
-        call printPriceStr
-        call Crlf
-        mov eax, finalPrice
-        mov edi, OFFSET finalPrice 
-        call printPriceStr
+    loop displayEachOrder          ; Repeat for the next order
+    
+    ; Display discounted amount
+    call Crlf
+    mov edx, OFFSET discountedAmountMsg
+    call WriteString
+    mov eax, discountedPrice
+    mov edi, OFFSET discountedPrice 
+    call printPriceStr
+
+    ; Display take away charge
+    call Crlf
+    mov edx, OFFSET takeawayChargeMsg
+    call WriteString
+    mov eax, totalTakeAway
+    mov edi, OFFSET totalTakeAway 
+    call printPriceStr
+
+    ; Display grand total
+    call Crlf
+    mov edx, OFFSET finalPriceMsg
+    call WriteString
+    mov eax, finalPrice
+    mov edi, OFFSET finalPrice 
+    call printPriceStr
 
     endDisplayInvoice:
         ret
@@ -922,9 +945,9 @@ displayOrderPrice PROC
     call printPriceStr          ; Convert the integer in EAX to a string and store in buffer
     ret
 
-zeroPrice:
-    ret
-displayOrderPrice ENDP
+    zeroPrice:
+        ret
+    displayOrderPrice ENDP
 
 
 ;==============================CUSTOM FUNCTIONS
