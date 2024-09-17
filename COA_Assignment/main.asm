@@ -92,9 +92,9 @@ ExitProcess proto, dwExitCode:dword
     sideDishChoice      BYTE  ?
 ;------------------------------------------CALCULATION
 ;~~~ORDER LIST
-    foodList            BYTE  100 DUP(0)
-    sideList            BYTE  100 DUP(0)
-    priceList           DWORD 100 DUP(0)
+    foodList            BYTE  64 DUP(0)
+    sideList            BYTE  64 DUP(0)
+    priceList           DWORD 64 DUP(0)
     orderListLen        DWORD 0
     loopNo              DWORD 0
     loopIndex           DWORD 0
@@ -114,12 +114,30 @@ main PROC
     ;call login
     call inputCustInfo
     call orderLoop
+    ;call debug
     call calcTotalPrice
     call calcFinalPrice
     call displayInvoice
-
     ; Exit cleanly
     invoke ExitProcess, 0
+
+debug PROC
+    mov ecx, orderListLen
+    mov esi, 0
+    looplist:
+        mov al, [foodList + esi]
+        call WriteChar
+        call Crlf
+
+        mov al, [sideList + esi]
+        call WriteChar
+        call Crlf
+        call Crlf
+        add esi, 2
+    loop looplist
+    ret
+    debug ENDP
+
 ;==============================PART 1: LOGIN
 login PROC
     startlogin:
@@ -450,7 +468,6 @@ check_promo_code PROC
     check_promo_code ENDP
 
 
-
 ;==============================PART 3: ORDERING
 orderLoop PROC
     mov ebx, 0
@@ -573,8 +590,7 @@ orderLoop PROC
         call Crlf
         mov edx, OFFSET contOrderMsg
         call WriteString
-        ; Reset EBX to prevent it from growing uncontrollably
-        mov ebx, 0
+        inc ebx
         ; Read input (expecting Y/N)
         mov edx, OFFSET inputYN
         mov ecx, 2
@@ -711,28 +727,34 @@ calcTotalPrice PROC
     cmp orderListLen, 0         ; Check if orderListLen is 0
     je noOrders                 ; If no orders, skip the calculations
 
+    ; Initialize total price
+    mov totalPrice, 0
+
     ; Loop through each food order to calculate the total price
     mov ecx, orderListLen       ; Set up loop counter based on number of orders
     mov esi, 0                  ; Start from index 0
 
     calcEachFood:  
-        mov currFoodPrice, 0     ; Clear current food price
-
-        ; Get the price of the food (store in currFoodPrice)
+            ;call dumpregs 
+        mov currFoodPrice, 0
+        mov loopNo, ecx                ; Store loop counter
+        mov loopIndex, esi             ; store loop index
         call getFoodPrice
-
-        ; Get the price of the side dish (add to currFoodPrice)
         call getSidePrice
 
         ; Store the total price (currFoodPrice) in priceList
         mov eax, currFoodPrice   ; Move currFoodPrice into register
-        
-        mov edi, esi             ; Copy esi to edi for multiplication
-        shl edi, 2               ; Multiply edi by 4 (DWORD size)
-        mov [priceList + edi], eax  ; Store price at proper index
+        ;call dumpregs 
+        mov edi, esi 
+        shl edi, 2 
+        ;call dumpregs
+        mov [priceList + edi], eax 
+
+        shr esi, 2 
 
         add totalPrice, eax      ; Add to total price
 
+        ; Check for takeaway charge
         mov al, isTakeAway
         cmp al, 1
         jne noTakeAwayCharge 
@@ -742,7 +764,10 @@ calcTotalPrice PROC
         add totalTakeAway, eax
 
         noTakeAwayCharge:
-        inc esi                    ; Move to next order index
+        ; Move to the next order
+        mov ecx, loopNo                ; Restore loop counter
+        mov esi, loopIndex             ; Restore loop index
+        add esi, 2                   ; Move to next order index
         loop calcEachFood
 
     jmp doneCalc
@@ -750,7 +775,7 @@ calcTotalPrice PROC
     noOrders:
     doneCalc:
     ret
-    calcTotalPrice ENDP
+calcTotalPrice ENDP
 
 getFoodPrice PROC
     ; Get the price of the food in cents
@@ -770,14 +795,8 @@ getFoodPrice PROC
 
     setFoodPrice:
         mov ebx, [FOOD_PRICE + edi]
-        jo priceOverflow           ; Check for overflow
         mov currFoodPrice, ebx    ; Store the food price in currFoodPrice (fixed-point cents)
     ret
-
-    priceOverflow:
-        ; Handle the overflow here
-        mov currFoodPrice, 2147483647  ; Set to max 32-bit value in case of overflow
-        ret
     getFoodPrice ENDP
 
 
@@ -793,6 +812,7 @@ getSidePrice PROC
     cmp al, '3'
     je setSideBPrice              ; Dumplings
 
+    ; Default case (invalid side order or combination of sides)
     setSideABPrice:
         mov edi, 12               ; Set index for Dumplings & Soya Milk (AB)
         jmp setSidePrice
@@ -810,8 +830,8 @@ getSidePrice PROC
         jmp setSidePrice
 
     setSidePrice:
-        mov ebx, [SIDEDISH_PRICE + edi]
-        add currFoodPrice, ebx    ; Add side dish price to the food price
+        mov ebx, [SIDEDISH_PRICE + edi]   ; Retrieve the price from SIDEDISH_PRICE array
+        add currFoodPrice, ebx            ; Add side dish price to the food price
     ret
     getSidePrice ENDP
 
@@ -843,7 +863,6 @@ calcFinalPrice PROC
     calcFinalPrice ENDP
 
 
-
 ;==============================PART 5: DISPLAY INVOICE (ALL ORDERS)
 displayInvoice PROC
     ; Check if there are any orders
@@ -869,10 +888,9 @@ displayInvoice PROC
         call displayOrderPrice         ; Display price from priceList after displaying the meal and side dish
 
         ; Move to the next order
-
         mov ecx, loopNo                ; Restore loop counter
         mov esi, loopIndex             ; Restore loop index
-        inc esi                        ; Increment index for next order
+        add esi, 2                        ; Increment index for next order
         call Crlf
     loop displayEachOrder          ; Repeat for the next order
     
@@ -899,7 +917,7 @@ displayInvoice PROC
     mov eax, finalPrice
     mov edi, OFFSET finalPrice 
     call printPriceStr
-
+    
     endDisplayInvoice:
         ret
     displayInvoice ENDP
@@ -924,6 +942,7 @@ getSide PROC
 displayOrderPrice PROC
     ; Calculate the correct index in priceList (esi is the order index)
 
+    ;call dumpregs
     mov edi, esi             ; edi holds the index in priceList
     shl edi, 2               ; Multiply edi by 4 to scale the index for DWORD access (since each price is 4 bytes)
     mov eax, [priceList + edi]  ; EAX now contains the price in cents
