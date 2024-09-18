@@ -5,105 +5,119 @@ INCLUDE Irvine32.inc
 
 .data
 ;==============================DISPLAY MESSAGES
-    enterContMsg        BYTE  "Enter anything to continue...", 0
+    enterContMsg        BYTE "Enter anything to continue...", 0
+    invalidCharMsg      BYTE "    INVALID INPUT: Name contain invalid character.", 13, 10, 0
+;------------------------------------------REGISTER
+    registerPromptUser  BYTE "Register a username (up to 20 characters): ", 0
+    registerPromptPass  BYTE "Register a password (up to 20 characters): ", 0
+    registrationSuccess BYTE "Registration successful!", 13, 10, 0
+    usernameTooShortMsg BYTE "    INVALID INPUT: Username must be between 1 and 20 characters without spaces.", 13, 10, 0
+    passwordTooShortMsg BYTE "    INVALID INPUT: Password must be between 1 and 20 characters without spaces.", 13, 10, 0
 ;------------------------------------------LOGIN
-    usernamePrompt      BYTE  "Enter admin username: ", 0
-    passwordPrompt      BYTE  "Enter admin password: ", 0
-    successMsg          BYTE  "Login successful!", 13, 10, 0 
-    startupMsg          BYTE  "Launching Food Ordering Program... ", 13, 10, 0
-    failLoginMsg        BYTE  "Invalid credentials!", 13, 10, 0 
+    usernamePrompt      BYTE "Enter username (or -111 to go back): ", 0
+    passwordPrompt      BYTE "Enter password:                      ", 0
+    successMsg          BYTE "Login successful!", 13, 10, 0 
+    failLoginMsg        BYTE "Invalid credentials!", 13, 10, 0 
+    startupMsg          BYTE "Launching Food Ordering Program... ", 13, 10, 0
 ;------------------------------------------ENTER CUSTOMER INFO
-    welcomeMsg          BYTE  "       Welcome to Pan-tastic Mee House!", 13, 10, 0
+    welcomeMsg          BYTE "--------------Welcome to Pan-tastic Mee House!--------------", 13, 10, 0
 ;~~~ENTER NAME
-    inputNameMsg        BYTE  "Enter your name (up to 50 characters):  ", 0
-    invalidCharMsg      BYTE  "    INVALID INPUT: Name contain invalid character.", 13, 10, 0
-    nameBlankMsg        BYTE  "    INVALID INPUT: No name was entered.", 13, 10, 0
-    strTooLongMsg       BYTE  "    INVALID INPUT: Name exceed 50 characters long.", 13, 10, 0
+    inputNameMsg        BYTE "Enter your name (up to 50 characters or enter -111 to go back to register menu):  ", 0
+    backToRegisterMsg   BYTE "Returning to registration, enter any key to continue...", 13, 10, 0
+    errorNameMsg        BYTE "Invalid input. Please enter a valid name or -111 to go back.", 13, 10, 0
+    nameBlankMsg        BYTE "    INVALID INPUT: No name was entered.", 13, 10, 0
+    strTooLongMsg       BYTE "    INVALID INPUT: Name exceed 50 characters long.", 13, 10, 0
 ;~~~ENTER MODE
-    dineOrTakeMsg       BYTE  "Dine-in or Takeaway? Enter 'D' or 'T':  ", 0
-    invalidDineTakeMsg  BYTE  "    INVALID INPUT: Please enter 'D' or 'T'.", 13, 10, 0
+    dineOrTakeMsg       BYTE "Dine-in or Takeaway? Enter 'D' or 'T':  ", 0
+    invalidDineTakeMsg  BYTE "    INVALID INPUT: Please enter 'D' or 'T'.", 13, 10, 0
 ;~~~ENTER PROMO CODE (OPTIONAL)
-    promoMsg            BYTE  "Do you have promo code to enter? (Y/N): ", 0
-    invalidPromoMsg     BYTE  "    INVALID INPUT: Please enter 'Y' or 'N'.", 13, 10, 0
-    promoCodeMsg        BYTE  "Promo Code: ", 0
-    invalidPromoCodeMsg BYTE  "Invalid promo code. Do you wish to retry? (Y/N): ", 0
+    promoMsg            BYTE "Do you have promo code to enter? (Y/N): ", 0
+    invalidPromoMsg     BYTE "    INVALID INPUT: Please enter 'Y' or 'N'.", 13, 10, 0
+    promoCodeMsg        BYTE "Promo Code: ", 0
+    invalidPromoCodeMsg BYTE "Invalid promo code. Do you wish to retry? (Y/N): ", 0
     promoSuccessMsg     BYTE "Promo Code used successfully!", 0
 
 ;------------------------------------------SELECT FOOD
 ;~~~SELECT MEAL
-    menuTitle           BYTE  "Select A Meal:", 13, 10, 0
-    foodA               BYTE  "A - Pan Mee                           RM  8.50", 13, 10, 0
-    foodB               BYTE  "B - Chilli Pan Mee                    RM 10.00", 13, 10, 0
+    menuTitle           BYTE "Select A Meal:", 13, 10, 0
+    foodA               BYTE "A - Dry Pan Mee                       RM  8.50", 13, 10, 0
+    foodB               BYTE "B - Chilli Pan Mee                    RM 10.00", 13, 10, 0
 ;~~~SELECT ADDON
-    sideDishTitle       BYTE  "Select An Add-On:", 13, 10, 0
-    noSideDish          BYTE  "1 - No add-on", 13, 10, 0
-    setWithA            BYTE  "2 - Set with Soya Milk                + RM 1.20", 13, 10, 0
-    setWithB            BYTE  "3 - Set with Dumplings                + RM 2.40", 13, 10, 0
-    setWithAB           BYTE  "4 - Set with Dumplings & Soya Milk    + RM 3.00", 13, 10, 0
+    sideDishTitle       BYTE "Select An Add-On:", 13, 10, 0
+    noSideDish          BYTE "1 - No add-on", 13, 10, 0
+    setWithA            BYTE "2 - Set with Soya Milk                + RM 1.20", 13, 10, 0
+    setWithB            BYTE "3 - Set with Dumplings                + RM 2.40", 13, 10, 0
+    setWithAB           BYTE "4 - Set with Dumplings & Soya Milk    + RM 3.00", 13, 10, 0
 ;~~~SELECTION PROMPT
-    selectionPrompt     BYTE  ">> Selection: ", 0
-    invalidInputMsg     BYTE  "Invalid selection, please try again.", 13, 10, 0
+    selectionPrompt     BYTE ">> Selection: ", 0
+    invalidInputMsg     BYTE "Invalid selection, please try again.", 13, 10, 0
 ;~~~SELECTED RESULT
-    resultMsg           BYTE  "You selected: ", 13, 10, 0
-    setMsg              BYTE  "Set ", 0
-    foodAMsg            BYTE  "Pan Mee", 0
-    foodBMsg            BYTE  "Chilli Pan Mee", 0
-    sideAOnlyMsg        BYTE  " with Soya Milk", 0
-    sideBOnlyMsg        BYTE  " with Dumplings", 0
-    sideABMsg           BYTE  " with Dumplings & Soya Milk", 0
+    resultMsg           BYTE "You selected: ", 13, 10, 0
+    setMsg              BYTE "Set ", 0
+    foodAMsg            BYTE "Dry Pan Mee", 0
+    foodBMsg            BYTE "Chilli Pan Mee", 0
+    sideAOnlyMsg        BYTE " with Soya Milk", 0
+    sideBOnlyMsg        BYTE " with Dumplings", 0
+    sideABMsg           BYTE " with Dumplings & Soya Milk", 0
 ;~~~CONFIRM ORDER AND LOOP ORDER
-    confirmOrderMsg     BYTE  "Do you want to confirm this order (Y/N): ", 0
-    contOrderMsg        BYTE  "Do you want to keep ordering? (Y/N): ", 0
+    confirmOrderMsg     BYTE "Do you want to confirm this order (Y/N): ", 0
+    contOrderMsg        BYTE "Do you want to keep ordering? (Y/N): ", 0
 ;~~~INVOICE
-    dearMsg             BYTE  "Dear ", 0
-    receiptMsg          BYTE  ", here is your receipt:", 13, 10, 0
-    RMMsg               BYTE  "RM ", 0
-    receiptHeader       BYTE  "Name                                              Price", 0
-    totalPriceMsg       BYTE  "Subtotal:                                         ", 0
-    discountedAmountMsg BYTE  "Discount:                                         ", 0
-    takeawayChargeMsg   BYTE  "Take Away Charge:                                 ", 0
-    finalPriceMsg       BYTE  "Grand Total:                                      ", 0
-    thankYouMsg         BYTE  "Thank you, have a nice day :D", 0
+    dearMsg             BYTE "Dear ", 0
+    receiptMsg          BYTE ", here is your invoice:", 13, 10, 0
+    RMMsg               BYTE "RM ", 0
+    receiptHeader       BYTE "Name                                              Price", 0
+    totalPriceMsg       BYTE "Subtotal:                                         ", 0
+    discountedAmountMsg BYTE "Discount:                                         ", 0
+    takeawayChargeMsg   BYTE "Take Away Charge:                                 ", 0
+    finalPriceMsg       BYTE "Grand Total:                                      ", 0
+    thankYouMsg         BYTE "Thank you, have a nice day :D", 0
 
 ;==============================VARIABLES
 ;------------------------------------------CONSTANTS
-    ADMIN_USERNAME      BYTE  "user123", 0  
-    ADMIN_PASSWORD      BYTE  "pass123", 0 
-    PROMO_CODE          BYTE  "eat2024", 0
+    BACK_CMD            BYTE "-111", 0  ; Command to go back
+    ADMIN_USERNAME      BYTE "user123", 0  
+    ADMIN_PASSWORD      BYTE "pass123", 0 
+    PROMO_CODE          BYTE "eat2024", 0
     FOOD_PRICE          DWORD 850, 1000             ; Prices for Food A (RM8.50), Food B (RM10.00) in cents
     SIDEDISH_PRICE      DWORD 0, 120, 240, 300      ; Prices for No Side (RM0.00), Side A (RM1.20), Side B (RM2.40), Side A+B ($RM.00) in cents
     TAKEAWAY_CHARGE     DWORD 20                    ; Extra charges for takeaway (RM0.20) in cent
-    DISCOUNT_PERCENT    DWORD 8                     ; Discount percentage (10%) as a whole number
+    DISCOUNT_PERCENT    DWORD 10                    ; Discount percentage (10%) as a whole number
 ;------------------------------------------COMMONLY USED
     dashAmount          DWORD 60
-    dash                BYTE  '-'
-    inputYN             BYTE  2 DUP(?)              ; Y / N
-    displayPriceStr     BYTE  9 DUP(0)
-    isProgramLooping    BYTE  1                     ; bool
-;------------------------------------------LOGIN
-    username            BYTE  20 DUP(?)   
-    password            BYTE  20 DUP(?)   
+    dash                BYTE '-'
+    inputYN             BYTE 2 DUP(?)              ; Y / N
+    displayPriceStr     BYTE 9 DUP(0)
+    isProgramLooping    BYTE 1                     ; bool
+;------------------------------------------REGISTRATION/LOGIN
+    backtoRegister      BYTE 0
+    username            BYTE 20 DUP(?)              ; Buffer for input username
+    password            BYTE 20 DUP(?)              ; Buffer for input password
+    registerUsername    BYTE 20 DUP(?)              ; Buffer for username, 20 characters max
+    registerPassword    BYTE 20 DUP(?)              ; Buffer for password, 20 characters max
+    registeredUsername  BYTE 20 DUP(?)              ; Buffer for registered username
+    registeredPassword  BYTE 20 DUP(?)              ; Buffer for registered password 
 ;------------------------------------------ENTER CUSTOMER INFO
-    inputCustName       BYTE  129 DUP(?)            ; Buffer to hold input (128 characters + null terminator)
-    inputDT             BYTE  2 DUP(?)              ; DineIn / TakeAway
-    inputPromoCode      BYTE  10 DUP(?)             ; Buffer for promo code input (maximum 10 characters)
+    inputCustName       BYTE 129 DUP(?)            ; Buffer to hold input (128 characters + null terminator)
+    inputDT             BYTE 2 DUP(?)              ; DineIn / TakeAway
+    inputPromoCode      BYTE 10 DUP(?)             ; Buffer for promo code input (maximum 10 characters)
 ;------------------------------------------SELECT FOOD
-    inputOrder          BYTE  2 DUP(?)              ; Define a buffer of 2 bytes (for user input)
-    inputConfirmOrder   BYTE  2 DUP(?) 
-    inputContOrder      BYTE  2 DUP(?)
-    mealChoice          BYTE  ?
-    sideDishChoice      BYTE  ?
+    inputOrder          BYTE 2 DUP(?)              ; Define a buffer of 2 bytes (for user input)
+    inputConfirmOrder   BYTE 2 DUP(?) 
+    inputContOrder      BYTE 2 DUP(?)
+    mealChoice          BYTE ?
+    sideDishChoice      BYTE ?
 ;------------------------------------------CALCULATION
 ;~~~ORDER LIST
-    foodList            BYTE  64 DUP(0)
-    sideList            BYTE  64 DUP(0)
+    foodList            BYTE 64 DUP(0)
+    sideList            BYTE 64 DUP(0)
     priceList           DWORD 64 DUP(0)
     orderListLen        DWORD 0
     loopNo              DWORD 0
     loopIndex           DWORD 0
 ;~~~PRICE CALCULATION
-    usingPromo          BYTE  0                     ; bool
-    isTakeAway          BYTE  0                     ; bool
+    usingPromo          BYTE 0                     ; bool
+    isTakeAway          BYTE 0                     ; bool
     currFoodPrice       DWORD 0
     totalPrice          DWORD 0
     totalTakeAway       DWORD 0
@@ -111,20 +125,30 @@ INCLUDE Irvine32.inc
     finalPrice          DWORD 0
 ;~~~INVOICE 
     foodStrLen          DWORD 0
-    gapSpace            BYTE  "."
+    gapSpace            BYTE "."
     invoiceNo           DWORD 0
 
 .code
 main PROC
     ; Initialize once and avoid re-execution
-    call login
     mainProgram:
-        call init
-        call inputCustInfo
-        call orderLoop
-        call calcTotalPrice
-        call calcFinalPrice
-        call displayInvoice
+        regiLogin:
+            mov backtoRegister, 0
+            call register
+            call login
+            mov al, backtoRegister
+            cmp al, 1
+            je regiLogin
+        orderProgram:
+            call init
+            call inputCustInfo
+            mov al, backtoRegister
+            cmp al, 1
+            je regiLogin
+            call orderLoop
+            call calcTotalPrice
+            call calcFinalPrice
+            call displayInvoice
     cmp isProgramLooping, 1
     je mainProgram
     ; Exit cleanly
@@ -171,66 +195,187 @@ init PROC
     ret
     init ENDP
 
-;==============================PART 1: LOGIN
+
+;===============================PART 1.1: REGISTER
+register PROC
+    call ClrScr
+    registerUsernameLoop:
+        ; Input username during registration
+        mov edx, OFFSET registerPromptUser
+        call WriteString
+        mov edx, OFFSET registerUsername
+        mov ecx, 20
+        call ReadString
+    
+        ; Check for spaces in the username
+        lea esi, registerUsername
+        call CheckForSpaces
+        cmp eax, 1                      ; If space is found, it's invalid
+        je invalidUsername
+
+        ; Validate length of entered username
+        lea esi, registerUsername
+        call StringLength                    ; Get the length of the username
+        cmp eax, 0                           ; Username cannot be empty
+        je invalidUsername
+        cmp eax, 20                          ; Ensure the length is within 20 characters
+        ja invalidUsername
+
+        ; Username is valid, proceed to password registration
+        jmp registerPasswordLoop
+
+    invalidUsername:
+        ; Display error message and re-prompt the user for a valid username
+        mov edx, OFFSET usernameTooShortMsg
+        call WriteString
+        call Crlf
+        jmp registerUsernameLoop
+
+    ; Prompt for password
+    registerPasswordLoop:
+        mov edx, OFFSET registerPromptPass
+        call WriteString
+        mov edx, OFFSET registerPassword   ; Store input in registerPassword buffer
+        mov ecx, 20                        ; Max length of 20
+        call ReadString
+
+        ; Check for spaces in the password
+        lea esi, registerPassword
+        call CheckForSpaces
+        cmp eax, 1                      ; If space is found, it's invalid
+        je invalidPassword
+
+        ; Validate length of entered password
+        lea esi, registerPassword
+        call StringLength                    ; Get the length of the password
+        cmp eax, 0                           ; Password cannot be empty
+        je invalidPassword
+        cmp eax, 20                          ; Ensure the length is within 20 characters
+        ja invalidPassword
+
+        ; Password is valid, proceed to complete registration
+        jmp storeRegisterData
+
+    invalidPassword:
+        ; Display error message and re-prompt the user for a valid password
+        mov edx, OFFSET passwordTooShortMsg
+        call WriteString
+        call Crlf
+        call ReadChar
+        jmp registerPasswordLoop
+
+    storeRegisterData:
+        ; Registration is complete, display success message
+        mov edx, OFFSET registrationSuccess
+        call WriteString
+        call Crlf
+        ret
+    register ENDP
+
+;----------------------------------------------CHECK FOR SPACES IN STRING
+CheckForSpaces PROC
+    push esi
+    mov eax, 0                  ; Assume no space found
+
+    checkLoop:
+        lodsb                       ; Load the next byte into AL
+        cmp al, 0                   ; If it's the end of the string (null terminator), exit
+        je doneChecking
+        cmp al, ' '                 ; Check if the character is a space
+        je foundSpace               ; If space is found, set EAX to 1
+        jmp checkLoop               ; Otherwise, keep checking
+
+    foundSpace:
+        mov eax, 1                  ; Space found, set EAX to 1
+
+    doneChecking:
+        pop esi
+        ret
+    CheckForSpaces ENDP
+
+
+;==============================PART 1.2: LOGIN
 login PROC
     startlogin:
         call ClrScr
-        ; Prompt input username display
+        ; Prompt for username
         mov edx, OFFSET usernamePrompt
         call WriteString
-    
-        ; Read username input
         mov edx, OFFSET username
         mov ecx, 20  ; Max length of input
         call ReadString
+
+        ; Check if user entered -111 to go back
+        lea esi, username
+        lea edi, OFFSET BACK_CMD
+        call StrCompare
+        cmp eax, 0
+        jne contLogin
+
+        goBackToRegister:               ; Display the message that we're returning to registration
+        mov edx, OFFSET backToRegisterMsg
+        call WriteString
+        mov backtoRegister, 1
+        call ReadChar
+        ret
     
-        ; Prompt password username display
+        contLogin:
+        ; Prompt for password
         mov edx, OFFSET passwordPrompt
         call WriteString
-    
-        ; Read password input
         mov edx, OFFSET password
         mov ecx, 20  
         call ReadString
 
-        ; Compare the entered username with the correct username
+        ; Compare entered username and password with registered credentials
+        mov esi, OFFSET username
+        mov edi, OFFSET registerUsername
+        call StrCompare
+        cmp eax, 0
+        jne checkAdminCredentials   ; If username doesn't match, check against hardcoded credentials
+
+        mov esi, OFFSET password
+        mov edi, OFFSET registerPassword
+        call StrCompare
+        cmp eax, 0
+        je loginSuccess  ; If username and password match the registered ones, login is successful
+
+    checkAdminCredentials:
+        ; Compare with hardcoded admin credentials
         mov esi, OFFSET username
         mov edi, OFFSET ADMIN_USERNAME
         call StrCompare
         cmp eax, 0
-        jne loginFailed 
-    
-        ; Compare the entered password with the correct one
+        jne loginFailed  ; If username doesn't match, fail
+
         mov esi, OFFSET password
         mov edi, OFFSET ADMIN_PASSWORD
         call StrCompare
         cmp eax, 0
-        jne loginFailed 
+        jne loginFailed  ; If password doesn't match, fail
 
-    ;------------------------------------------LOGIN SUCCESS
-    mov edx, OFFSET successMsg
-    call WriteString
-    call Crlf
-    call Crlf
-    ret
+    loginSuccess:
+        ; Display success message
+        mov edx, OFFSET successMsg
+        call WriteString
+        call Crlf
+        ret
 
-    ;------------------------------------------LOGIN FAILURE
     loginFailed:
+        ; Display failure message
         mov edx, OFFSET failLoginMsg
         call WriteString
         call Crlf
-        mov edx, OFFSET enterContMsg
-        call WriteString
         call ReadChar
         jmp startlogin
     login ENDP
+
 
 ;==============================PART 2: ENTER CUSTOMERS' INFO
 inputCustInfo PROC
     call ClrScr
     mov edx, offset welcomeMsg
     call WriteString
-    call printDash
 
     input_loop_start:
         ; Display input prompt
@@ -242,6 +387,13 @@ inputCustInfo PROC
         mov edx, OFFSET inputCustName
         mov ecx, 129  ; Set the input limit to 128 characters + null terminator
         call ReadString
+
+        ; Check if user entered -111 to go back
+        lea esi, inputCustName
+        lea edi, OFFSET BACK_CMD
+        call StrCompare
+        cmp eax, 0
+        je goBackToRegister
 
         ; Check the length of the input
         mov esi, OFFSET inputCustName
@@ -255,12 +407,19 @@ inputCustInfo PROC
         nameNull:
             mov edx, OFFSET nameBlankMsg
             call WriteString
-            jmp nameInputInvalid     ; Re-prompt to re-enter input
+            jmp nameInputInvalid        ; Re-prompt to re-enter input
 
         nameTooLong:
             mov edx, OFFSET strTooLongMsg
             call WriteString
-            jmp nameInputInvalid     ; Re-prompt to re-enter input
+            jmp nameInputInvalid        ; Re-prompt to re-enter input
+        
+        goBackToRegister:               ; Display the message that we're returning to registration
+            mov edx, OFFSET backToRegisterMsg
+            call WriteString
+            mov backtoRegister, 1
+            call ReadChar
+            ret
 
         check_characters:
             ; Check the characters of the input
