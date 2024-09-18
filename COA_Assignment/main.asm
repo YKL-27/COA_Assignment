@@ -5,35 +5,26 @@ INCLUDE Irvine32.inc
 
 .data
 ;==============================DISPLAY MESSAGES
-;===============================register
-registerPromptUser    BYTE "Register a username (up to 20 characters): ", 0
-registerPromptPass    BYTE "Register a password (up to 20 characters): ", 0
-registrationSuccess   BYTE "Registration successful!", 13, 10, 0
-usernameTooShortMsg   BYTE "Error: Username must be between 1 and 20 characters.", 13, 10, 0
-passwordTooShortMsg   BYTE "Error: Password must be between 1 and 20 characters.", 13, 10, 0
-invalidCharMsg        BYTE "Error: No spaces allowed.", 13, 10, 0
+    enterContMsg        BYTE  "Enter anything to continue...", 0
 ;------------------------------------------LOGIN
-    usernamePrompt      BYTE "Enter username: ", 0
-    passwordPrompt      BYTE "Enter password: ", 0
-    successMsg          BYTE "Login successful!", 13, 10, 0 
-    failLoginMsg        BYTE "Invalid credentials!", 13, 10, 0  
+    usernamePrompt      BYTE  "Enter admin username: ", 0
+    passwordPrompt      BYTE  "Enter admin password: ", 0
+    successMsg          BYTE  "Login successful!", 13, 10, 0 
     startupMsg          BYTE  "Launching Food Ordering Program... ", 13, 10, 0
+    failLoginMsg        BYTE  "Invalid credentials!", 13, 10, 0 
 ;------------------------------------------ENTER CUSTOMER INFO
-    welcomeMsg          BYTE  "Welcome to Our Restaurant", 13, 10, 0
+    welcomeMsg          BYTE  "       Welcome to Pan-tastic Mee House!", 13, 10, 0
 ;~~~ENTER NAME
-    inputNameMsg        BYTE  "Enter your name (up to 50 characters or enter -111 to go back to register menu):  ", 0
-    backCommand         BYTE "-111", 0  ; Command to go back
-    backToRegisterMsg   BYTE "Returning to registration...", 13, 10, 0
-    errorNameMsg        BYTE "Invalid input. Please enter a valid name or -111 to go back.", 13, 10, 0
-    tooLongMsg          BYTE  "Input too long.", 0
-    largeLenMsg         BYTE  "Length between 50 and 128 characters. Number of characters entered: ", 0
-    reenterNameMsg      BYTE  "Please re-enter name", 13, 10, 0
+    inputNameMsg        BYTE  "Enter your name (up to 50 characters):  ", 0
+    invalidCharMsg      BYTE  "    INVALID INPUT: Name contain invalid character.", 13, 10, 0
+    nameBlankMsg        BYTE  "    INVALID INPUT: No name was entered.", 13, 10, 0
+    strTooLongMsg       BYTE  "    INVALID INPUT: Name exceed 50 characters long.", 13, 10, 0
 ;~~~ENTER MODE
     dineOrTakeMsg       BYTE  "Dine-in or Takeaway? Enter 'D' or 'T':  ", 0
-    invalidDineTakeMsg  BYTE  "Invalid input. Please enter 'D' or 'T'.", 13, 10, 0
+    invalidDineTakeMsg  BYTE  "    INVALID INPUT: Please enter 'D' or 'T'.", 13, 10, 0
 ;~~~ENTER PROMO CODE (OPTIONAL)
     promoMsg            BYTE  "Do you have promo code to enter? (Y/N): ", 0
-    invalidPromoMsg     BYTE  "Invalid input. Please enter 'Y' or 'N'.", 13, 10, 0
+    invalidPromoMsg     BYTE  "    INVALID INPUT: Please enter 'Y' or 'N'.", 13, 10, 0
     promoCodeMsg        BYTE  "Promo Code: ", 0
     invalidPromoCodeMsg BYTE  "Invalid promo code. Do you wish to retry? (Y/N): ", 0
     promoSuccessMsg     BYTE "Promo Code used successfully!", 0
@@ -55,11 +46,11 @@ invalidCharMsg        BYTE "Error: No spaces allowed.", 13, 10, 0
 ;~~~SELECTED RESULT
     resultMsg           BYTE  "You selected: ", 13, 10, 0
     setMsg              BYTE  "Set ", 0
-    foodAMsg            BYTE  "Pan Mee ", 0
-    foodBMsg            BYTE  "Chilli Pan Mee ", 0
-    sideAOnlyMsg        BYTE  "with Soya Milk", 0
-    sideBOnlyMsg        BYTE  "with Dumplings", 0
-    sideABMsg           BYTE  "with Dumplings & Soya Milk", 0
+    foodAMsg            BYTE  "Pan Mee", 0
+    foodBMsg            BYTE  "Chilli Pan Mee", 0
+    sideAOnlyMsg        BYTE  " with Soya Milk", 0
+    sideBOnlyMsg        BYTE  " with Dumplings", 0
+    sideABMsg           BYTE  " with Dumplings & Soya Milk", 0
 ;~~~CONFIRM ORDER AND LOOP ORDER
     confirmOrderMsg     BYTE  "Do you want to confirm this order (Y/N): ", 0
     contOrderMsg        BYTE  "Do you want to keep ordering? (Y/N): ", 0
@@ -73,12 +64,11 @@ invalidCharMsg        BYTE "Error: No spaces allowed.", 13, 10, 0
     takeawayChargeMsg   BYTE  "Take Away Charge:                                 ", 0
     finalPriceMsg       BYTE  "Grand Total:                                      ", 0
     thankYouMsg         BYTE  "Thank you, have a nice day :D", 0
-    exitInvoiceMsg      BYTE  "Enter anything to continue...", 0
 
 ;==============================VARIABLES
 ;------------------------------------------CONSTANTS
-    ADMIN_USERNAME        BYTE "user123", 0  
-    ADMIN_PASSWORD        BYTE "pass123", 0 
+    ADMIN_USERNAME      BYTE  "user123", 0  
+    ADMIN_PASSWORD      BYTE  "pass123", 0 
     PROMO_CODE          BYTE  "eat2024", 0
     FOOD_PRICE          DWORD 850, 1000             ; Prices for Food A (RM8.50), Food B (RM10.00) in cents
     SIDEDISH_PRICE      DWORD 0, 120, 240, 300      ; Prices for No Side (RM0.00), Side A (RM1.20), Side B (RM2.40), Side A+B ($RM.00) in cents
@@ -91,12 +81,8 @@ invalidCharMsg        BYTE "Error: No spaces allowed.", 13, 10, 0
     displayPriceStr     BYTE  9 DUP(0)
     isProgramLooping    BYTE  1                     ; bool
 ;------------------------------------------LOGIN
-    username            BYTE 20 DUP(?)   ; Buffer for input username
-    password            BYTE 20 DUP(?)   ; Buffer for input password
-    registerUsername      BYTE 20 DUP(?)  ; Buffer for username, 20 characters max
-    registerPassword      BYTE 20 DUP(?)  ; Buffer for password, 20 characters max
-    registeredUsername    BYTE 20 DUP(?)   ; Buffer for registered username
-    registeredPassword    BYTE 20 DUP(?)   ; Buffer for registered password
+    username            BYTE  20 DUP(?)   
+    password            BYTE  20 DUP(?)   
 ;------------------------------------------ENTER CUSTOMER INFO
     inputCustName       BYTE  129 DUP(?)            ; Buffer to hold input (128 characters + null terminator)
     inputDT             BYTE  2 DUP(?)              ; DineIn / TakeAway
@@ -124,20 +110,14 @@ invalidCharMsg        BYTE "Error: No spaces allowed.", 13, 10, 0
     discountedPrice     DWORD 0
     finalPrice          DWORD 0
 ;~~~INVOICE 
-    foodStrLen          DWORD  0
-    spacebar            BYTE  " "
+    foodStrLen          DWORD 0
+    gapSpace            BYTE  "."
+    invoiceNo           DWORD 0
 
 .code
 main PROC
-    ; Start with registration process
-    call register
-
-    ; After registration, proceed to login
+    ; Initialize once and avoid re-execution
     call login
-
-    ; After login, proceed to enter customer info
-    call inputCustInfo
-
     mainProgram:
         call init
         call inputCustInfo
@@ -150,6 +130,7 @@ main PROC
     ; Exit cleanly
     invoke ExitProcess, 0
 
+;==============================INITIALISE: RESET VARAIBLES FOR NEXT CUSTOMER TO ORDER
 init PROC
     xor eax, eax
 
@@ -189,268 +170,162 @@ init PROC
 
     ret
     init ENDP
-;===============================REGISTER
-register PROC
-    registerUsernameLoop:
-        ; Input username during registration
-        mov edx, OFFSET registerPromptUser
-        call WriteString
-        mov edx, OFFSET registerUsername
-        mov ecx, 20
-        call ReadString
-    
-        ; Check for spaces in the username
-        lea esi, registerUsername
-        call CheckForSpaces
-        cmp eax, 1                      ; If space is found, it's invalid
-        je invalidUsername
-
-        ; Validate length of entered username
-        lea esi, registerUsername
-        call StringLength                    ; Get the length of the username
-        cmp eax, 0                           ; Username cannot be empty
-        je invalidUsername
-        cmp eax, 20                          ; Ensure the length is within 20 characters
-        ja invalidUsername
-
-        ; Username is valid, proceed to password registration
-        jmp registerPasswordLoop
-
-    invalidUsername:
-        ; Display error message and re-prompt the user for a valid username
-        mov edx, OFFSET usernameTooShortMsg
-        call WriteString
-        call Crlf
-        jmp registerUsernameLoop
-
-    ; Prompt for password
-    registerPasswordLoop:
-        mov edx, OFFSET registerPromptPass
-        call WriteString
-        mov edx, OFFSET registerPassword   ; Store input in registerPassword buffer
-        mov ecx, 20                        ; Max length of 20
-        call ReadString
-
-        ; Check for spaces in the password
-        lea esi, registerPassword
-        call CheckForSpaces
-        cmp eax, 1                      ; If space is found, it's invalid
-        je invalidPassword
-
-        ; Validate length of entered password
-        lea esi, registerPassword
-        call StringLength                    ; Get the length of the password
-        cmp eax, 0                           ; Password cannot be empty
-        je invalidPassword
-        cmp eax, 20                          ; Ensure the length is within 20 characters
-        ja invalidPassword
-
-        ; Password is valid, proceed to complete registration
-        jmp storeRegisterData
-
-    invalidPassword:
-        ; Display error message and re-prompt the user for a valid password
-        mov edx, OFFSET passwordTooShortMsg
-        call WriteString
-        call Crlf
-        jmp registerPasswordLoop
-
-    storeRegisterData:
-        ; Registration is complete, display success message
-        mov edx, OFFSET registrationSuccess
-        call WriteString
-        call Crlf
-        ret
-register ENDP
 
 ;==============================PART 1: LOGIN
 login PROC
     startlogin:
-        ; Prompt for username
+        call ClrScr
+        ; Prompt input username display
         mov edx, OFFSET usernamePrompt
         call WriteString
+    
+        ; Read username input
         mov edx, OFFSET username
         mov ecx, 20  ; Max length of input
         call ReadString
     
-        ; Prompt for password
+        ; Prompt password username display
         mov edx, OFFSET passwordPrompt
         call WriteString
+    
+        ; Read password input
         mov edx, OFFSET password
         mov ecx, 20  
         call ReadString
 
-        ; Compare entered username and password with registered credentials
-        mov esi, OFFSET username
-        mov edi, OFFSET registerUsername
-        call StrCompare
-        cmp eax, 0
-        jne checkAdminCredentials   ; If username doesn't match, check against hardcoded credentials
-
-        mov esi, OFFSET password
-        mov edi, OFFSET registerPassword
-        call StrCompare
-        cmp eax, 0
-        je loginSuccess  ; If username and password match the registered ones, login is successful
-
-    checkAdminCredentials:
-        ; Compare with hardcoded admin credentials
+        ; Compare the entered username with the correct username
         mov esi, OFFSET username
         mov edi, OFFSET ADMIN_USERNAME
         call StrCompare
         cmp eax, 0
-        jne loginFailed  ; If username doesn't match, fail
-
+        jne loginFailed 
+    
+        ; Compare the entered password with the correct one
         mov esi, OFFSET password
         mov edi, OFFSET ADMIN_PASSWORD
         call StrCompare
         cmp eax, 0
-        jne loginFailed  ; If password doesn't match, fail
+        jne loginFailed 
 
-    loginSuccess:
-        ; Display success message
-        mov edx, OFFSET successMsg
-        call WriteString
-        call Crlf
-        ret
+    ;------------------------------------------LOGIN SUCCESS
+    mov edx, OFFSET successMsg
+    call WriteString
+    call Crlf
+    call Crlf
+    ret
 
+    ;------------------------------------------LOGIN FAILURE
     loginFailed:
-        ; Display failure message
         mov edx, OFFSET failLoginMsg
         call WriteString
         call Crlf
+        mov edx, OFFSET enterContMsg
+        call WriteString
+        call ReadChar
         jmp startlogin
-login ENDP
+    login ENDP
 
 ;==============================PART 2: ENTER CUSTOMERS' INFO
 inputCustInfo PROC
+    call ClrScr
+    mov edx, offset welcomeMsg
+    call WriteString
+    call printDash
+
     input_loop_start:
-        ; Display input prompt for customer name
+        ; Display input prompt
+        call Crlf
         mov edx, OFFSET inputNameMsg
         call WriteString
 
-        ; Read the input customer name
+        ; Read the input string
         mov edx, OFFSET inputCustName
-        mov ecx, 50  ; Set the input limit to 50 characters
+        mov ecx, 129  ; Set the input limit to 128 characters + null terminator
         call ReadString
 
-        ; Check if user entered -111 to go back
-        lea esi, inputCustName
-        lea edi, OFFSET backCommand
-        call StrCompare
-        cmp eax, 0
-        je goBackToRegister  ; If -111 is entered, go back to registration
+        ; Check the length of the input
+        mov esi, OFFSET inputCustName
+        call StringLength        ; Get the length of input string into EAX
+        cmp eax, 50              ; Check if length is greater than 50
+        jg nameTooLong          
+        cmp eax, 0               ; Check if length is 0 or
+        jle nameNull           
+        jmp check_characters
 
-        ; Normal flow to check name validity (implement your name validation here)
-        ; ...
+        nameNull:
+            mov edx, OFFSET nameBlankMsg
+            call WriteString
+            jmp nameInputInvalid     ; Re-prompt to re-enter input
 
-        jmp done
+        nameTooLong:
+            mov edx, OFFSET strTooLongMsg
+            call WriteString
+            jmp nameInputInvalid     ; Re-prompt to re-enter input
 
-    goBackToRegister:
-        ; Display the message that we're returning to registration
-        mov edx, OFFSET backToRegisterMsg
-        call WriteString
-        call Crlf
-        call register  ; Call the registration procedure again
+        check_characters:
+            ; Check the characters of the input
+            call CheckNameCharacters
+            cmp eax, 1               ; EAX == 0 means contain invalid characters
+            je nameInputValid        ; If valid, proceed to next step
 
-    done:
-        ret
-inputCustInfo ENDP
+            ; INVALID characters
+            mov edx, OFFSET invalidCharMsg
+            call WriteString
+            jmp nameInputInvalid     ; Re-prompt to enter input
 
+        nameInputValid:
+            ; If name is valid, ask for dining preference
+            call dine_or_takeaway_check
+            ; If dining preference is valid, ask for promo code
+            call promo_code_check
+            ; If both checks pass, exit the input loop
+            ret
 
-; Length check function
-CheckCustNameLength PROC
-    ; Get the string length
-    mov eax, OFFSET inputCustName
-    call StrLength
-    mov ebx, eax  ; Save string length in EBX
-
-    ; Check if input is too long (> 128 characters)
-    cmp ebx, 128
-    jae invalidNameLength  ; If greater or equal to 128, it's invalid
-
-    ; Check if length is between 50 and 128 characters
-    cmp ebx, 50
-    jae handleLargeNameInput    ; If length >= 50 but <= 128, show the length and invalid message
-
-    ; Length is valid (between 1 and 50)
-    mov eax, 1
-    ret
-
-    handleLargeNameInput:
-        ; Handle input length between 50 and 128 characters
-        mov edx, OFFSET largeLenMsg
-        call WriteString
-        mov eax, ebx        ; Move the string length (in EBX) to EAX
-        call Crlf           ; Move to the next line
-
-        ; Print the invalid input message and prompt re-entry
-        mov edx, OFFSET errorNameMsg
-        call WriteString
-        call Crlf
-        mov edx, OFFSET reenterNameMsg
-        call WriteString
-        call Crlf           ; Move to the next line
-
-        ; Set return value to 0 (invalid)
-        mov eax, 0
-        ret
-
-    invalidNameLength:
-        ; Handle input exceeding the allowed 128 characters
-        mov edx, OFFSET tooLongMsg
-        call WriteString
-        call Crlf           ; Move to the next line
-        mov edx, OFFSET reenterNameMsg
-        call WriteString
-        call Crlf           ; Move to the next line
-
-        ; Set return value to 0 (invalid)
-        mov eax, 0
-        ret
-    CheckCustNameLength ENDP
+        nameInputInvalid:
+            jmp input_loop_start
+    inputCustInfo ENDP
 
 ; Character check function (Valid characters: A-Z, a-z)
 CheckNameCharacters PROC
+    mov ecx, 129              ; Set the max length for checking
     mov esi, OFFSET inputCustName
     check_loop:
-        lodsb               ; Load the next character into AL
-        cmp al, 0           ; Check if it's the end of the string (null terminator)
-        je valid_input      ; If it's the end, input is valid
-        cmp al, 'z'
-        jbe check_loop      ; If it's a space character, continue checking
-        cmp al, 'A'         
-        jb invalid_input    ; If less than 'A', it's invalid
-        cmp al, 'Z'         
-        jbe check_loop      ; If it's an uppercase letter, continue checking
+        mov al, [esi]          ; Load a character from the string
+        cmp al, 0              ; Check if it's the null terminator
+        je valid_input         ; If null terminator, input is valid
+
+        cmp al, 20h            ; Check if it's a space character
+        je valid_character     ; If it's a space, it's valid
+
+        cmp al, 'A'
+        jb invalid_input       ; If less than 'A', it's invalid
+        cmp al, 'Z'
+        jbe valid_character    ; If uppercase letter, it's valid
+
         cmp al, 'a'
-        jb invalid_input    ; If less than 'a', it's invalid
+        jb invalid_input       ; If less than 'a', it's invalid
         cmp al, 'z'
-        jbe check_loop      ; If it's a lowercase letter, continue checking
-        jmp invalid_input   ; Any other characters are invalid
+        jbe valid_character    ; If lowercase letter, it's valid
+
+        jmp invalid_input      ; Any other character is invalid
+
+        valid_character:
+            inc esi                ; Move to the next character
+    loop check_loop        ; Continue checking until null terminator
 
     valid_input:
-        ; If input is valid, set return value to 1
-        mov eax, 1
-        ret
+            mov eax, 1             ; All characters are valid
+            ret
 
     invalid_input:
-        ; Handle invalid characters in the input
-        mov edx, OFFSET errorNameMsg
-        call WriteString
-        call Crlf           ; Move to the next line
-        mov edx, OFFSET reenterNameMsg
-        call WriteString
-        call Crlf           ; Move to the next line
-
-        ; Set return value to 0 (invalid)
-        mov eax, 0
-        ret
+            mov eax, 0             ; Invalid character found
+            ret
     CheckNameCharacters ENDP
 
 ; Function to check Dine-in or Takeaway input
 dine_or_takeaway_check PROC
     dine_input_loop:
+        call Crlf
         ; Display the dine-in or takeaway prompt
         mov edx, OFFSET dineOrTakeMsg
         call WriteString
@@ -489,7 +364,6 @@ CheckDineTake PROC
 
     invalidDTInput:
         ; If input is invalid, output invalid message
-        call printDash
         mov edx, OFFSET invalidDineTakeMsg
         call WriteString
         call Crlf
@@ -510,6 +384,7 @@ CheckDineTake PROC
 ; Promo code check function
 promo_code_check PROC
     promo_input_loop:
+        call Crlf
         ; Display promo code query
         mov edx, OFFSET promoMsg
         call WriteString
@@ -526,15 +401,6 @@ promo_code_check PROC
         cmp al, 'y'
         je promo_code_entry
         jmp no_promo_code
-        ; cmp al, 'N'
-        ; je no_promo_code
-        ; cmp al, 'n'
-        ; je no_promo_code
-        ; Invalid input, re-enter loop
-        ; mov edx, OFFSET invalidPromoMsg
-        ; call WriteString
-        ; call Crlf
-        ; jmp promo_input_loop
 
     promo_code_entry:
         ; Ask for promo code
@@ -548,6 +414,7 @@ promo_code_check PROC
 ; Check promo code validity
 check_promo_code PROC
     promo_code_loop:
+        call Crlf
         ; Display promo code prompt
         mov edx, OFFSET promoCodeMsg
         call WriteString
@@ -586,7 +453,6 @@ check_promo_code PROC
         mov usingPromo, 1
         mov edx, OFFSET promoSuccessMsg   ; Display "Promo Code used successfully"
         call WriteString
-        call Crlf
         ret
     check_promo_code ENDP
 
@@ -596,6 +462,7 @@ orderLoop PROC
     mov ebx, 0
     ;----------------------------------------------display Mealmenu and get valid selection
     orderLoopStart:
+        call ClrScr
         call DisplayMealMenu
         ; Display the meal selection prompt again
         mov edx, OFFSET inputOrder  ; Set the buffer to store the input
@@ -627,6 +494,9 @@ orderLoop PROC
 
     ;----------------------------------------------display SideDishMenu and get valid selection
     GetSideDishSelection:
+        call Crlf
+        call printDash
+        call Crlf
         call DisplaySideDishMenu
         ; Display the meal selection prompt again
         mov edx, OFFSET inputOrder  ; Set the buffer to store the input
@@ -656,6 +526,9 @@ orderLoop PROC
 
     ;----------------------------------------------display selection & confirm
     ; Print "You selected: "
+    call Crlf
+    call printDash
+    call Crlf
     mov edx, OFFSET resultMsg
     call WriteString
     call displaySelection
@@ -732,7 +605,6 @@ orderLoop PROC
 
 ;------------------------------------------DISPLAY FOOD MENU
 DisplayMealMenu PROC
-    call printDash ; call function to print 30 dashes
 
     ; display menu title and food option
     call Crlf
@@ -753,8 +625,6 @@ DisplayMealMenu PROC
 ;------------------------------------------DISPLAY SIDE DISH MENU
 DisplaySideDishMenu PROC
     ; display sidedish title and set option
-    call Crlf
-    call Crlf
     mov edx, OFFSET sideDishTitle
     call WriteString
     mov edx, OFFSET noSideDish
@@ -994,9 +864,7 @@ calcFinalPrice PROC
 
 ;==============================PART 5: DISPLAY INVOICE (ALL ORDERS)
 displayInvoice PROC
-    call Crlf
-    call printDash
-
+    call ClrScr
     cmp orderListLen, 0         ; Check if orderListLen is 0
     je noInvoice                ; If no orders, skip the calculations
 
@@ -1008,9 +876,11 @@ displayInvoice PROC
     call WriteString
     call Crlf
 
+    call printDash
     mov edx, OFFSET receiptHeader
     call WriteString
     call Crlf
+    call printDash
 
     mov ecx, orderListLen    ; Load the number of orders into ecx
     mov esi, 0               ; Start at the first order
@@ -1033,7 +903,7 @@ displayInvoice PROC
         printSpace:
             cmp ebx, 0            ; Check if spaces are left to print
             jz donePrintSpace     ; Exit if none left
-            mov al, spacebar      ; Print space
+            mov al, gapSpace      ; Print space
             call WriteChar
             dec ebx               ; Decrement space count
             jmp printSpace
@@ -1047,8 +917,6 @@ displayInvoice PROC
             add esi, 2           ; Move to the next order (assuming 2-byte entries)
             pop ecx               ; Restore the loop counter
     loop displayEachOrder ; Decrement ecx and loop if non-zero
-
-    call Crlf
     call printDash
 
     mov edx, OFFSET totalPriceMsg
@@ -1070,21 +938,24 @@ displayInvoice PROC
     call printPriceStr
     call Crlf
 
+    call printDash
     mov edx, OFFSET finalPriceMsg
     call WriteString
     mov eax, finalPrice
     call printPriceStr
     call Crlf
-    call Crlf
+    call printDash
 
+    call Crlf
+    call Crlf
     mov edx, OFFSET thankYouMsg 
     call WriteString
-    call Crlf
-    call Crlf
 
     noInvoice:
-
-    mov edx, OFFSET exitInvoiceMsg
+    call Crlf
+    call Crlf
+    call Crlf
+    mov edx, OFFSET enterContMsg
     call WriteString
     call ReadChar
 
@@ -1128,7 +999,7 @@ getOrderPrice PROC
 
 
 ;==============================CUSTOM FUNCTIONS
-;------------------------------------------PRINT PAGE SEPERATION LINE
+;------------------------------------------PRINT HORIZONTAL SEPERATION LINE
 printDash PROC
     ; Set up the loop counter and character
     mov al, dash                ; Load the dash character into AL
@@ -1170,7 +1041,8 @@ StrCompare PROC
         pop edi          
         pop esi
         ret
-StrCompare ENDP
+
+    StrCompare ENDP
 
 ;------------------------------------------GET STRING LENGTH
 ; INPUT:    ESI         - the address of the string.
@@ -1190,28 +1062,7 @@ StringLength PROC
         mov  eax, ecx             ; Move the string length into EAX
         pop  esi                  ; Restore the original value of ESI
         ret                       ; Return to the caller
-StringLength ENDP
-
-;============================== CHECK FOR SPACES IN STRING
-CheckForSpaces PROC
-    push esi
-    mov eax, 0                  ; Assume no space found
-
-checkLoop:
-    lodsb                       ; Load the next byte into AL
-    cmp al, 0                   ; If it's the end of the string (null terminator), exit
-    je doneChecking
-    cmp al, ' '                 ; Check if the character is a space
-    je foundSpace               ; If space is found, set EAX to 1
-    jmp checkLoop               ; Otherwise, keep checking
-
-foundSpace:
-    mov eax, 1                  ; Space found, set EAX to 1
-
-doneChecking:
-    pop esi
-    ret
-CheckForSpaces ENDP
+    StringLength ENDP
 
 ;------------------------------------------PRINT PRICE (NNNN CENT --> RM NN.NN)
 ; INPUT:    EAX   - INT value (cent).
