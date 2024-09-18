@@ -1,69 +1,69 @@
 INCLUDE Irvine32.inc
-.model flat, stdcall
-ExitProcess proto, dwExitCode:dword
-.stack 4096
+    .model flat, stdcall
+    ExitProcess proto, dwExitCode:dword
+    .stack 4096
 
 .data
 ;==============================DISPLAY MESSAGES
-;------------------------------------------COMMONLY USED
-    dashAmount          DWORD 30
-    dash                BYTE  '-'
-    pauseEnter          BYTE  'Press "Enter" key to continue...'
 ;------------------------------------------LOGIN
-    usernamePrompt      BYTE  "Enter username: ", 0
-    passwordPrompt      BYTE  "Enter password: ", 0
-    successMsg          BYTE  "Login successful!", 0 
-    startupMsg          BYTE  "Starting "
-    failMsg             BYTE  "Invalid credentials!", 0 
+    usernamePrompt      BYTE  "Enter admin username: ", 0
+    passwordPrompt      BYTE  "Enter admin password: ", 0
+    successMsg          BYTE  "Login successful!", 13, 10, 0 
+    startupMsg          BYTE  "Launching Food Ordering Program... ", 13, 10, 0
+    failLoginMsg        BYTE  "Invalid credentials!", 13, 10, 0 
 ;------------------------------------------ENTER CUSTOMER INFO
-    welcomeMsg          BYTE  "Welcome to Our Restaurant", 0
+    welcomeMsg          BYTE  "Welcome to Our Restaurant", 13, 10, 0
 ;~~~ENTER NAME
-    inputMsg            BYTE  "Enter name (up to 128 characters):     ", 0
-    errorMsg            BYTE  "Invalid input. Too long or invalid character.", 0
-    tooLongMsg          BYTE  "Input too long. Max length is 128 characters.", 0
+    inputNameMsg        BYTE  "Enter name (up to 50 characters):     ", 0
+    errorNameMsg        BYTE  "Invalid input. Too long or invalid character.", 13, 10, 0
+    tooLongMsg          BYTE  "Input too long.", 0
     largeLenMsg         BYTE  "Length between 50 and 128 characters. Number of characters entered: ", 0
-    reenterMsg          BYTE  "Please re-enter", 0
+    reenterNameMsg      BYTE  "Please re-enter name", 13, 10, 0
 ;~~~ENTER MODE
     dineOrTakeMsg       BYTE  "Dine-in or Takeaway? Enter 'D' or 'T': ", 0
-    invalidDineTakeMsg  BYTE  "Invalid input. Please enter 'D' or 'T'.", 0
+    invalidDineTakeMsg  BYTE  "Invalid input. Please enter 'D' or 'T'.", 13, 10, 0
 ;~~~ENTER PROMO CODE (OPTIONAL)
     promoMsg            BYTE  "Do you have promo code to enter? (Y/N): ", 0
-    invalidPromoMsg     BYTE  "Invalid input. Please enter 'Y' or 'N'.", 0
+    invalidPromoMsg     BYTE  "Invalid input. Please enter 'Y' or 'N'.", 13, 10, 0
     promoCodeMsg        BYTE  "Promo Code: ", 0
     invalidPromoCodeMsg BYTE  "Invalid promo code. Do you wish to retry? (Y/N): ", 0
-    promoSuccessMsg BYTE "Promo Code used successfully!", 0
+    promoSuccessMsg     BYTE "Promo Code used successfully!", 0
 
 ;------------------------------------------SELECT FOOD
 ;~~~SELECT MEAL
-    menuTitle           BYTE  "Select A Meal:", 0
-    foodA               BYTE  "A - Pan Mee                           RM  8.50", 0
-    foodB               BYTE  "B - Chilli Pan Mee                    RM 10.00", 0
+    menuTitle           BYTE  "Select A Meal:", 13, 10, 0
+    foodA               BYTE  "A - Pan Mee                           RM  8.50", 13, 10, 0
+    foodB               BYTE  "B - Chilli Pan Mee                    RM 10.00", 13, 10, 0
 ;~~~SELECT ADDON
-    sideDishTitle       BYTE  "Select An Add-On:", 0
-    noSideDish          BYTE  "1 - No add-on", 0
-    setWithA            BYTE  "2 - Set with Soya Milk                + RM 1.20", 0
-    setWithB            BYTE  "3 - Set with Dumplings                + RM 2.40", 0
-    setWithAB           BYTE  "4 - Set with Dumplings & Soya Milk    + RM 3.00", 0
+    sideDishTitle       BYTE  "Select An Add-On:", 13, 10, 0
+    noSideDish          BYTE  "1 - No add-on", 13, 10, 0
+    setWithA            BYTE  "2 - Set with Soya Milk                + RM 1.20", 13, 10, 0
+    setWithB            BYTE  "3 - Set with Dumplings                + RM 2.40", 13, 10, 0
+    setWithAB           BYTE  "4 - Set with Dumplings & Soya Milk    + RM 3.00", 13, 10, 0
 ;~~~SELECTION PROMPT
     selectionPrompt     BYTE  ">> Selection: ", 0
-    invalidInputMsg     BYTE  "Invalid selection, please try again.", 0
+    invalidInputMsg     BYTE  "Invalid selection, please try again.", 13, 10, 0
 ;~~~SELECTED RESULT
-    resultMsg           BYTE  "You selected: ", 0
+    resultMsg           BYTE  "You selected: ", 13, 10, 0
     setMsg              BYTE  "Set ", 0
     foodAMsg            BYTE  "Pan Mee ", 0
     foodBMsg            BYTE  "Chilli Pan Mee ", 0
-    sideAOnlyMsg        BYTE  "with Soya Milk ", 0
-    sideBOnlyMsg        BYTE  "with Dumplings ", 0
-    sideABMsg           BYTE  "with Dumplings & Soya Milk ", 0
+    sideAOnlyMsg        BYTE  "with Soya Milk", 0
+    sideBOnlyMsg        BYTE  "with Dumplings", 0
+    sideABMsg           BYTE  "with Dumplings & Soya Milk", 0
 ;~~~CONFIRM ORDER AND LOOP ORDER
     confirmOrderMsg     BYTE  "Do you want to confirm this order (Y/N): ", 0
     contOrderMsg        BYTE  "Do you want to keep ordering? (Y/N): ", 0
 ;~~~INVOICE
-    totalPriceMsg       BYTE  "Total Price:           ", 0
-    discountedAmountMsg BYTE  "Discount:              ", 0
-    takeawayChargeMsg   BYTE  "Take Away Charge:      ", 0
-    finalPriceMsg       BYTE  "Grand Total:           ", 0
-    RMMSG               BYTE  "RM ", 0
+    dearMsg             BYTE  "Dear ", 0
+    receiptMsg          BYTE  ", here is your receipt:", 13, 10, 0
+    RMMsg               BYTE  "RM ", 0
+    receiptHeader       BYTE  "Name                                              Price", 0
+    totalPriceMsg       BYTE  "Subtotal:                                         ", 0
+    discountedAmountMsg BYTE  "Discount:                                         ", 0
+    takeawayChargeMsg   BYTE  "Take Away Charge:                                 ", 0
+    finalPriceMsg       BYTE  "Grand Total:                                      ", 0
+    thankYouMsg         BYTE  "Thank you, have a nice day :D", 0
 
 ;==============================VARIABLES
 ;------------------------------------------CONSTANTS
@@ -75,6 +75,8 @@ ExitProcess proto, dwExitCode:dword
     TAKEAWAY_CHARGE     DWORD 20
     DISCOUNT_PERCENT    DWORD 10                     ; Discount percentage as a whole number (10%)
 ;------------------------------------------COMMONLY USED
+    dashAmount          DWORD 60
+    dash                BYTE  '-'
     inputYN             BYTE  2 DUP(?)   ; Y / N
     displayPriceStr     BYTE  9 DUP(0)
 ;------------------------------------------LOGIN
@@ -85,7 +87,7 @@ ExitProcess proto, dwExitCode:dword
     inputDT             BYTE  2 DUP(?)   ; DineIn / TakeAway
     inputPromoCode      BYTE  10 DUP(?)  ; Buffer for promo code input (maximum 10 characters)
 ;------------------------------------------SELECT FOOD
-    inputOrder          BYTE  2 DUP(?)   ; Define a buffer of 5 bytes (for user input)
+    inputOrder          BYTE  2 DUP(?)   ; Define a buffer of 2 bytes (for user input)
     inputConfirmOrder   BYTE  2 DUP(?) 
     inputContOrder      BYTE  2 DUP(?)
     mealChoice          BYTE  ?
@@ -107,15 +109,8 @@ ExitProcess proto, dwExitCode:dword
     discountedPrice     DWORD 0
     finalPrice          DWORD 0
 ;~~~INVOICE 
-    charSpacing         BYTE  0 ; full invoice spacing = 75 chars wide
-    dearMsg          BYTE "Dear ", 0
-    receiptMsg       BYTE ", here is your receipt:", 0
-    receiptHeader    BYTE "Name                         Price", 0
-    totalMsg         BYTE "Total:                      ", 0
-    discountMsg      BYTE "Discount:                   ", 0
-    grandTotalMsg    BYTE "Grand Total:                ", 0
-    thankYouMsg      BYTE "Thank you, have a nice day :D", 0
-    dashLine         BYTE "--------------------------------------------", 0
+    foodStrLen          DWORD  0
+    spacebar            BYTE  " "
 
 .code
 main PROC
@@ -123,29 +118,11 @@ main PROC
     call login
     call inputCustInfo
     call orderLoop
-    ;call debug
     call calcTotalPrice
     call calcFinalPrice
     call displayInvoice
     ; Exit cleanly
     invoke ExitProcess, 0
-
-debug PROC
-    mov ecx, orderListLen
-    mov esi, 0
-    looplist:
-        mov al, [foodList + esi]
-        call WriteChar
-        call Crlf
-
-        mov al, [sideList + esi]
-        call WriteChar
-        call Crlf
-        call Crlf
-        add esi, 2
-    loop looplist
-    ret
-    debug ENDP
 
 ;==============================PART 1: LOGIN
 login PROC
@@ -191,7 +168,7 @@ login PROC
 
     ;------------------------------------------LOGIN FAILURE
     loginFailed:
-        mov edx, OFFSET failMsg
+        mov edx, OFFSET failLoginMsg
         call WriteString
         call Crlf
         call Crlf
@@ -205,10 +182,9 @@ inputCustInfo PROC
         call WriteString
         call Crlf
         call printDash
-        call Crlf
 
         ; Display input prompt
-        mov edx, OFFSET inputMsg
+        mov edx, OFFSET inputNameMsg
         call WriteString
 
         ; Read the input string
@@ -269,10 +245,10 @@ CheckCustNameLength PROC
         call Crlf           ; Move to the next line
 
         ; Print the invalid input message and prompt re-entry
-        mov edx, OFFSET errorMsg
+        mov edx, OFFSET errorNameMsg
         call WriteString
         call Crlf
-        mov edx, OFFSET reenterMsg
+        mov edx, OFFSET reenterNameMsg
         call WriteString
         call Crlf           ; Move to the next line
 
@@ -285,7 +261,7 @@ CheckCustNameLength PROC
         mov edx, OFFSET tooLongMsg
         call WriteString
         call Crlf           ; Move to the next line
-        mov edx, OFFSET reenterMsg
+        mov edx, OFFSET reenterNameMsg
         call WriteString
         call Crlf           ; Move to the next line
 
@@ -320,10 +296,10 @@ CheckNameCharacters PROC
 
     invalid_input:
         ; Handle invalid characters in the input
-        mov edx, OFFSET errorMsg
+        mov edx, OFFSET errorNameMsg
         call WriteString
         call Crlf           ; Move to the next line
-        mov edx, OFFSET reenterMsg
+        mov edx, OFFSET reenterNameMsg
         call WriteString
         call Crlf           ; Move to the next line
 
@@ -374,7 +350,6 @@ CheckDineTake PROC
     invalidDTInput:
         ; If input is invalid, output invalid message
         call printDash
-        call Crlf
         mov edx, OFFSET invalidDineTakeMsg
         call WriteString
         call Crlf
@@ -619,7 +594,6 @@ orderLoop PROC
 ;------------------------------------------DISPLAY FOOD MENU
 DisplayMealMenu PROC
     call printDash ; call function to print 30 dashes
-    call Crlf
 
     ; display menu title and food option
     call Crlf
@@ -628,7 +602,6 @@ DisplayMealMenu PROC
     call Crlf
     mov edx, OFFSET foodA
     call WriteString
-    call Crlf
     mov edx, OFFSET foodB
     call WriteString
     call Crlf
@@ -645,16 +618,12 @@ DisplaySideDishMenu PROC
     call Crlf
     mov edx, OFFSET sideDishTitle
     call WriteString
-    call Crlf
     mov edx, OFFSET noSideDish
     call WriteString
-    call Crlf
     mov edx, OFFSET setWithA
     call WriteString
-    call Crlf
     mov edx, OFFSET setWithB
     call WriteString
-    call Crlf
     mov edx, OFFSET setWithAB
     call WriteString
     call Crlf
@@ -666,14 +635,17 @@ DisplaySideDishMenu PROC
 
 
 displaySelection PROC
-    
     call clearBuffer
+    mov foodStrLen, 0
 
     cmp sideDishChoice, '1'
     je notSetMeal
     ; Display "Set " if it is not ala-carte
     mov edx, OFFSET setMsg
     call WriteString
+    mov esi, OFFSET setMsg
+    call StringLength
+    add foodStrLen, eax
 
     notSetMeal:
 
@@ -691,12 +663,18 @@ displaySelection PROC
         ; If mealChoice is 'A' or 'a', print "Pan Mee"
         mov edx, OFFSET foodAMsg
         call WriteString
+        mov esi, OFFSET foodAMsg
+        call StringLength
+        add foodStrLen, eax
         jmp DisplayAddon
 
     SelectFoodB:
         ; If mealChoice is 'B' or 'b', print "Chilli Pan Mee"
         mov edx, OFFSET foodBMsg
         call WriteString
+        mov esi, OFFSET foodBMsg
+        call StringLength
+        add foodStrLen, eax
         jmp DisplayAddon
 
     DisplayAddon:
@@ -717,16 +695,25 @@ displaySelection PROC
     SideDishASelected:
         mov edx, OFFSET sideAOnlyMsg
         call WriteString
+        mov esi, OFFSET sideAOnlyMsg
+        call StringLength
+        add foodStrLen, eax
         jmp EndDisplay
 
     SideDishBSelected:
         mov edx, OFFSET sideBOnlyMsg
         call WriteString
+        mov esi, OFFSET sideBOnlyMsg
+        call StringLength
+        add foodStrLen, eax
         jmp EndDisplay
 
     SideDishABSelected:
         mov edx, OFFSET sideABMsg
         call WriteString
+        mov esi, OFFSET sideABMsg
+        call StringLength
+        add foodStrLen, eax
 
     EndDisplay:
         ret
@@ -745,11 +732,8 @@ calcTotalPrice PROC
     mov ecx, orderListLen       ; Set up loop counter based on number of orders
     mov esi, 0                  ; Start from index 0
 
-    calcEachFood:  
-            ;call dumpregs 
+    calcEachFood:
         mov currFoodPrice, 0
-        mov loopNo, ecx                ; Store loop counter
-        mov loopIndex, esi             ; store loop index
         call getFoodPrice
         call getSidePrice
 
@@ -758,10 +742,7 @@ calcTotalPrice PROC
         ;call dumpregs 
         mov edi, esi 
         shl edi, 2 
-        ;call dumpregs
         mov [priceList + edi], eax 
-
-        shr esi, 2 
 
         add totalPrice, eax      ; Add to total price
 
@@ -776,17 +757,15 @@ calcTotalPrice PROC
 
         noTakeAwayCharge:
         ; Move to the next order
-        mov ecx, loopNo                ; Restore loop counter
-        mov esi, loopIndex             ; Restore loop index
-        add esi, 2                   ; Move to next order index
-        loop calcEachFood
+        add esi, 2                  ; Move to next order index
+    loop calcEachFood
 
     jmp doneCalc
 
     noOrders:
     doneCalc:
     ret
-calcTotalPrice ENDP
+    calcTotalPrice ENDP
 
 getFoodPrice PROC
     ; Get the price of the food in cents
@@ -876,87 +855,92 @@ calcFinalPrice PROC
 
 ;==============================PART 5: DISPLAY INVOICE (ALL ORDERS)
 displayInvoice PROC
-    ; ???????
+    call Crlf
+    call printDash
 
-    ; ?????????
-    call Crlf
-    mov edx, OFFSET dashLine           ; ?????
+    mov edx, OFFSET dearMsg
     call WriteString
-    call Crlf
-
-    mov edx, OFFSET dearMsg            ; ?? "Dear [inputCustName]"
+    mov edx, OFFSET inputCustName 
     call WriteString
-    mov edx, OFFSET inputCustName      ; ??????
+    mov edx, OFFSET receiptMsg 
     call WriteString
-    mov edx, OFFSET receiptMsg         ; ?? "here is your receipt:"
-    call WriteString
-    call Crlf
     call Crlf
 
-    ; ???? "Name" ? "Price"
     mov edx, OFFSET receiptHeader
     call WriteString
     call Crlf
 
-    ; ????????????
-    mov ecx, orderListLen               ; ??????
-    mov esi, 0                          ; ????????
-    displayEachOrder:
-        mov loopNo, ecx                 ; ??????
-        mov loopIndex, esi              ; ??????
+mov ecx, orderListLen    ; Load the number of orders into ecx
+mov esi, 0               ; Start at the first order
+displayEachOrder:
+    push ecx             ; Save the loop counter
+    push esi             ; Save the index for this iteration
 
-        ; ????????????
-        call getFood                    ; ?? mealChoice
-        call getSide                    ; ?? sideDishChoice
-        call displaySelection           ; ???????????
+    call getFood         ; Get food information
+    call getSide         ; Get side dish information
+    call displaySelection; Display the selected order
 
-        ; ????
-        call WriteChar                  ; ????? (Tab ???)
-        call displayOrderPrice          ; ?????????
-        call Crlf                       ; ??
+    ; Calculate the spacing based on the food name length
+    mov eax, foodStrLen   ; Get the length of the food string
+    cmp eax, 0            ; If no food string, skip the order
+    jz donePrintSpace     ; Jump to done if no food string
 
-        ; ???????
-        mov ecx, loopNo                 ; ??????
-        mov esi, loopIndex              ; ????
-        add esi, 2                      ; ????????
-        loop displayEachOrder           
+    mov ebx, 50           ; Set the max width for display
+    sub ebx, eax          ; Calculate spaces to print
 
-    ; ????????????
+    printSpace:
+        cmp ebx, 0            ; Check if spaces are left to print
+        jz donePrintSpace     ; Exit if none left
+        mov al, spacebar      ; Print space
+        call WriteChar
+        dec ebx               ; Decrement space count
+        jmp printSpace
+
+    donePrintSpace:
+        pop esi               ; Restore the index
+        push esi
+        call getOrderPrice; Display the order price
+        call Crlf             ; New line
+        pop esi
+        add esi, 2           ; Move to the next order (assuming 2-byte entries)
+        pop ecx               ; Restore the loop counter
+    loop displayEachOrder ; Decrement ecx and loop if non-zero
+
     call Crlf
-    mov edx, OFFSET dashLine            ; ?????
-    call WriteString
-    call Crlf
+    call printDash
 
-    ; ??
-    mov edx, OFFSET totalMsg            ; ?? "Total:"
+    mov edx, OFFSET totalPriceMsg
     call WriteString
     mov eax, totalPrice
-    call printPriceStr                  ; ????
+    call printPriceStr
     call Crlf
 
-    ; ??
-    mov edx, OFFSET discountMsg         ; ?? "Discount:"
+    mov edx, OFFSET discountedAmountMsg
     call WriteString
     mov eax, discountedPrice
-    call printPriceStr                  ; ??????
+    call printPriceStr
     call Crlf
 
-    ; ????
-    mov edx, OFFSET grandTotalMsg       ; ?? "Grand Total:"
+    mov edx, OFFSET takeawayChargeMsg
+    call WriteString
+    mov eax, totalTakeAway
+    mov edi, OFFSET totalTakeAway 
+    call printPriceStr
+    call Crlf
+
+    mov edx, OFFSET finalPriceMsg
     call WriteString
     mov eax, finalPrice
-    call printPriceStr                  ; ??????
+    call printPriceStr
     call Crlf
 
-    ; ?????
     call Crlf
-    mov edx, OFFSET thankYouMsg         ; ?? "Thank you, have a nice day :D"
+    mov edx, OFFSET thankYouMsg 
     call WriteString
     call Crlf
 
     ret
-displayInvoice ENDP
-
+    displayInvoice ENDP
 
 ;------------------------------------------DISPLAY FOOD
 getFood PROC
@@ -975,12 +959,12 @@ getSide PROC
     getSide ENDP
 
 ;------------------------------------------DISPLAY PRICE
-displayOrderPrice PROC
+getOrderPrice PROC
     ; Calculate the correct index in priceList (esi is the order index)
 
-    ;call dumpregs
     mov edi, esi             ; edi holds the index in priceList
-    shl edi, 2               ; Multiply edi by 4 to scale the index for DWORD access (since each price is 4 bytes)
+    shl edi, 2               ; Multiply edi by 4 to scale the index for DWORD access
+
     mov eax, [priceList + edi]  ; EAX now contains the price in cents
     cmp eax, 0               ; Ensure the price is not zero
     je zeroPrice             ; Handle zero price case separately
@@ -991,7 +975,7 @@ displayOrderPrice PROC
 
     zeroPrice:
         ret
-    displayOrderPrice ENDP
+    getOrderPrice ENDP
 
 
 ;==============================CUSTOM FUNCTIONS
@@ -1003,15 +987,16 @@ printDash PROC
 
     print_loop:
         call WriteChar          ; Call WriteChar to print the character
-        loop print_loop         ; Decrement ECX and loop until ECX reaches 0
-        ret                     ; Return to the calling procedure
+    loop print_loop             ; Decrement ECX and loop until ECX reaches 0
+
+    call Crlf
+    ret                     ; Return to the calling procedure
     printDash ENDP
 
 ;------------------------------------------STRING COMPARISON
+; INPUT:    ESI & EDI   - the address of the string.
+; OUTPUT:   EAX         - 0 = equal, 1 = different
 StrCompare PROC
-    ; Compares two strings pointed by ESI and EDI
-    ; Returns 0 if strings are equal, 1 otherwise
-    
     push esi
     push edi
     compareLoop:
@@ -1039,12 +1024,31 @@ StrCompare PROC
 
     StrCompare ENDP
 
-printPriceStr PROC
-    ; Input: EAX contains the integer value in cents (e.g., 850 for RM 8.50)
-    ; Output: The number is displayed as a string with two decimal places
+;------------------------------------------GET STRING LENGTH
+; INPUT:    ESI         - the address of the string.
+; OUTPUT:   EAX         - the length of the string.
+StringLength PROC
+    push esi                  ; Save the original value of ESI
+    mov  ecx, 0               ; Initialize ECX to count the characters
 
+    findLength:
+        cmp  BYTE PTR [esi], 0    ; Check if the current byte is null (0)
+        je   done                 ; If it's null, exit the loop
+        inc  esi                  ; Move to the next byte
+        inc  ecx                  ; Increment the character counter
+        jmp  findLength           ; Repeat the loop
+
+    done:
+        mov  eax, ecx             ; Move the string length into EAX
+        pop  esi                  ; Restore the original value of ESI
+        ret                       ; Return to the caller
+    StringLength ENDP
+
+;------------------------------------------PRINT PRICE (NNNN CENT --> RM NN.NN)
+; INPUT:    EAX   - INT value (cent).
+printPriceStr PROC
     ;display "RM"
-    mov edx, OFFSET RMMSG
+    mov edx, OFFSET RMMsg
     call WriteString
 
     mov edi, OFFSET displayPriceStr  ; Load the address of the displayPriceStr buffer
@@ -1088,19 +1092,16 @@ printPriceStr PROC
     call WriteString                 ; Output the formatted price
 
     ret
-printPriceStr ENDP
+    printPriceStr ENDP
 
-
+;------------------------------------------CLEAR BUFFER
 clearBuffer PROC
-    ; ???????
     mov edi, OFFSET displayPriceStr
     mov ecx, 9
     mov al, 0
     rep stosb
     ret
-clearBuffer ENDP
-
-
+    clearBuffer ENDP
 
 main ENDP
 END main
