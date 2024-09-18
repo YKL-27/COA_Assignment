@@ -108,10 +108,19 @@ ExitProcess proto, dwExitCode:dword
     finalPrice          DWORD 0
 ;~~~INVOICE 
     charSpacing         BYTE  0 ; full invoice spacing = 75 chars wide
+    dearMsg          BYTE "Dear ", 0
+    receiptMsg       BYTE ", here is your receipt:", 0
+    receiptHeader    BYTE "Name                         Price", 0
+    totalMsg         BYTE "Total:                      ", 0
+    discountMsg      BYTE "Discount:                   ", 0
+    grandTotalMsg    BYTE "Grand Total:                ", 0
+    thankYouMsg      BYTE "Thank you, have a nice day :D", 0
+    dashLine         BYTE "--------------------------------------------", 0
+
 .code
 main PROC
     ; Initialize once and avoid re-execution
-    ;call login
+    call login
     call inputCustInfo
     call orderLoop
     ;call debug
@@ -657,6 +666,8 @@ DisplaySideDishMenu PROC
 
 
 displaySelection PROC
+    
+    call clearBuffer
 
     cmp sideDishChoice, '1'
     je notSetMeal
@@ -865,62 +876,87 @@ calcFinalPrice PROC
 
 ;==============================PART 5: DISPLAY INVOICE (ALL ORDERS)
 displayInvoice PROC
-    ; Check if there are any orders
-    cmp orderListLen, 0
-    je endDisplayInvoice          ; If no orders, exit
+    ; ???????
 
-    mov ecx, orderListLen         ; Set up loop counter (number of orders)
-    mov esi, 0    ; Start from last index (LEO store last order at index 0)
-
-    displayEachOrder:
-        mov loopNo, ecx                ; Store loop counter
-        mov loopIndex, esi             ; store loop index
-
-        ; Get and display the current order's meal and side dish
-        call getFood                   ; Set mealChoice from foodList
-        call getSide                   ; Set sideDishChoice from sideList
-        
-        ; Display the selected meal and side
-        call displaySelection          
-
-        mov edx, OFFSET RMMsg
-        ; Now display the price for the order 
-        call displayOrderPrice         ; Display price from priceList after displaying the meal and side dish
-
-        ; Move to the next order
-        mov ecx, loopNo                ; Restore loop counter
-        mov esi, loopIndex             ; Restore loop index
-        add esi, 2                        ; Increment index for next order
-        call Crlf
-    loop displayEachOrder          ; Repeat for the next order
-    
-    ; Display discounted amount
+    ; ?????????
     call Crlf
-    mov edx, OFFSET discountedAmountMsg
+    mov edx, OFFSET dashLine           ; ?????
+    call WriteString
+    call Crlf
+
+    mov edx, OFFSET dearMsg            ; ?? "Dear [inputCustName]"
+    call WriteString
+    mov edx, OFFSET inputCustName      ; ??????
+    call WriteString
+    mov edx, OFFSET receiptMsg         ; ?? "here is your receipt:"
+    call WriteString
+    call Crlf
+    call Crlf
+
+    ; ???? "Name" ? "Price"
+    mov edx, OFFSET receiptHeader
+    call WriteString
+    call Crlf
+
+    ; ????????????
+    mov ecx, orderListLen               ; ??????
+    mov esi, 0                          ; ????????
+    displayEachOrder:
+        mov loopNo, ecx                 ; ??????
+        mov loopIndex, esi              ; ??????
+
+        ; ????????????
+        call getFood                    ; ?? mealChoice
+        call getSide                    ; ?? sideDishChoice
+        call displaySelection           ; ???????????
+
+        ; ????
+        call WriteChar                  ; ????? (Tab ???)
+        call displayOrderPrice          ; ?????????
+        call Crlf                       ; ??
+
+        ; ???????
+        mov ecx, loopNo                 ; ??????
+        mov esi, loopIndex              ; ????
+        add esi, 2                      ; ????????
+        loop displayEachOrder           
+
+    ; ????????????
+    call Crlf
+    mov edx, OFFSET dashLine            ; ?????
+    call WriteString
+    call Crlf
+
+    ; ??
+    mov edx, OFFSET totalMsg            ; ?? "Total:"
+    call WriteString
+    mov eax, totalPrice
+    call printPriceStr                  ; ????
+    call Crlf
+
+    ; ??
+    mov edx, OFFSET discountMsg         ; ?? "Discount:"
     call WriteString
     mov eax, discountedPrice
-    mov edi, OFFSET discountedPrice 
-    call printPriceStr
-
-    ; Display take away charge
+    call printPriceStr                  ; ??????
     call Crlf
-    mov edx, OFFSET takeawayChargeMsg
-    call WriteString
-    mov eax, totalTakeAway
-    mov edi, OFFSET totalTakeAway 
-    call printPriceStr
 
-    ; Display grand total
-    call Crlf
-    mov edx, OFFSET finalPriceMsg
+    ; ????
+    mov edx, OFFSET grandTotalMsg       ; ?? "Grand Total:"
     call WriteString
     mov eax, finalPrice
-    mov edi, OFFSET finalPrice 
-    call printPriceStr
-    
-    endDisplayInvoice:
-        ret
-    displayInvoice ENDP
+    call printPriceStr                  ; ??????
+    call Crlf
+
+    ; ?????
+    call Crlf
+    mov edx, OFFSET thankYouMsg         ; ?? "Thank you, have a nice day :D"
+    call WriteString
+    call Crlf
+
+    ret
+displayInvoice ENDP
+
 
 ;------------------------------------------DISPLAY FOOD
 getFood PROC
@@ -1004,8 +1040,12 @@ StrCompare PROC
     StrCompare ENDP
 
 printPriceStr PROC
-    ; Input: EAX contains the integer value in cents (e.g., 1000 for 10.00)
+    ; Input: EAX contains the integer value in cents (e.g., 850 for RM 8.50)
     ; Output: The number is displayed as a string with two decimal places
+
+    ;display "RM"
+    mov edx, OFFSET RMMSG
+    call WriteString
 
     mov edi, OFFSET displayPriceStr  ; Load the address of the displayPriceStr buffer
     add edi, 8                       ; Move to the end of the buffer (leaving space for null terminator)
@@ -1014,10 +1054,26 @@ printPriceStr PROC
     mov BYTE PTR [edi], 0
     dec edi                          ; Move back to start filling digits
 
-    ; Convert the integer in EAX (cents) to a string (handle up to 9999 cents = $99.99)
+    ; Convert the cents (two digits) and store them first
+    mov ecx, 10                      ; Base 10
+    xor edx, edx
+    div ecx                          ; EAX = quotient, EDX = remainder
+    add dl, '0'                      ; Convert remainder (last digit of cents) to ASCII
+    mov [edi], dl
+    dec edi
+    xor edx, edx
+    div ecx                          ; Get the second last digit of cents
+    add dl, '0'
+    mov [edi], dl
+    dec edi
+
+    ; Insert decimal point
+    mov BYTE PTR [edi], '.'
+    dec edi
+
+    ; Now convert the remaining part (integer portion)
     IntToStrLoop:
         xor edx, edx                 ; Clear EDX for division
-        mov ecx, 10                  ; Base 10
         div ecx                      ; EAX / 10, quotient in EAX, remainder in EDX
         add dl, '0'                  ; Convert remainder (digit) to ASCII
         mov [edi], dl                ; Store ASCII character in buffer
@@ -1026,36 +1082,25 @@ printPriceStr PROC
         test eax, eax                ; Check if there are more digits to process
         jnz IntToStrLoop             ; If EAX is not zero, continue
 
-    ; Now, EDI points to the last digit before the null terminator
-    ; Move back two positions to prepare for inserting the decimal point
-    inc edi                          ; Adjust EDI to point to the first character of the string
-
-    ; Move back two places to account for the cents and insert the decimal point
-    mov esi, edi                     ; Use ESI to track the end of the string
-    FindEndOfStr:
-        cmp BYTE PTR [esi], 0
-        je StrEndFound
-        inc esi                       ; Move forward to find the null terminator
-        jmp FindEndOfStr
-    StrEndFound:
-
-    ; Move back two positions to insert the decimal point
-    sub esi, 1                        ; Now ESI points to the last digit (cents)
-    mov al, [esi]                     ; Move the last digit (cents) into AL
-    mov [esi+1], al                   ; Shift it one position to the right
-    dec esi                           ; Move back to the previous digit
-    mov al, [esi]
-    mov [esi+1], al                   ; Shift the second-last digit (cents) to the right
-
-    ; Insert the decimal point
-    mov BYTE PTR [esi], '.'           ; Insert the decimal point before the cents
-
     ; Print the formatted string using WriteString
-    mov edx, edi                      ; Move pointer to the start of the string (EDI) into EDX
-    call WriteString                  ; Output the formatted price
+    inc edi                          ; Move pointer to the start of the string (EDI)
+    mov edx, edi                     ; Load the pointer into EDX for WriteString
+    call WriteString                 ; Output the formatted price
 
     ret
-    printPriceStr ENDP
+printPriceStr ENDP
+
+
+clearBuffer PROC
+    ; ???????
+    mov edi, OFFSET displayPriceStr
+    mov ecx, 9
+    mov al, 0
+    rep stosb
+    ret
+clearBuffer ENDP
+
+
 
 main ENDP
 END main
