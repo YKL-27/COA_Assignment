@@ -5,6 +5,7 @@ INCLUDE Irvine32.inc
 
 .data
 ;==============================DISPLAY MESSAGES
+    enterContMsg        BYTE  "Enter anything to continue...", 0
 ;------------------------------------------LOGIN
     usernamePrompt      BYTE  "Enter admin username: ", 0
     passwordPrompt      BYTE  "Enter admin password: ", 0
@@ -12,7 +13,7 @@ INCLUDE Irvine32.inc
     startupMsg          BYTE  "Launching Food Ordering Program... ", 13, 10, 0
     failLoginMsg        BYTE  "Invalid credentials!", 13, 10, 0 
 ;------------------------------------------ENTER CUSTOMER INFO
-    welcomeMsg          BYTE  "Welcome to Our Restaurant", 13, 10, 0
+    welcomeMsg          BYTE  "Welcome to Pan-tastic Mee House", 13, 10, 0
 ;~~~ENTER NAME
     inputNameMsg        BYTE  "Enter your name (up to 50 characters):  ", 0
     invalidCharMsg      BYTE  "    INVALID INPUT: Name contain invalid character.", 13, 10, 0
@@ -45,11 +46,11 @@ INCLUDE Irvine32.inc
 ;~~~SELECTED RESULT
     resultMsg           BYTE  "You selected: ", 13, 10, 0
     setMsg              BYTE  "Set ", 0
-    foodAMsg            BYTE  "Pan Mee ", 0
-    foodBMsg            BYTE  "Chilli Pan Mee ", 0
-    sideAOnlyMsg        BYTE  "with Soya Milk", 0
-    sideBOnlyMsg        BYTE  "with Dumplings", 0
-    sideABMsg           BYTE  "with Dumplings & Soya Milk", 0
+    foodAMsg            BYTE  "Pan Mee", 0
+    foodBMsg            BYTE  "Chilli Pan Mee", 0
+    sideAOnlyMsg        BYTE  " with Soya Milk", 0
+    sideBOnlyMsg        BYTE  " with Dumplings", 0
+    sideABMsg           BYTE  " with Dumplings & Soya Milk", 0
 ;~~~CONFIRM ORDER AND LOOP ORDER
     confirmOrderMsg     BYTE  "Do you want to confirm this order (Y/N): ", 0
     contOrderMsg        BYTE  "Do you want to keep ordering? (Y/N): ", 0
@@ -63,7 +64,6 @@ INCLUDE Irvine32.inc
     takeawayChargeMsg   BYTE  "Take Away Charge:                                 ", 0
     finalPriceMsg       BYTE  "Grand Total:                                      ", 0
     thankYouMsg         BYTE  "Thank you, have a nice day :D", 0
-    exitInvoiceMsg      BYTE  "Enter anything to continue...", 0
 
 ;==============================VARIABLES
 ;------------------------------------------CONSTANTS
@@ -111,7 +111,7 @@ INCLUDE Irvine32.inc
     finalPrice          DWORD 0
 ;~~~INVOICE 
     foodStrLen          DWORD 0
-    spacebar            BYTE  " "
+    gapSpace            BYTE  "."
     invoiceNo           DWORD 0
 
 .code
@@ -130,6 +130,7 @@ main PROC
     ; Exit cleanly
     invoke ExitProcess, 0
 
+;==============================INITIALISE: RESET VARAIBLES FOR NEXT CUSTOMER TO ORDER
 init PROC
     xor eax, eax
 
@@ -173,6 +174,7 @@ init PROC
 ;==============================PART 1: LOGIN
 login PROC
     startlogin:
+        call ClrScr
         ; Prompt input username display
         mov edx, OFFSET usernamePrompt
         call WriteString
@@ -217,7 +219,9 @@ login PROC
         mov edx, OFFSET failLoginMsg
         call WriteString
         call Crlf
-        call Crlf
+        mov edx, OFFSET enterContMsg
+        call WriteString
+        call ReadChar
         jmp startlogin
     login ENDP
 
@@ -238,7 +242,6 @@ inputCustInfo PROC
         mov edx, OFFSET inputCustName
         mov ecx, 129  ; Set the input limit to 128 characters + null terminator
         call ReadString
-        call Crlf
 
         ; Check the length of the input
         mov esi, OFFSET inputCustName
@@ -291,6 +294,9 @@ CheckNameCharacters PROC
         cmp al, 0              ; Check if it's the null terminator
         je valid_input         ; If null terminator, input is valid
 
+        cmp al, 20h            ; Check if it's a space character
+        je valid_character     ; If it's a space, it's valid
+
         cmp al, 'A'
         jb invalid_input       ; If less than 'A', it's invalid
         cmp al, 'Z'
@@ -300,9 +306,6 @@ CheckNameCharacters PROC
         jb invalid_input       ; If less than 'a', it's invalid
         cmp al, 'z'
         jbe valid_character    ; If lowercase letter, it's valid
-
-        cmp al, 20h            ; Check if it's a space character
-        je valid_character     ; If it's a space, it's valid
 
         jmp invalid_input      ; Any other character is invalid
 
@@ -322,6 +325,7 @@ CheckNameCharacters PROC
 ; Function to check Dine-in or Takeaway input
 dine_or_takeaway_check PROC
     dine_input_loop:
+        call Crlf
         ; Display the dine-in or takeaway prompt
         mov edx, OFFSET dineOrTakeMsg
         call WriteString
@@ -380,6 +384,7 @@ CheckDineTake PROC
 ; Promo code check function
 promo_code_check PROC
     promo_input_loop:
+        call Crlf
         ; Display promo code query
         mov edx, OFFSET promoMsg
         call WriteString
@@ -409,6 +414,7 @@ promo_code_check PROC
 ; Check promo code validity
 check_promo_code PROC
     promo_code_loop:
+        call Crlf
         ; Display promo code prompt
         mov edx, OFFSET promoCodeMsg
         call WriteString
@@ -447,7 +453,6 @@ check_promo_code PROC
         mov usingPromo, 1
         mov edx, OFFSET promoSuccessMsg   ; Display "Promo Code used successfully"
         call WriteString
-        call Crlf
         ret
     check_promo_code ENDP
 
@@ -457,6 +462,7 @@ orderLoop PROC
     mov ebx, 0
     ;----------------------------------------------display Mealmenu and get valid selection
     orderLoopStart:
+        call ClrScr
         call DisplayMealMenu
         ; Display the meal selection prompt again
         mov edx, OFFSET inputOrder  ; Set the buffer to store the input
@@ -488,6 +494,9 @@ orderLoop PROC
 
     ;----------------------------------------------display SideDishMenu and get valid selection
     GetSideDishSelection:
+        call Crlf
+        call printDash
+        call Crlf
         call DisplaySideDishMenu
         ; Display the meal selection prompt again
         mov edx, OFFSET inputOrder  ; Set the buffer to store the input
@@ -517,6 +526,9 @@ orderLoop PROC
 
     ;----------------------------------------------display selection & confirm
     ; Print "You selected: "
+    call Crlf
+    call printDash
+    call Crlf
     mov edx, OFFSET resultMsg
     call WriteString
     call displaySelection
@@ -593,7 +605,6 @@ orderLoop PROC
 
 ;------------------------------------------DISPLAY FOOD MENU
 DisplayMealMenu PROC
-    call printDash ; call function to print 30 dashes
 
     ; display menu title and food option
     call Crlf
@@ -614,8 +625,6 @@ DisplayMealMenu PROC
 ;------------------------------------------DISPLAY SIDE DISH MENU
 DisplaySideDishMenu PROC
     ; display sidedish title and set option
-    call Crlf
-    call Crlf
     mov edx, OFFSET sideDishTitle
     call WriteString
     mov edx, OFFSET noSideDish
@@ -855,9 +864,7 @@ calcFinalPrice PROC
 
 ;==============================PART 5: DISPLAY INVOICE (ALL ORDERS)
 displayInvoice PROC
-    call Crlf
-    call printDash
-
+    call ClrScr
     cmp orderListLen, 0         ; Check if orderListLen is 0
     je noInvoice                ; If no orders, skip the calculations
 
@@ -869,9 +876,11 @@ displayInvoice PROC
     call WriteString
     call Crlf
 
+    call printDash
     mov edx, OFFSET receiptHeader
     call WriteString
     call Crlf
+    call printDash
 
     mov ecx, orderListLen    ; Load the number of orders into ecx
     mov esi, 0               ; Start at the first order
@@ -894,7 +903,7 @@ displayInvoice PROC
         printSpace:
             cmp ebx, 0            ; Check if spaces are left to print
             jz donePrintSpace     ; Exit if none left
-            mov al, spacebar      ; Print space
+            mov al, gapSpace      ; Print space
             call WriteChar
             dec ebx               ; Decrement space count
             jmp printSpace
@@ -908,8 +917,6 @@ displayInvoice PROC
             add esi, 2           ; Move to the next order (assuming 2-byte entries)
             pop ecx               ; Restore the loop counter
     loop displayEachOrder ; Decrement ecx and loop if non-zero
-
-    call Crlf
     call printDash
 
     mov edx, OFFSET totalPriceMsg
@@ -931,21 +938,24 @@ displayInvoice PROC
     call printPriceStr
     call Crlf
 
+    call printDash
     mov edx, OFFSET finalPriceMsg
     call WriteString
     mov eax, finalPrice
     call printPriceStr
     call Crlf
-    call Crlf
+    call printDash
 
+    call Crlf
+    call Crlf
     mov edx, OFFSET thankYouMsg 
     call WriteString
-    call Crlf
-    call Crlf
 
     noInvoice:
-
-    mov edx, OFFSET exitInvoiceMsg
+    call Crlf
+    call Crlf
+    call Crlf
+    mov edx, OFFSET enterContMsg
     call WriteString
     call ReadChar
 
