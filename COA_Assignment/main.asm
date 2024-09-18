@@ -15,16 +15,15 @@ INCLUDE Irvine32.inc
     welcomeMsg          BYTE  "Welcome to Our Restaurant", 13, 10, 0
 ;~~~ENTER NAME
     inputNameMsg        BYTE  "Enter your name (up to 50 characters):  ", 0
-    errorNameMsg        BYTE  "Invalid input. Too long or invalid character.", 13, 10, 0
-    tooLongMsg          BYTE  "Input too long.", 0
-    largeLenMsg         BYTE  "Length between 50 and 128 characters. Number of characters entered: ", 0
-    reenterNameMsg      BYTE  "Please re-enter name", 13, 10, 0
+    invalidCharMsg      BYTE  "    INVALID INPUT: Name contain invalid character.", 13, 10, 0
+    nameBlankMsg        BYTE  "    INVALID INPUT: No name was entered.", 13, 10, 0
+    strTooLongMsg       BYTE  "    INVALID INPUT: Name exceed 50 characters long.", 13, 10, 0
 ;~~~ENTER MODE
     dineOrTakeMsg       BYTE  "Dine-in or Takeaway? Enter 'D' or 'T':  ", 0
-    invalidDineTakeMsg  BYTE  "Invalid input. Please enter 'D' or 'T'.", 13, 10, 0
+    invalidDineTakeMsg  BYTE  "    INVALID INPUT: Please enter 'D' or 'T'.", 13, 10, 0
 ;~~~ENTER PROMO CODE (OPTIONAL)
     promoMsg            BYTE  "Do you have promo code to enter? (Y/N): ", 0
-    invalidPromoMsg     BYTE  "Invalid input. Please enter 'Y' or 'N'.", 13, 10, 0
+    invalidPromoMsg     BYTE  "    INVALID INPUT: Please enter 'Y' or 'N'.", 13, 10, 0
     promoCodeMsg        BYTE  "Promo Code: ", 0
     invalidPromoCodeMsg BYTE  "Invalid promo code. Do you wish to retry? (Y/N): ", 0
     promoSuccessMsg     BYTE "Promo Code used successfully!", 0
@@ -111,8 +110,9 @@ INCLUDE Irvine32.inc
     discountedPrice     DWORD 0
     finalPrice          DWORD 0
 ;~~~INVOICE 
-    foodStrLen          DWORD  0
+    foodStrLen          DWORD 0
     spacebar            BYTE  " "
+    invoiceNo           DWORD 0
 
 .code
 main PROC
@@ -224,13 +224,13 @@ login PROC
 ;==============================PART 2: ENTER CUSTOMERS' INFO
 inputCustInfo PROC
     call ClrScr
-    input_loop_start:
-        mov edx, offset welcomeMsg
-        call WriteString
-        call Crlf
-        call printDash
+    mov edx, offset welcomeMsg
+    call WriteString
+    call printDash
 
+    input_loop_start:
         ; Display input prompt
+        call Crlf
         mov edx, OFFSET inputNameMsg
         call WriteString
 
@@ -238,121 +238,85 @@ inputCustInfo PROC
         mov edx, OFFSET inputCustName
         mov ecx, 129  ; Set the input limit to 128 characters + null terminator
         call ReadString
+        call Crlf
 
         ; Check the length of the input
-        call CheckCustNameLength
-        cmp eax, 0       ; EAX == 0 indicates invalid length
-        je input_loop_start ; If length check fails, re-enter the loop
+        mov esi, OFFSET inputCustName
+        call StringLength        ; Get the length of input string into EAX
+        cmp eax, 50              ; Check if length is greater than 50
+        jg nameTooLong          
+        cmp eax, 0               ; Check if length is 0 or
+        jle nameNull           
+        jmp check_characters
 
-        ; Check the characters of the input
-        call CheckNameCharacters
-        cmp eax, 0       ; EAX == 0 indicates invalid characters
-        je input_loop_start ; If character check fails, re-enter the loop
+        nameNull:
+            mov edx, OFFSET nameBlankMsg
+            call WriteString
+            jmp nameInputInvalid     ; Re-prompt to re-enter input
 
-        ; If name is valid, ask for dining preference
-        call dine_or_takeaway_check
+        nameTooLong:
+            mov edx, OFFSET strTooLongMsg
+            call WriteString
+            jmp nameInputInvalid     ; Re-prompt to re-enter input
 
-        ; If dining preference is valid, ask for promo code
-        call promo_code_check
+        check_characters:
+            ; Check the characters of the input
+            call CheckNameCharacters
+            cmp eax, 1               ; EAX == 0 means contain invalid characters
+            je nameInputValid        ; If valid, proceed to next step
 
-        ; If both checks pass, exit the input loop
-        jmp done
+            ; INVALID characters
+            mov edx, OFFSET invalidCharMsg
+            call WriteString
+            jmp nameInputInvalid     ; Re-prompt to enter input
 
-    done:
-        ;call WaitMsg
-        call Crlf
-        ret
+        nameInputValid:
+            ; If name is valid, ask for dining preference
+            call dine_or_takeaway_check
+            ; If dining preference is valid, ask for promo code
+            call promo_code_check
+            ; If both checks pass, exit the input loop
+            ret
+
+        nameInputInvalid:
+            jmp input_loop_start
     inputCustInfo ENDP
-
-
-; Length check function
-CheckCustNameLength PROC
-    ; Get the string length
-    mov eax, OFFSET inputCustName
-    call StrLength
-    mov ebx, eax  ; Save string length in EBX
-
-    ; Check if input is too long (> 128 characters)
-    cmp ebx, 128
-    jae invalidNameLength  ; If greater or equal to 128, it's invalid
-
-    ; Check if length is between 50 and 128 characters
-    cmp ebx, 50
-    jae handleLargeNameInput    ; If length >= 50 but <= 128, show the length and invalid message
-
-    ; Length is valid (between 1 and 50)
-    mov eax, 1
-    ret
-
-    handleLargeNameInput:
-        ; Handle input length between 50 and 128 characters
-        mov edx, OFFSET largeLenMsg
-        call WriteString
-        mov eax, ebx        ; Move the string length (in EBX) to EAX
-        call Crlf           ; Move to the next line
-
-        ; Print the invalid input message and prompt re-entry
-        mov edx, OFFSET errorNameMsg
-        call WriteString
-        call Crlf
-        mov edx, OFFSET reenterNameMsg
-        call WriteString
-        call Crlf           ; Move to the next line
-
-        ; Set return value to 0 (invalid)
-        mov eax, 0
-        ret
-
-    invalidNameLength:
-        ; Handle input exceeding the allowed 128 characters
-        mov edx, OFFSET tooLongMsg
-        call WriteString
-        call Crlf           ; Move to the next line
-        mov edx, OFFSET reenterNameMsg
-        call WriteString
-        call Crlf           ; Move to the next line
-
-        ; Set return value to 0 (invalid)
-        mov eax, 0
-        ret
-    CheckCustNameLength ENDP
 
 ; Character check function (Valid characters: A-Z, a-z)
 CheckNameCharacters PROC
+    mov ecx, 129              ; Set the max length for checking
     mov esi, OFFSET inputCustName
     check_loop:
-        lodsb               ; Load the next character into AL
-        cmp al, 0           ; Check if it's the end of the string (null terminator)
-        je valid_input      ; If it's the end, input is valid
-        cmp al, 'z'
-        jbe check_loop      ; If it's a space character, continue checking
-        cmp al, 'A'         
-        jb invalid_input    ; If less than 'A', it's invalid
-        cmp al, 'Z'         
-        jbe check_loop      ; If it's an uppercase letter, continue checking
+        mov al, [esi]          ; Load a character from the string
+        cmp al, 0              ; Check if it's the null terminator
+        je valid_input         ; If null terminator, input is valid
+
+        cmp al, 'A'
+        jb invalid_input       ; If less than 'A', it's invalid
+        cmp al, 'Z'
+        jbe valid_character    ; If uppercase letter, it's valid
+
         cmp al, 'a'
-        jb invalid_input    ; If less than 'a', it's invalid
+        jb invalid_input       ; If less than 'a', it's invalid
         cmp al, 'z'
-        jbe check_loop      ; If it's a lowercase letter, continue checking
-        jmp invalid_input   ; Any other characters are invalid
+        jbe valid_character    ; If lowercase letter, it's valid
+
+        cmp al, 20h            ; Check if it's a space character
+        je valid_character     ; If it's a space, it's valid
+
+        jmp invalid_input      ; Any other character is invalid
+
+        valid_character:
+            inc esi                ; Move to the next character
+    loop check_loop        ; Continue checking until null terminator
 
     valid_input:
-        ; If input is valid, set return value to 1
-        mov eax, 1
-        ret
+            mov eax, 1             ; All characters are valid
+            ret
 
     invalid_input:
-        ; Handle invalid characters in the input
-        mov edx, OFFSET errorNameMsg
-        call WriteString
-        call Crlf           ; Move to the next line
-        mov edx, OFFSET reenterNameMsg
-        call WriteString
-        call Crlf           ; Move to the next line
-
-        ; Set return value to 0 (invalid)
-        mov eax, 0
-        ret
+            mov eax, 0             ; Invalid character found
+            ret
     CheckNameCharacters ENDP
 
 ; Function to check Dine-in or Takeaway input
@@ -396,7 +360,6 @@ CheckDineTake PROC
 
     invalidDTInput:
         ; If input is invalid, output invalid message
-        call printDash
         mov edx, OFFSET invalidDineTakeMsg
         call WriteString
         call Crlf
@@ -433,15 +396,6 @@ promo_code_check PROC
         cmp al, 'y'
         je promo_code_entry
         jmp no_promo_code
-        ; cmp al, 'N'
-        ; je no_promo_code
-        ; cmp al, 'n'
-        ; je no_promo_code
-        ; Invalid input, re-enter loop
-        ; mov edx, OFFSET invalidPromoMsg
-        ; call WriteString
-        ; call Crlf
-        ; jmp promo_input_loop
 
     promo_code_entry:
         ; Ask for promo code
