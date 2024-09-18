@@ -13,7 +13,7 @@ INCLUDE Irvine32.inc
     startupMsg          BYTE  "Launching Food Ordering Program... ", 13, 10, 0
     failLoginMsg        BYTE  "Invalid credentials!", 13, 10, 0 
 ;------------------------------------------ENTER CUSTOMER INFO
-    welcomeMsg          BYTE  "Welcome to Pan-tastic Mee House", 13, 10, 0
+    welcomeMsg          BYTE  "       Welcome to Pan-tastic Mee House!", 13, 10, 0
 ;~~~ENTER NAME
     inputNameMsg        BYTE  "Enter your name (up to 50 characters):  ", 0
     invalidCharMsg      BYTE  "    INVALID INPUT: Name contain invalid character.", 13, 10, 0
@@ -999,7 +999,7 @@ getOrderPrice PROC
 
 
 ;==============================CUSTOM FUNCTIONS
-;------------------------------------------PRINT PAGE SEPERATION LINE
+;------------------------------------------PRINT HORIZONTAL SEPERATION LINE
 printDash PROC
     ; Set up the loop counter and character
     mov al, dash                ; Load the dash character into AL
