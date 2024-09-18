@@ -14,13 +14,13 @@ INCLUDE Irvine32.inc
 ;------------------------------------------ENTER CUSTOMER INFO
     welcomeMsg          BYTE  "Welcome to Our Restaurant", 13, 10, 0
 ;~~~ENTER NAME
-    inputNameMsg        BYTE  "Enter name (up to 50 characters):     ", 0
+    inputNameMsg        BYTE  "Enter your name (up to 50 characters):  ", 0
     errorNameMsg        BYTE  "Invalid input. Too long or invalid character.", 13, 10, 0
     tooLongMsg          BYTE  "Input too long.", 0
     largeLenMsg         BYTE  "Length between 50 and 128 characters. Number of characters entered: ", 0
     reenterNameMsg      BYTE  "Please re-enter name", 13, 10, 0
 ;~~~ENTER MODE
-    dineOrTakeMsg       BYTE  "Dine-in or Takeaway? Enter 'D' or 'T': ", 0
+    dineOrTakeMsg       BYTE  "Dine-in or Takeaway? Enter 'D' or 'T':  ", 0
     invalidDineTakeMsg  BYTE  "Invalid input. Please enter 'D' or 'T'.", 13, 10, 0
 ;~~~ENTER PROMO CODE (OPTIONAL)
     promoMsg            BYTE  "Do you have promo code to enter? (Y/N): ", 0
@@ -64,30 +64,32 @@ INCLUDE Irvine32.inc
     takeawayChargeMsg   BYTE  "Take Away Charge:                                 ", 0
     finalPriceMsg       BYTE  "Grand Total:                                      ", 0
     thankYouMsg         BYTE  "Thank you, have a nice day :D", 0
+    exitInvoiceMsg      BYTE  "Enter anything to continue...", 0
 
 ;==============================VARIABLES
 ;------------------------------------------CONSTANTS
-    CORRECT_USERNAME    BYTE  "user123", 0  
-    CORRECT_PASSWORD    BYTE  "pass123", 0 
-    CORRECT_PROMO_CODE  BYTE  "eat2024", 0
-    FOOD_PRICE          DWORD 850, 1000              ; Prices for Food A ($8.50), Food B ($10.00) in cents
-    SIDEDISH_PRICE      DWORD 0, 120, 240, 300       ; Prices for No Side ($0.00), Side A ($1.20), Side B ($2.40), Side A+B ($3.00) in cents
-    TAKEAWAY_CHARGE     DWORD 20
-    DISCOUNT_PERCENT    DWORD 10                     ; Discount percentage as a whole number (10%)
+    ADMIN_USERNAME      BYTE  "user123", 0  
+    ADMIN_PASSWORD      BYTE  "pass123", 0 
+    PROMO_CODE          BYTE  "eat2024", 0
+    FOOD_PRICE          DWORD 850, 1000             ; Prices for Food A (RM8.50), Food B (RM10.00) in cents
+    SIDEDISH_PRICE      DWORD 0, 120, 240, 300      ; Prices for No Side (RM0.00), Side A (RM1.20), Side B (RM2.40), Side A+B ($RM.00) in cents
+    TAKEAWAY_CHARGE     DWORD 20                    ; Extra charges for takeaway (RM0.20) in cent
+    DISCOUNT_PERCENT    DWORD 8                     ; Discount percentage (10%) as a whole number
 ;------------------------------------------COMMONLY USED
     dashAmount          DWORD 60
     dash                BYTE  '-'
-    inputYN             BYTE  2 DUP(?)   ; Y / N
+    inputYN             BYTE  2 DUP(?)              ; Y / N
     displayPriceStr     BYTE  9 DUP(0)
+    isProgramLooping    BYTE  1                     ; bool
 ;------------------------------------------LOGIN
     username            BYTE  20 DUP(?)   
     password            BYTE  20 DUP(?)   
 ;------------------------------------------ENTER CUSTOMER INFO
-    inputCustName       BYTE  129 DUP(?) ; Buffer to hold input (128 characters + null terminator)
-    inputDT             BYTE  2 DUP(?)   ; DineIn / TakeAway
-    inputPromoCode      BYTE  10 DUP(?)  ; Buffer for promo code input (maximum 10 characters)
+    inputCustName       BYTE  129 DUP(?)            ; Buffer to hold input (128 characters + null terminator)
+    inputDT             BYTE  2 DUP(?)              ; DineIn / TakeAway
+    inputPromoCode      BYTE  10 DUP(?)             ; Buffer for promo code input (maximum 10 characters)
 ;------------------------------------------SELECT FOOD
-    inputOrder          BYTE  2 DUP(?)   ; Define a buffer of 2 bytes (for user input)
+    inputOrder          BYTE  2 DUP(?)              ; Define a buffer of 2 bytes (for user input)
     inputConfirmOrder   BYTE  2 DUP(?) 
     inputContOrder      BYTE  2 DUP(?)
     mealChoice          BYTE  ?
@@ -101,8 +103,8 @@ INCLUDE Irvine32.inc
     loopNo              DWORD 0
     loopIndex           DWORD 0
 ;~~~PRICE CALCULATION
-    usingPromo          BYTE  0 ; bool
-    isTakeAway          BYTE  0 ; bool
+    usingPromo          BYTE  0                     ; bool
+    isTakeAway          BYTE  0                     ; bool
     currFoodPrice       DWORD 0
     totalPrice          DWORD 0
     totalTakeAway       DWORD 0
@@ -116,13 +118,57 @@ INCLUDE Irvine32.inc
 main PROC
     ; Initialize once and avoid re-execution
     call login
-    call inputCustInfo
-    call orderLoop
-    call calcTotalPrice
-    call calcFinalPrice
-    call displayInvoice
+    mainProgram:
+        call init
+        call inputCustInfo
+        call orderLoop
+        call calcTotalPrice
+        call calcFinalPrice
+        call displayInvoice
+    cmp isProgramLooping, 1
+    je mainProgram
     ; Exit cleanly
     invoke ExitProcess, 0
+
+init PROC
+    xor eax, eax
+
+    mov ecx, 129
+    mov esi, 0
+    clearCustName:
+        mov [inputCustName+esi], al
+        inc esi
+    loop clearCustName
+
+    mov ecx, 10
+    mov esi, 0
+    clearPromoCode:
+        mov [inputPromoCode+esi], al
+        inc esi 
+    loop clearPromoCode
+
+    mov ecx, 64
+    mov esi, 0
+    clear64:
+        mov[foodList+esi], al
+        mov[sideList+esi], al
+        mov[priceList+esi], eax
+        inc esi 
+    loop clear64
+
+    mov orderListLen, eax
+    mov loopNo, eax
+    mov loopIndex, eax
+    mov usingPromo, al
+    mov isTakeAway, al
+    mov currFoodPrice, eax
+    mov totalPrice, eax
+    mov totalTakeAway, eax
+    mov discountedPrice, eax
+    mov finalPrice, eax
+
+    ret
+    init ENDP
 
 ;==============================PART 1: LOGIN
 login PROC
@@ -147,14 +193,14 @@ login PROC
 
         ; Compare the entered username with the correct username
         mov esi, OFFSET username
-        mov edi, OFFSET CORRECT_USERNAME
+        mov edi, OFFSET ADMIN_USERNAME
         call StrCompare
         cmp eax, 0
         jne loginFailed 
     
         ; Compare the entered password with the correct one
         mov esi, OFFSET password
-        mov edi, OFFSET CORRECT_PASSWORD
+        mov edi, OFFSET ADMIN_PASSWORD
         call StrCompare
         cmp eax, 0
         jne loginFailed 
@@ -177,6 +223,7 @@ login PROC
 
 ;==============================PART 2: ENTER CUSTOMERS' INFO
 inputCustInfo PROC
+    call ClrScr
     input_loop_start:
         mov edx, offset welcomeMsg
         call WriteString
@@ -390,7 +437,6 @@ promo_code_check PROC
         ; je no_promo_code
         ; cmp al, 'n'
         ; je no_promo_code
-
         ; Invalid input, re-enter loop
         ; mov edx, OFFSET invalidPromoMsg
         ; call WriteString
@@ -420,7 +466,7 @@ check_promo_code PROC
 
         ; Compare user input to correct promo code
         mov esi, OFFSET inputPromoCode
-        mov edi, OFFSET CORRECT_PROMO_CODE
+        mov edi, OFFSET PROMO_CODE
         call StrCompare
 
         ; If promo code is valid (EAX == 0), exit loop
@@ -858,6 +904,9 @@ displayInvoice PROC
     call Crlf
     call printDash
 
+    cmp orderListLen, 0         ; Check if orderListLen is 0
+    je noInvoice                ; If no orders, skip the calculations
+
     mov edx, OFFSET dearMsg
     call WriteString
     mov edx, OFFSET inputCustName 
@@ -870,40 +919,40 @@ displayInvoice PROC
     call WriteString
     call Crlf
 
-mov ecx, orderListLen    ; Load the number of orders into ecx
-mov esi, 0               ; Start at the first order
-displayEachOrder:
-    push ecx             ; Save the loop counter
-    push esi             ; Save the index for this iteration
+    mov ecx, orderListLen    ; Load the number of orders into ecx
+    mov esi, 0               ; Start at the first order
+    displayEachOrder:
+        push ecx             ; Save the loop counter
+        push esi             ; Save the index for this iteration
 
-    call getFood         ; Get food information
-    call getSide         ; Get side dish information
-    call displaySelection; Display the selected order
+        call getFood         ; Get food information
+        call getSide         ; Get side dish information
+        call displaySelection; Display the selected order
 
-    ; Calculate the spacing based on the food name length
-    mov eax, foodStrLen   ; Get the length of the food string
-    cmp eax, 0            ; If no food string, skip the order
-    jz donePrintSpace     ; Jump to done if no food string
+        ; Calculate the spacing based on the food name length
+        mov eax, foodStrLen   ; Get the length of the food string
+        cmp eax, 0            ; If no food string, skip the order
+        jz donePrintSpace     ; Jump to done if no food string
 
-    mov ebx, 50           ; Set the max width for display
-    sub ebx, eax          ; Calculate spaces to print
+        mov ebx, 50           ; Set the max width for display
+        sub ebx, eax          ; Calculate spaces to print
 
-    printSpace:
-        cmp ebx, 0            ; Check if spaces are left to print
-        jz donePrintSpace     ; Exit if none left
-        mov al, spacebar      ; Print space
-        call WriteChar
-        dec ebx               ; Decrement space count
-        jmp printSpace
+        printSpace:
+            cmp ebx, 0            ; Check if spaces are left to print
+            jz donePrintSpace     ; Exit if none left
+            mov al, spacebar      ; Print space
+            call WriteChar
+            dec ebx               ; Decrement space count
+            jmp printSpace
 
-    donePrintSpace:
-        pop esi               ; Restore the index
-        push esi
-        call getOrderPrice; Display the order price
-        call Crlf             ; New line
-        pop esi
-        add esi, 2           ; Move to the next order (assuming 2-byte entries)
-        pop ecx               ; Restore the loop counter
+        donePrintSpace:
+            pop esi               ; Restore the index
+            push esi
+            call getOrderPrice; Display the order price
+            call Crlf             ; New line
+            pop esi
+            add esi, 2           ; Move to the next order (assuming 2-byte entries)
+            pop ecx               ; Restore the loop counter
     loop displayEachOrder ; Decrement ecx and loop if non-zero
 
     call Crlf
@@ -933,11 +982,18 @@ displayEachOrder:
     mov eax, finalPrice
     call printPriceStr
     call Crlf
-
     call Crlf
+
     mov edx, OFFSET thankYouMsg 
     call WriteString
     call Crlf
+    call Crlf
+
+    noInvoice:
+
+    mov edx, OFFSET exitInvoiceMsg
+    call WriteString
+    call ReadChar
 
     ret
     displayInvoice ENDP
