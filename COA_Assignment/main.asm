@@ -20,7 +20,6 @@ SetConsoleOutputCP PROTO :DWORD   ; For printing character with ASCII code beyon
 ;------------------------------------------COMMONLY USED
     dashAmount          DWORD 60
     dash                BYTE '-'
-    inputYN             BYTE 2 DUP(?)               ; Input Yes or No
     displayPriceStr     BYTE 9 DUP(0)
     isProgramLooping    BYTE 1                      ; bool
 ;------------------------------------------REGISTRATION/LOGIN
@@ -390,18 +389,23 @@ login PROC
             mov edx, OFFSET password
             mov ecx, 20  
             call ReadString
-
         ; Compare entered username and password with registered credentials
         mov esi, OFFSET username
         mov edi, OFFSET registerUsername
         call StrCompare
-        cmp eax, 1
-        mov esi, OFFSET password
-        mov edi, OFFSET registerPassword
-        call StrCompare
-        cmp eax, 1
-        je loginSuccess  ; If username and password match the registered ones, login is successful
-        jmp loginFailed  ; If password doesn't match, fail
+        cmp eax, 0
+        je loginFailed    ; If username and password match the registered ones, login is successful
+
+        loginEnterPass:
+            mov esi, OFFSET password
+            mov edi, OFFSET registerPassword
+            call StrCompare
+        cmp eax, 0
+        je loginFailed    ; If username and password match the registered ones, login is successful
+        
+        jmp loginSuccess      ; If username doesn't match, fail
+        
+
 
     loginSuccess:
         ; Display success message
@@ -540,25 +544,25 @@ dine_or_takeaway_check PROC
         mov edx, OFFSET dineOrTakeMsg
         call WriteString
 
-        ; Read the input (expecting 1 character)
-        mov edx, OFFSET inputDT
-        mov ecx, 2      ; Read only one character plus null terminator
-        call ReadString
+        ; Read a single character input
+        call ReadChar
+        mov [inputDT], al          ; Store the input character
+        call WriteChar              ; Echo the character (optional)
+        call Crlf                   ; Move to the next line
 
         ; Check if the input is 'T', 't', 'D', or 'd'
         call CheckDineTake
 
         cmp eax, 1
-        jne dine_input_loop  ; If invalid, re-enter the loop
+        jne dine_input_loop          ; If invalid, re-enter the loop
 
         ret
     dine_or_takeaway_check ENDP
-
+    
 
 ; Check if input is 'D', 'd', 'T', or 't'
 CheckDineTake PROC
-    mov esi, OFFSET inputDT
-    lodsb           ; Load the first character from the buffer into AL
+    mov al, [inputDT]             ; Load the input character into AL
 
     ; Check for 'D', 'd'
     cmp al, 'D'
@@ -576,7 +580,8 @@ CheckDineTake PROC
         ; If input is invalid, output invalid message
         mov edx, OFFSET invalidDineTakeMsg
         call WriteString
-        mov eax, 0      ; Set return value to 0 (invalid)
+        call Crlf
+        mov eax, 0                    ; Set return value to 0 (invalid)
         ret
 
     setTakeAway:
@@ -585,7 +590,7 @@ CheckDineTake PROC
         jmp validDTInput
 
     validDTInput:
-        mov eax, 1      ; Set return value to 1 (valid)
+        mov eax, 1                    ; Set return value to 1 (valid)
         ret
     CheckDineTake ENDP
 
@@ -1243,13 +1248,8 @@ inputYesOrNo PROC
         call WriteString
         push edx  ; Save the edx register
 
-        mov edx, OFFSET inputYN
         mov ecx, 2      ; Expect 1 character plus null terminator
-        call ReadString
-
-        ; Now, ensure we are checking only the first character
-        mov esi, OFFSET inputYN  ; Load the address of the input buffer
-        lodsb                    ; Load the first character into AL from inputYN
+        call ReadChar
 
         ; Check if AL contains 'Y', 'y', 'N', or 'n'
         cmp al, 'Y'
