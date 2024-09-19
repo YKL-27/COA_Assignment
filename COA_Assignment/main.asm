@@ -186,7 +186,7 @@ main PROC
             call calcTotalPrice
             call calcFinalPrice
             call displayInvoice
-    je mainProgram
+    jmp mainProgram
 
     terminateProgram:
         ; Exit cleanly
@@ -368,7 +368,7 @@ login PROC
         lea edi, OFFSET BACK_CMD
         call StrCompare
         cmp eax, 0
-        jne contLogin
+        je contLogin
 
         goBackToRegister:               ; Display the message that we're returning to registration
             mov edx, OFFSET backToRegisterMsg
@@ -395,11 +395,11 @@ login PROC
         mov esi, OFFSET username
         mov edi, OFFSET registerUsername
         call StrCompare
-        cmp eax, 0
+        cmp eax, 1
         mov esi, OFFSET password
         mov edi, OFFSET registerPassword
         call StrCompare
-        cmp eax, 0
+        cmp eax, 1
         je loginSuccess  ; If username and password match the registered ones, login is successful
         jmp loginFailed  ; If password doesn't match, fail
 
@@ -443,7 +443,7 @@ inputCustInfo PROC
         lea esi, inputCustName
         lea edi, OFFSET BACK_CMD
         call StrCompare
-        cmp eax, 0
+        cmp eax, 1
         je goBackToRegister
 
         ; Check the length of the input
@@ -630,9 +630,7 @@ check_promo_code PROC
         mov esi, OFFSET inputPromoCode
         mov edi, OFFSET PROMO_CODE
         call StrCompare
-
-        ; If promo code is valid (EAX == 0), exit loop
-        cmp eax, 0
+        cmp eax, 1
         je valid_promo_code
 
         ; Invalid promo code, re-enter loop
@@ -733,13 +731,11 @@ orderLoop PROC
     call Crlf
     call Crlf
 
-
-    call DumpMem        ; Dump memory around orderListLen before confirmOrder
     confirmOrder:
         mov edx, OFFSET confirmOrderMsg
         call inputYesOrNo
         cmp eax, 1
-        je confirmOrder
+        je storeOrder
         jmp contOrder
 
     storeOrder:
