@@ -1,12 +1,41 @@
 INCLUDE Irvine32.inc
-    .model flat, stdcall
-    ExitProcess proto, dwExitCode:dword
-    .stack 4096
+includelib kernel32.lib      ; Include the library for Windows API functions
+
+.model flat, stdcall
+ExitProcess proto, dwExitCode:dword
+.stack 4096
+
+SetConsoleOutputCP PROTO :DWORD   ; Declare the external function prototype
 
 .data
 ;==============================DISPLAY MESSAGES
     enterContMsg        BYTE "Enter anything to continue...", 0
     invalidCharMsg      BYTE "    INVALID INPUT: Name contain invalid character.", 13, 10, 0
+    logoImg1            BYTE  "         ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣤⣦⣤⣤⣤⣤⣤⣶⣶⡄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀",13,10,0
+    logoImg2            BYTE  "⠀⠀⠀⠀⠀⠀⠀⠀         ⠀⠀⠀⠀⠀⠀⣸⡿⠛⢻⠛⢻⠛⢻⣿⡟⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀",13,10,0
+    logoImg3            BYTE  "⠀⠀⠀⠀⠀         ⠀⠀⠀⠀⠀⠀⠀⠀⢀⣿⡇⠀⡿⠀⣼⠀⢸⣿⡅⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀",13,10,0
+    logoImg4            BYTE  "⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀         ⠘⣿⡇⠀⣿⠀⢹⠀⢸⣿⡇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣀⣠⣤⣤⡀",13,10,0
+    logoImg5            BYTE  "⠀⠀⠀⠀⠀⠀⠀⠀⠀         ⠀⠀⠀⠀⠀⠸⣿⡀⠸⡆⠘⣇⠀⢿⣷⠀⠀⠀⠀⣀⣠⣤⣶⣶⣾⣿⠿⠿⠛⠋⢻⡆",13,10,0
+    logoImg6            BYTE  "⠀⠀⠀⠀⠀⠀⠀         ⠀⠀⠀⠀⠀⠀⠀⠀⣿⡇⠀⣿⠀⢿⣄⣸⣿⣦⣤⣴⠿⠿⠛⠛⠉⠁⢀⣀⣀⣀⣄⣤⣼⣿",13,10,0
+    logoImg7            BYTE  "⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀         ⠀⠀⠀⠀⢀⣿⡇⠀⡿⠀⣼⣿⣿⣯⣿⣦⣤⣤⣶⣶⣶⣿⢿⠿⠟⠿⠛⠛⠛⠛⠋",13,10,0
+    logoImg8            BYTE  "⠀⠀⠀⠀⠀⠀⠀         ⠀⠀⠀⠀⠀⠀⠀⢸⣿⠁⣸⠃⢠⡟⢻⣿⣿⣿⣿⣿⣭⣭⣭⣵⣶⣤⣀⣄⣠⣤⣤⣴⣶⣦",13,10,0
+    logoImg9            BYTE  "⠀⠀⠀⠀⠀⠀         ⠀⠀⠀⠀⠀⠀⠀⢠⣿⡇⠀⣿⠀⣸⠀⢸⣿⣶⣦⣤⣤⣄⣀⣀⣀⠀⠀⠉⠈⠉⠈⠉⠉⢽⣿",13,10,0
+    logoImg10           BYTE  "⠀⠀⠀⠀         ⠀⠀⠀⠀⠀⠀⠀⠀⣀⣸⣿⡇⠀⣿⠀⢸⠀⢸⣿⡿⣿⣿⣿⣿⡟⠛⠻⠿⠿⠿⣿⣶⣶⣶⣶⣿⣿",13,10,0
+    logoImg11           BYTE  "⠀⠀         ⠀⠀⠀⠀⠀⢀⣤⣶⣿⡿⣿⣿⣿⣷⠀⠹⡆⠘⣇⠈⣿⡟⠛⠛⠛⠾⣿⡳⣄⠀⠀⠀⠀⠀⠀⠈⠉⠉⠁",13,10,0
+    logoImg12           BYTE  "⠀⠀⠀         ⠀⠀⠀⣰⣿⢟⡭⠒⢀⣐⣲⣿⣿⡇⠀⣷⠀⢿⠀⢸⣏⣈⣁⣉⣳⣬⣻⣿⣷⣀⠀⠀⠀⠀⠀⠀⠀⠀",13,10,0
+    logoImg13           BYTE  "         ⠀⠀⣀⣤⣾⣿⡿⠟⠛⠛⠿⣿⣋⣡⠤⢺⡇⠀⡿⠀⣼⠀⢸⣿⠟⠋⣉⢉⡉⣉⠙⠻⢿⣯⣿⣦⣄⠀⠀⠀⠀",13,10,0
+    logoImg14           BYTE  "         ⢠⣾⡿⢋⣽⠋⣠⠊⣉⠉⢲⣈⣿⣧⣶⣿⠁⢠⣇⣠⣯⣀⣾⠧⠖⣁⣠⣤⣤⣤⣭⣷⣄⠙⢿⡙⢿⣷⡀⠀⠀",13,10,0
+    logoImg15           BYTE  "         ⢸⣿⣄⠸⣧⣼⣁⡎⣠⡾⠛⣉⠀⠄⣈⣉⠻⢿⣋⠁⠌⣉⠻⣧⡾⢋⡡⠔⠒⠒⠢⢌⣻⣶⣾⠇⣸⣿⡇⠀⠀",13,10,0
+    logoImg16           BYTE  "         ⣹⣿⣿⣷⣦⣍⣛⠻⠿⠶⢾⣤⣤⣦⣤⣬⣷⣬⣿⣦⣤⣬⣷⣼⣿⣧⣴⣾⠿⠿⠿⢛⣛⣩⣴⣾⣿⣿⡇⠀⠀",13,10,0
+    logoImg17           BYTE  "         ⣸⣿⣟⡾⣽⣻⢿⡿⣷⣶⣦⣤⣤⣤⣬⣭⣉⣍⣉⣉⣩⣩⣭⣭⣤⣤⣤⣴⣶⣶⣿⡿⣿⣟⣿⣽⣿⣿⡇⠀⠀",13,10,0
+    logoImg18           BYTE  "         ⢸⣿⡍⠉⠛⠛⠿⠽⣷⣯⣿⣽⣻⣻⣟⢿⣻⢿⡿⣿⣟⣿⣻⢟⣿⣻⢯⣿⣽⣾⣷⠿⠗⠛⠉⠁⢸⣿⡇⠀⠀",13,10,0
+    logoImg19           BYTE  "         ⠘⣿⣧⠀⠀⠀⠀⠀⠀⠀⠈⠉⠉⠉⠉⠛⠙⠛⠛⠛⠛⠋⠛⠋⠉⠉⠉⠉⠁⠀⠀⠀⠀⠀⠀⠀⣿⡿⠀⠀⠀",13,10,0
+    logoImg20           BYTE  "         ⠀⠹⣿⣆⠀⠀⠀⠀⠀⠀⠀⠀⣴⣿⣷⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣴⣿⣦⡀⠀⠀⠀⠀⠀⠀⣼⣿⠇⠀⠀⠀",13,10,0
+    logoImg21           BYTE  "⠀⠀         ⠹⣿⣆⠀⠀⠀⠀⠀⠀⠀⠻⠿⠟⠀⠀⠀⠿⣦⣤⠞⠀⠀⠀⠻⠿⠟⠀⠀⠀⠀⠀⢀⣼⣿⠋⠀⠀⠀⠀",13,10,0
+    logoImg22           BYTE  "⠀⠀⠀         ⠘⢿⣷⣶⣶⣤⣤⣤⣀⣀⣀⡀⣀⠀⡀⠀⠀⠀⡀⣀⡀⣀⣀⣀⣠⣤⣤⣴⣶⣶⣿⡿⠃⠀⠀⠀⠀⠀",13,10,0
+    logoImg23           BYTE  "⠀⠀⠀⠀⠀         ⠙⢿⣿⣾⡙⠯⠿⠽⢿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠿⠿⠿⠙⢋⣿⣿⡿⠋⠀⠀⠀⠀⠀⠀⠀",13,10,0
+    logoImg24           BYTE  "⠀⠀⠀⠀⠀⠀         ⠀⠙⠻⢿⣶⣤⣀⣀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣀⣀⣤⣾⣿⠿⠋⠀⠀⠀⠀⠀⠀⠀⠀⠀",13,10,0
+    logoImg25           BYTE  "⠀⠀⠀⠀⠀⠀⠀⠀⠀          ⠉⠙⠻⠿⠿⠷⣶⣶⣶⣶⣶⣶⣶⠿⠿⠿⠿⠛⠉⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀",13,10,0
 ;------------------------------------------REGISTER
     registerPromptUser  BYTE "Register a username (up to 20 characters): ", 0
     registerPromptPass  BYTE "Register a password (up to 20 characters): ", 0
@@ -31,10 +60,10 @@ INCLUDE Irvine32.inc
     dineOrTakeMsg       BYTE "Dine-in or Takeaway? Enter 'D' or 'T':  ", 0
     invalidDineTakeMsg  BYTE "    INVALID INPUT: Please enter 'D' or 'T'.", 13, 10, 0
 ;~~~ENTER PROMO CODE (OPTIONAL)
-    promoMsg            BYTE "Do you have promo code to enter? (Y/N): ", 0
+    promoMsg            BYTE "Do you have promo code to enter? (Y = Yes): ", 0
     invalidPromoMsg     BYTE "    INVALID INPUT: Please enter 'Y' or 'N'.", 13, 10, 0
     promoCodeMsg        BYTE "Promo Code: ", 0
-    invalidPromoCodeMsg BYTE "Invalid promo code. Do you wish to retry? (Y/N): ", 0
+    invalidPromoCodeMsg BYTE "Invalid promo code. Do you wish to retry? (Y = Yes): ", 0
     promoSuccessMsg     BYTE "Promo Code used successfully!", 0
 
 ;------------------------------------------SELECT FOOD
@@ -60,8 +89,8 @@ INCLUDE Irvine32.inc
     sideBOnlyMsg        BYTE " with Dumplings", 0
     sideABMsg           BYTE " with Dumplings & Soya Milk", 0
 ;~~~CONFIRM ORDER AND LOOP ORDER
-    confirmOrderMsg     BYTE "Do you want to confirm this order (Y/N): ", 0
-    contOrderMsg        BYTE "Do you want to keep ordering? (Y/N): ", 0
+    confirmOrderMsg     BYTE "Do you want to confirm this order (Y = Yes): ", 0
+    contOrderMsg        BYTE "Do you want to keep ordering? (Y = Yes)    : ", 0
 ;~~~INVOICE
     dearMsg             BYTE "Dear ", 0
     receiptMsg          BYTE ", here is your invoice:", 13, 10, 0
@@ -374,6 +403,8 @@ login PROC
 ;==============================PART 2: ENTER CUSTOMERS' INFO
 inputCustInfo PROC
     call ClrScr
+    call Crlf
+    call printLogo
     mov edx, offset welcomeMsg
     call WriteString
 
@@ -595,7 +626,6 @@ check_promo_code PROC
         ; Invalid promo code, re-enter loop
         mov edx, OFFSET invalidPromoCodeMsg
         call WriteString
-        call Crlf
         ; Read input (expecting Y/N)
         mov edx, OFFSET inputYN
         mov ecx, 2      ; Read one character plus null terminator
@@ -1158,6 +1188,66 @@ getOrderPrice PROC
 
 
 ;==============================CUSTOM FUNCTIONS
+;------------------------------------------PRINT NOODLE HOUSE LOGO
+printLogo PROC
+    ; Set UTF-8 code page
+    INVOKE SetConsoleOutputCP, 65001
+    mov eax, 65001  ; Set UTF-8 code page
+    push eax
+    call SetConsoleOutputCP  
+    mov edx, offset logoImg1
+    call WriteString
+    mov edx, offset logoImg2
+    call WriteString
+    mov edx, offset logoImg3
+    call WriteString
+    mov edx, offset logoImg4
+    call WriteString
+    mov edx, offset logoImg5
+    call WriteString
+    mov edx, offset logoImg6
+    call WriteString
+    mov edx, offset logoImg7
+    call WriteString
+    mov edx, offset logoImg8
+    call WriteString
+    mov edx, offset logoImg9
+    call WriteString
+    mov edx, offset logoImg10
+    call WriteString
+    mov edx, offset logoImg11
+    call WriteString
+    mov edx, offset logoImg12
+    call WriteString
+    mov edx, offset logoImg13
+    call WriteString
+    mov edx, offset logoImg14
+    call WriteString
+    mov edx, offset logoImg15
+    call WriteString
+    mov edx, offset logoImg16
+    call WriteString
+    mov edx, offset logoImg17
+    call WriteString
+    mov edx, offset logoImg18
+    call WriteString
+    mov edx, offset logoImg19
+    call WriteString
+    mov edx, offset logoImg20
+    call WriteString
+    mov edx, offset logoImg21
+    call WriteString
+    mov edx, offset logoImg22
+    call WriteString
+    mov edx, offset logoImg23
+    call WriteString
+    mov edx, offset logoImg24
+    call WriteString
+    mov edx, offset logoImg25
+    call WriteString
+    ret
+    printLogo ENDP
+
 ;------------------------------------------PRINT HORIZONTAL SEPERATION LINE
 printDash PROC
     ; Set up the loop counter and character
