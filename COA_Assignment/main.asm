@@ -11,31 +11,31 @@ SetConsoleOutputCP PROTO :DWORD   ; Declare the external function prototype
 ;==============================DISPLAY MESSAGES
     enterContMsg        BYTE "Enter anything to continue...", 0
     invalidCharMsg      BYTE "    INVALID INPUT: Name contain invalid character.", 13, 10, 0
-    logoImg1            BYTE  "         ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣤⣦⣤⣤⣤⣤⣤⣶⣶⡄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀",13,10,0
-    logoImg2            BYTE  "⠀⠀⠀⠀⠀⠀⠀⠀         ⠀⠀⠀⠀⠀⠀⣸⡿⠛⢻⠛⢻⠛⢻⣿⡟⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀",13,10,0
-    logoImg3            BYTE  "⠀⠀⠀⠀⠀         ⠀⠀⠀⠀⠀⠀⠀⠀⢀⣿⡇⠀⡿⠀⣼⠀⢸⣿⡅⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀",13,10,0
-    logoImg4            BYTE  "⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀         ⠘⣿⡇⠀⣿⠀⢹⠀⢸⣿⡇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣀⣠⣤⣤⡀",13,10,0
-    logoImg5            BYTE  "⠀⠀⠀⠀⠀⠀⠀⠀⠀         ⠀⠀⠀⠀⠀⠸⣿⡀⠸⡆⠘⣇⠀⢿⣷⠀⠀⠀⠀⣀⣠⣤⣶⣶⣾⣿⠿⠿⠛⠋⢻⡆",13,10,0
-    logoImg6            BYTE  "⠀⠀⠀⠀⠀⠀⠀         ⠀⠀⠀⠀⠀⠀⠀⠀⣿⡇⠀⣿⠀⢿⣄⣸⣿⣦⣤⣴⠿⠿⠛⠛⠉⠁⢀⣀⣀⣀⣄⣤⣼⣿",13,10,0
-    logoImg7            BYTE  "⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀         ⠀⠀⠀⠀⢀⣿⡇⠀⡿⠀⣼⣿⣿⣯⣿⣦⣤⣤⣶⣶⣶⣿⢿⠿⠟⠿⠛⠛⠛⠛⠋",13,10,0
-    logoImg8            BYTE  "⠀⠀⠀⠀⠀⠀⠀         ⠀⠀⠀⠀⠀⠀⠀⢸⣿⠁⣸⠃⢠⡟⢻⣿⣿⣿⣿⣿⣭⣭⣭⣵⣶⣤⣀⣄⣠⣤⣤⣴⣶⣦",13,10,0
-    logoImg9            BYTE  "⠀⠀⠀⠀⠀⠀         ⠀⠀⠀⠀⠀⠀⠀⢠⣿⡇⠀⣿⠀⣸⠀⢸⣿⣶⣦⣤⣤⣄⣀⣀⣀⠀⠀⠉⠈⠉⠈⠉⠉⢽⣿",13,10,0
-    logoImg10           BYTE  "⠀⠀⠀⠀         ⠀⠀⠀⠀⠀⠀⠀⠀⣀⣸⣿⡇⠀⣿⠀⢸⠀⢸⣿⡿⣿⣿⣿⣿⡟⠛⠻⠿⠿⠿⣿⣶⣶⣶⣶⣿⣿",13,10,0
-    logoImg11           BYTE  "⠀⠀         ⠀⠀⠀⠀⠀⢀⣤⣶⣿⡿⣿⣿⣿⣷⠀⠹⡆⠘⣇⠈⣿⡟⠛⠛⠛⠾⣿⡳⣄⠀⠀⠀⠀⠀⠀⠈⠉⠉⠁",13,10,0
-    logoImg12           BYTE  "⠀⠀⠀         ⠀⠀⠀⣰⣿⢟⡭⠒⢀⣐⣲⣿⣿⡇⠀⣷⠀⢿⠀⢸⣏⣈⣁⣉⣳⣬⣻⣿⣷⣀⠀⠀⠀⠀⠀⠀⠀⠀",13,10,0
-    logoImg13           BYTE  "         ⠀⠀⣀⣤⣾⣿⡿⠟⠛⠛⠿⣿⣋⣡⠤⢺⡇⠀⡿⠀⣼⠀⢸⣿⠟⠋⣉⢉⡉⣉⠙⠻⢿⣯⣿⣦⣄⠀⠀⠀⠀",13,10,0
-    logoImg14           BYTE  "         ⢠⣾⡿⢋⣽⠋⣠⠊⣉⠉⢲⣈⣿⣧⣶⣿⠁⢠⣇⣠⣯⣀⣾⠧⠖⣁⣠⣤⣤⣤⣭⣷⣄⠙⢿⡙⢿⣷⡀⠀⠀",13,10,0
-    logoImg15           BYTE  "         ⢸⣿⣄⠸⣧⣼⣁⡎⣠⡾⠛⣉⠀⠄⣈⣉⠻⢿⣋⠁⠌⣉⠻⣧⡾⢋⡡⠔⠒⠒⠢⢌⣻⣶⣾⠇⣸⣿⡇⠀⠀",13,10,0
-    logoImg16           BYTE  "         ⣹⣿⣿⣷⣦⣍⣛⠻⠿⠶⢾⣤⣤⣦⣤⣬⣷⣬⣿⣦⣤⣬⣷⣼⣿⣧⣴⣾⠿⠿⠿⢛⣛⣩⣴⣾⣿⣿⡇⠀⠀",13,10,0
-    logoImg17           BYTE  "         ⣸⣿⣟⡾⣽⣻⢿⡿⣷⣶⣦⣤⣤⣤⣬⣭⣉⣍⣉⣉⣩⣩⣭⣭⣤⣤⣤⣴⣶⣶⣿⡿⣿⣟⣿⣽⣿⣿⡇⠀⠀",13,10,0
-    logoImg18           BYTE  "         ⢸⣿⡍⠉⠛⠛⠿⠽⣷⣯⣿⣽⣻⣻⣟⢿⣻⢿⡿⣿⣟⣿⣻⢟⣿⣻⢯⣿⣽⣾⣷⠿⠗⠛⠉⠁⢸⣿⡇⠀⠀",13,10,0
-    logoImg19           BYTE  "         ⠘⣿⣧⠀⠀⠀⠀⠀⠀⠀⠈⠉⠉⠉⠉⠛⠙⠛⠛⠛⠛⠋⠛⠋⠉⠉⠉⠉⠁⠀⠀⠀⠀⠀⠀⠀⣿⡿⠀⠀⠀",13,10,0
-    logoImg20           BYTE  "         ⠀⠹⣿⣆⠀⠀⠀⠀⠀⠀⠀⠀⣴⣿⣷⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣴⣿⣦⡀⠀⠀⠀⠀⠀⠀⣼⣿⠇⠀⠀⠀",13,10,0
-    logoImg21           BYTE  "⠀⠀         ⠹⣿⣆⠀⠀⠀⠀⠀⠀⠀⠻⠿⠟⠀⠀⠀⠿⣦⣤⠞⠀⠀⠀⠻⠿⠟⠀⠀⠀⠀⠀⢀⣼⣿⠋⠀⠀⠀⠀",13,10,0
-    logoImg22           BYTE  "⠀⠀⠀         ⠘⢿⣷⣶⣶⣤⣤⣤⣀⣀⣀⡀⣀⠀⡀⠀⠀⠀⡀⣀⡀⣀⣀⣀⣠⣤⣤⣴⣶⣶⣿⡿⠃⠀⠀⠀⠀⠀",13,10,0
-    logoImg23           BYTE  "⠀⠀⠀⠀⠀         ⠙⢿⣿⣾⡙⠯⠿⠽⢿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠿⠿⠿⠙⢋⣿⣿⡿⠋⠀⠀⠀⠀⠀⠀⠀",13,10,0
-    logoImg24           BYTE  "⠀⠀⠀⠀⠀⠀         ⠀⠙⠻⢿⣶⣤⣀⣀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣀⣀⣤⣾⣿⠿⠋⠀⠀⠀⠀⠀⠀⠀⠀⠀",13,10,0
-    logoImg25           BYTE  "⠀⠀⠀⠀⠀⠀⠀⠀⠀          ⠉⠙⠻⠿⠿⠷⣶⣶⣶⣶⣶⣶⣶⠿⠿⠿⠿⠛⠉⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀",13,10,0
+    logoImg1            BYTE  "         ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣤⣦⣤⣤⣤⣤⣤⣶⣶⡄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀", 13, 10, 0
+    logoImg2            BYTE  "⠀⠀⠀⠀⠀⠀⠀⠀         ⠀⠀⠀⠀⠀⠀⣸⡿⠛⢻⠛⢻⠛⢻⣿⡟⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀", 13, 10, 0
+    logoImg3            BYTE  "⠀⠀⠀⠀⠀         ⠀⠀⠀⠀⠀⠀⠀⠀⢀⣿⡇⠀⡿⠀⣼⠀⢸⣿⡅⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀", 13, 10, 0
+    logoImg4            BYTE  "⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀         ⠘⣿⡇⠀⣿⠀⢹⠀⢸⣿⡇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣀⣠⣤⣤⡀", 13, 10, 0
+    logoImg5            BYTE  "⠀⠀⠀⠀⠀⠀⠀⠀⠀         ⠀⠀⠀⠀⠀⠸⣿⡀⠸⡆⠘⣇⠀⢿⣷⠀⠀⠀⠀⣀⣠⣤⣶⣶⣾⣿⠿⠿⠛⠋⢻⡆", 13, 10, 0
+    logoImg6            BYTE  "⠀⠀⠀⠀⠀⠀⠀         ⠀⠀⠀⠀⠀⠀⠀⠀⣿⡇⠀⣿⠀⢿⣄⣸⣿⣦⣤⣴⠿⠿⠛⠛⠉⠁⢀⣀⣀⣀⣄⣤⣼⣿", 13, 10, 0
+    logoImg7            BYTE  "⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀         ⠀⠀⠀⠀⢀⣿⡇⠀⡿⠀⣼⣿⣿⣯⣿⣦⣤⣤⣶⣶⣶⣿⢿⠿⠟⠿⠛⠛⠛⠛⠋", 13, 10, 0
+    logoImg8            BYTE  "⠀⠀⠀⠀⠀⠀⠀         ⠀⠀⠀⠀⠀⠀⠀⢸⣿⠁⣸⠃⢠⡟⢻⣿⣿⣿⣿⣿⣭⣭⣭⣵⣶⣤⣀⣄⣠⣤⣤⣴⣶⣦", 13, 10, 0
+    logoImg9            BYTE  "⠀⠀⠀⠀⠀⠀         ⠀⠀⠀⠀⠀⠀⠀⢠⣿⡇⠀⣿⠀⣸⠀⢸⣿⣶⣦⣤⣤⣄⣀⣀⣀⠀⠀⠉⠈⠉⠈⠉⠉⢽⣿", 13, 10, 0
+    logoImg10           BYTE  "⠀⠀⠀⠀         ⠀⠀⠀⠀⠀⠀⠀⠀⣀⣸⣿⡇⠀⣿⠀⢸⠀⢸⣿⡿⣿⣿⣿⣿⡟⠛⠻⠿⠿⠿⣿⣶⣶⣶⣶⣿⣿", 13, 10, 0
+    logoImg11           BYTE  "⠀⠀         ⠀⠀⠀⠀⠀⢀⣤⣶⣿⡿⣿⣿⣿⣷⠀⠹⡆⠘⣇⠈⣿⡟⠛⠛⠛⠾⣿⡳⣄⠀⠀⠀⠀⠀⠀⠈⠉⠉⠁", 13, 10, 0
+    logoImg12           BYTE  "⠀⠀⠀         ⠀⠀⠀⣰⣿⢟⡭⠒⢀⣐⣲⣿⣿⡇⠀⣷⠀⢿⠀⢸⣏⣈⣁⣉⣳⣬⣻⣿⣷⣀⠀⠀⠀⠀⠀⠀⠀⠀", 13, 10, 0
+    logoImg13           BYTE  "         ⠀⠀⣀⣤⣾⣿⡿⠟⠛⠛⠿⣿⣋⣡⠤⢺⡇⠀⡿⠀⣼⠀⢸⣿⠟⠋⣉⢉⡉⣉⠙⠻⢿⣯⣿⣦⣄⠀⠀⠀⠀", 13, 10, 0
+    logoImg14           BYTE  "         ⢠⣾⡿⢋⣽⠋⣠⠊⣉⠉⢲⣈⣿⣧⣶⣿⠁⢠⣇⣠⣯⣀⣾⠧⠖⣁⣠⣤⣤⣤⣭⣷⣄⠙⢿⡙⢿⣷⡀⠀⠀", 13, 10, 0
+    logoImg15           BYTE  "         ⢸⣿⣄⠸⣧⣼⣁⡎⣠⡾⠛⣉⠀⠄⣈⣉⠻⢿⣋⠁⠌⣉⠻⣧⡾⢋⡡⠔⠒⠒⠢⢌⣻⣶⣾⠇⣸⣿⡇⠀⠀", 13, 10, 0
+    logoImg16           BYTE  "         ⣹⣿⣿⣷⣦⣍⣛⠻⠿⠶⢾⣤⣤⣦⣤⣬⣷⣬⣿⣦⣤⣬⣷⣼⣿⣧⣴⣾⠿⠿⠿⢛⣛⣩⣴⣾⣿⣿⡇⠀⠀", 13, 10, 0
+    logoImg17           BYTE  "         ⣸⣿⣟⡾⣽⣻⢿⡿⣷⣶⣦⣤⣤⣤⣬⣭⣉⣍⣉⣉⣩⣩⣭⣭⣤⣤⣤⣴⣶⣶⣿⡿⣿⣟⣿⣽⣿⣿⡇⠀⠀", 13, 10, 0
+    logoImg18           BYTE  "         ⢸⣿⡍⠉⠛⠛⠿⠽⣷⣯⣿⣽⣻⣻⣟⢿⣻⢿⡿⣿⣟⣿⣻⢟⣿⣻⢯⣿⣽⣾⣷⠿⠗⠛⠉⠁⢸⣿⡇⠀⠀", 13, 10, 0
+    logoImg19           BYTE  "         ⠘⣿⣧⠀⠀⠀⠀⠀⠀⠀⠈⠉⠉⠉⠉⠛⠙⠛⠛⠛⠛⠋⠛⠋⠉⠉⠉⠉⠁⠀⠀⠀⠀⠀⠀⠀⣿⡿⠀⠀⠀", 13, 10, 0
+    logoImg20           BYTE  "         ⠀⠹⣿⣆⠀⠀⠀⠀⠀⠀⠀⠀⣴⣿⣷⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣴⣿⣦⡀⠀⠀⠀⠀⠀⠀⣼⣿⠇⠀⠀⠀", 13, 10, 0
+    logoImg21           BYTE  "⠀⠀         ⠹⣿⣆⠀⠀⠀⠀⠀⠀⠀⠻⠿⠟⠀⠀⠀⠿⣦⣤⠞⠀⠀⠀⠻⠿⠟⠀⠀⠀⠀⠀⢀⣼⣿⠋⠀⠀⠀⠀", 13, 10, 0
+    logoImg22           BYTE  "⠀⠀⠀         ⠘⢿⣷⣶⣶⣤⣤⣤⣀⣀⣀⡀⣀⠀⡀⠀⠀⠀⡀⣀⡀⣀⣀⣀⣠⣤⣤⣴⣶⣶⣿⡿⠃⠀⠀⠀⠀⠀", 13, 10, 0
+    logoImg23           BYTE  "⠀⠀⠀⠀⠀         ⠙⢿⣿⣾⡙⠯⠿⠽⢿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠿⠿⠿⠙⢋⣿⣿⡿⠋⠀⠀⠀⠀⠀⠀⠀", 13, 10, 0
+    logoImg24           BYTE  "⠀⠀⠀⠀⠀⠀         ⠀⠙⠻⢿⣶⣤⣀⣀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣀⣀⣤⣾⣿⠿⠋⠀⠀⠀⠀⠀⠀⠀⠀⠀", 13, 10, 0
+    logoImg25           BYTE  "⠀⠀⠀⠀⠀⠀⠀⠀⠀          ⠉⠙⠻⠿⠿⠷⣶⣶⣶⣶⣶⣶⣶⠿⠿⠿⠿⠛⠉⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀", 13, 10, 0
 ;------------------------------------------REGISTER
     registerPromptUser  BYTE "Register a username (up to 20 characters): ", 0
     registerPromptPass  BYTE "Register a password (up to 20 characters): ", 0
@@ -93,7 +93,7 @@ SetConsoleOutputCP PROTO :DWORD   ; Declare the external function prototype
     contOrderMsg        BYTE "Do you want to keep ordering? (Y = Yes)    : ", 0
 ;~~~INVOICE
     dearMsg             BYTE "Dear ", 0
-    receiptMsg          BYTE ", here is your invoice:", 13, 10, 0
+    receiptMsg          BYTE ", here is your invoice:", 13, 10, 0    
     RMMsg               BYTE "RM ", 0
     receiptHeader       BYTE "Name                                              Price", 0
     totalPriceMsg       BYTE "Subtotal:                                         ", 0
@@ -775,7 +775,6 @@ orderLoop PROC
         call Crlf
         mov edx, OFFSET contOrderMsg
         call WriteString
-        inc ebx
         ; Read input (expecting Y/N)
         mov edx, OFFSET inputYN
         mov ecx, 2
@@ -1312,6 +1311,39 @@ StringLength PROC
         pop  esi                  ; Restore the original value of ESI
         ret                       ; Return to the caller
     StringLength ENDP
+
+CheckLength PROC
+    ; Assume ESI contains the address of the input string
+
+    xor ecx, ecx         ; Clear ECX (this will store the length)
+    mov al, [esi]         ; Load first byte of the string
+    test al, al           ; Test if the string is empty (null byte)
+    jz short empty_input  ; If null, jump to handle empty input
+
+    count_loop:
+        inc esi              ; Move to next character in the string
+        inc ecx              ; Increment length counter
+        mov al, [esi]        ; Load the next byte of the string
+        test al, al          ; Check if it's the null terminator
+        jnz count_loop       ; If not null, continue counting
+
+        ; Set EAX to 1 if length is valid (let's assume valid length is between 1 and 100)
+        cmp ecx, 1
+        jl invalid_length     ; Length too short
+        cmp ecx, 100
+        jg invalid_length     ; Length too long
+
+        mov eax, 1           ; Valid length
+        ret
+
+    invalid_length:
+        mov eax, 0           ; Invalid length
+        ret
+
+    empty_input:
+        mov eax, 0           ; Empty input, invalid
+        ret
+    CheckLength ENDP
 
 ;------------------------------------------PRINT PRICE (NNNN CENT --> RM NN.NN)
 ; INPUT:    EAX   - INT value (cent).
