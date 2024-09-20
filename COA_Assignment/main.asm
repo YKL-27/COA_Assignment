@@ -68,6 +68,7 @@ SetConsoleOutputCP PROTO :DWORD   ; For printing character with ASCII code beyon
     spacebar            BYTE ' '
     welcomeMsg          BYTE "--------------Welcome to Pan-tastic Mee House!--------------", 13, 10, 0
     invalidYN           BYTE "    INVALID INPUT: Please enter 'Y' or 'N'.", 13, 10, 0
+    enterToContMsg     BYTE 13, 10, 13, 10, "Enter anything to continue...", 0
     enterToExitMsg      BYTE 13, 10, 13, 10, 13, 10, 13, 10, "Enter anything to exit...", 0
 ;------------------------------------------COMPANY LOGO
     logoImg1            BYTE  "                       ⢀⣤⣦⣤⣤⣤⣤⣤⣶⣶⡄                ", 13, 10, 0
@@ -133,6 +134,7 @@ SetConsoleOutputCP PROTO :DWORD   ; For printing character with ASCII code beyon
 
 ;------------------------------------------SELECT FOOD
 ;~~~SELECT MEAL
+    totalOrderMsg       BYTE "Total orders: ", 0
     menuTitle           BYTE "Select A Meal:", 13, 10, 0
     foodA               BYTE "[A] Dry Pan Mee                       RM  8.50", 13, 10, 0
     foodB               BYTE "[B] Chilli Pan Mee                    RM 10.00", 13, 10, 0
@@ -335,12 +337,14 @@ register PROC
         ; Display error message and re-prompt the user for a valid password
         mov edx, OFFSET passwordTooShortMsg
         call WriteString
-        call ReadChar
+        mov edx, OFFSET enterToContMsg
         jmp registerPasswordLoop
 
     storeRegisterData:
         ; Registration is complete, display success message
         mov edx, OFFSET registrationSuccess
+        call WriteString
+        mov edx, OFFSET enterToContMsg
         call WriteString
         call ReadChar
         ret
@@ -434,16 +438,20 @@ login PROC
         ; Display success message
         mov edx, OFFSET loginSuccessMsg
         call WriteString
-        call ReadChar
+        mov edx, OFFSET enterToContMsg
+        call WriteString
         call Crlf
+        call ReadChar
         ret
 
     loginFailed:
         ; Display failure message
         mov edx, OFFSET loginFailedMsg
         call WriteString
-        call ReadChar
+        mov edx, OFFSET enterToContMsg
+        call WriteString
         call Crlf
+        call ReadChar
         jmp startlogin
     login ENDP
 
@@ -800,6 +808,11 @@ orderLoop PROC
 
 ;------------------------------------------DISPLAY FOOD MENU
 DisplayMealMenu PROC
+    mov edx, OFFSET totalOrderMsg
+    call WriteString
+    mov eax, orderListLen
+    call WriteDec
+    call Crlf
 
     ; display menu title and food option
     call Crlf
