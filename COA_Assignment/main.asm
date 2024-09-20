@@ -59,15 +59,16 @@ SetConsoleOutputCP PROTO :DWORD   ; For printing character with ASCII code beyon
 ;------------------------------------------INVOICE
     foodStrLen          DWORD 0
     priceStrLen         DWORD 0
-    invoiceID           BYTE 0
+    invoiceNo           DWORD 1000
     orderNo             DWORD 0
 
 ;==============================DISPLAY MESSAGES
 ;------------------------------------------COMMONLY USED
     lineChar            BYTE '-'
+    spacebar            BYTE ' '
     welcomeMsg          BYTE "--------------Welcome to Pan-tastic Mee House!--------------", 13, 10, 0
     invalidYN           BYTE "    INVALID INPUT: Please enter 'Y' or 'N'.", 13, 10, 0
-    enterToContMsg      BYTE 13, 13, 10, "Enter anything to continue...", 0
+    enterToExitMsg      BYTE 13, 10, 13, 10, 13, 10, 13, 10, "Enter anything to exit...", 0
 ;------------------------------------------COMPANY LOGO
     logoImg1            BYTE  "                       ⢀⣤⣦⣤⣤⣤⣤⣤⣶⣶⡄                ", 13, 10, 0
     logoImg2            BYTE  "                       ⣸⡿⠛⢻⠛⢻⠛⢻⣿⡟⠁                ", 13, 10, 0
@@ -95,21 +96,27 @@ SetConsoleOutputCP PROTO :DWORD   ; For printing character with ASCII code beyon
     logoImg24           BYTE  "                ⠙⠻⢿⣶⣤⣀⣀           ⣀⣀⣤⣾⣿⠿⠋         ", 13, 10, 0
     logoImg25           BYTE  "                   ⠉⠙⠻⠿⠿⠷⣶⣶⣶⣶⣶⣶⣶⠿⠿⠿⠿⠛⠉⠁           ", 13, 10, 0
 ;------------------------------------------REGISTER
-    registerTitleMsg    BYTE "REGISTER", 13, 10, "  Create an new account to continue", 13, 13, 10, 0
-    registerPromptUser  BYTE "  Create a username (up to 20 characters): ", 0
-    registerPromptPass  BYTE "  Create a password (up to 20 characters): ", 0
-    registrationSuccess BYTE "Registration successful!", 13, 10, 0
+    registerTitleMsg    BYTE "--------------------------REGISTER--------------------------", 13, 10
+                        BYTE "    Create an new account to continue", 13, 10
+                        BYTE "    * Maximum 20 characters", 13, 10
+                        BYTE "    * No spaces allowed", 13, 10, 13, 10, 0
+    registerPromptUser  BYTE "Create a username: ", 0
+    registerPromptPass  BYTE "Create a password: ", 0
+    registrationSuccess BYTE 13, 10, "Registred successful!", 13, 10, 0
     usernameTooShortMsg BYTE "    INVALID INPUT: Username must be between 1 and 20 characters without spaces.", 13, 10, 0
     passwordTooShortMsg BYTE "    INVALID INPUT: Password must be between 1 and 20 characters without spaces.", 13, 10, 0
     terminateMsg        BYTE 13, 13, 10, "Termination Program Entered, closing program...", 13, 10, 0
 ;------------------------------------------LOGIN
-    usernamePrompt      BYTE "Enter username (or -111 to go back): ", 0
-    passwordPrompt      BYTE "Enter password:                      ", 0
-    loginSuccessMsg     BYTE "Login successful!", 13, 10, 0 
+    loginTitleMsg       BYTE "---------------------------LOGIN----------------------------", 13, 10 
+                        BYTE "    Enter your crendentials to start ordering", 13, 10
+                        BYTE "    * Enter -111 to go back to registration", 13, 10, 13, 10, 0
+    usernamePrompt      BYTE "Enter username: ", 0
+    passwordPrompt      BYTE "Enter password: ", 0
+    loginSuccessMsg     BYTE 13, 10, "Login successful!", 13, 10, 0 
     loginFailedMsg      BYTE "Invalid credentials!", 13, 10, 0 
 ;------------------------------------------ENTER CUSTOMER INFO
 ;~~~ENTER NAME
-    inputNameMsg        BYTE "Enter your name (up to 50 characters or enter -111 to go back to register menu):  ", 0
+    inputNameMsg        BYTE "Enter your name", 13, 10, "* Max 50 characters", 13, 10, "* Enter -111 to log out", 13, 10, ">>> ", 0
     backToRegisterMsg   BYTE "Returning to registration, enter any key to continue...", 13, 10, 0
     errorNameMsg        BYTE "Invalid input. Please enter a valid name or -111 to go back.", 13, 10, 0
     invalidCharMsg      BYTE "    INVALID INPUT: Name contain invalid character.", 13, 10, 0
@@ -119,27 +126,27 @@ SetConsoleOutputCP PROTO :DWORD   ; For printing character with ASCII code beyon
     dineOrTakeMsg       BYTE "Dine-in or Takeaway? Enter 'D' or 'T':  ", 0
     invalidDineTakeMsg  BYTE "    INVALID INPUT: Please enter 'D' or 'T'.", 13, 10, 0
 ;~~~ENTER PROMO CODE (OPTIONAL)
-    promoMsg            BYTE "Do you have promo code to enter? (Y = Yes): ", 0
+    promoMsg            BYTE "Do you have promo code to enter? (Y/N): ", 0
     promoCodeMsg        BYTE "Promo Code: ", 0
-    invalidPromoCodeMsg BYTE "Invalid promo code. Do you wish to retry? (Y = Yes): ", 0
+    invalidPromoCodeMsg BYTE "Invalid promo code. Do you wish to retry? (Y/B): ", 0
     promoSuccessMsg     BYTE "Promo Code used successfully!", 0
 
 ;------------------------------------------SELECT FOOD
 ;~~~SELECT MEAL
     menuTitle           BYTE "Select A Meal:", 13, 10, 0
-    foodA               BYTE "A - Dry Pan Mee                       RM  8.50", 13, 10, 0
-    foodB               BYTE "B - Chilli Pan Mee                    RM 10.00", 13, 10, 0
+    foodA               BYTE "[A] Dry Pan Mee                       RM  8.50", 13, 10, 0
+    foodB               BYTE "[B] Chilli Pan Mee                    RM 10.00", 13, 10, 0
 ;~~~SELECT ADDON
     sideDishTitle       BYTE "Select An Add-On:", 13, 10, 0
-    noSideDish          BYTE "1 - No add-on", 13, 10, 0
-    setWithA            BYTE "2 - Set with Soya Milk                + RM 1.20", 13, 10, 0
-    setWithB            BYTE "3 - Set with Dumplings                + RM 2.40", 13, 10, 0
-    setWithAB           BYTE "4 - Set with Dumplings & Soya Milk    + RM 3.00", 13, 10, 0
+    noSideDish          BYTE "[1] No add-on", 13, 10, 0
+    setWithA            BYTE "[2] Set with Soya Milk                + RM 1.20", 13, 10, 0
+    setWithB            BYTE "[3] Set with Dumplings                + RM 2.40", 13, 10, 0
+    setWithAB           BYTE "[4] Set with Dumplings & Soya Milk    + RM 3.00", 13, 10, 0
 ;~~~SELECTION PROMPT
     selectionPrompt     BYTE ">> Selection: ", 0
     invalidInputMsg     BYTE "Invalid selection, please try again.", 13, 10, 0
 ;~~~SELECTED RESULT
-    resultMsg           BYTE "You selected: ", 13, 10, 0
+    resultMsg           BYTE "You selected: ", 13, 10, "  > ", 0
     setMsg              BYTE "Set ", 0
     foodAMsg            BYTE "Dry Pan Mee", 0
     foodBMsg            BYTE "Chilli Pan Mee", 0
@@ -147,31 +154,33 @@ SetConsoleOutputCP PROTO :DWORD   ; For printing character with ASCII code beyon
     sideBOnlyMsg        BYTE " with Dumplings", 0
     sideABMsg           BYTE " with Dumplings & Soya Milk", 0
 ;~~~CONFIRM ORDER AND LOOP ORDER
-    confirmOrderMsg     BYTE "Do you want to confirm this order (Y = Yes): ", 0
-    contOrderMsg        BYTE "Do you want to keep ordering? (Y = Yes)    : ", 0
+    confirmOrderMsg     BYTE "Do you want to confirm this order (Y/N): ", 0
+    contOrderMsg        BYTE "Do you want to keep ordering? (Y/N)    : ", 0
 ;------------------------------------------INVOICE
     dearMsg             BYTE "Dear ", 0
     receiptMsg          BYTE ", here is your invoice:", 13, 10, 0   
-    invoiceBdTop        BYTE "   _____________________________________________________________  ", 13, 10
-                        BYTE " / \                                                            \ ", 13, 10
-                        BYTE "|   |                                                            |", 13, 10 
-                        BYTE " \__|                                                            |", 13, 10, 0
-    invoiceBdLeft       BYTE "    |", 0
-    invoiceBdRight      BYTE "|", 13, 10, 0
-    invoiceBdBottom     BYTE "    |   _________________________________________________________|___", 13, 10
-                        BYTE "    |  /                                                            /", 13, 10
-                        BYTE "    \_/____________________________________________________________/ ", 13, 10, 0
-    addressMsg          BYTE "Pan-tastic Mee House", 13, 10
-                        BYTE "Lot 27-1, Jalan Genting Kelang,", 13, 10
-                        BYTE "Taman Bunga Raya", 13, 10
-                        BYTE "53000 Kuala Lumpur", 13, 10, 0
-    receiptHeader       BYTE "Name                                              Price     ", 0
+    invoiceBdTop        BYTE "   _______________________________________________________________  ", 13, 10
+                        BYTE " / \                                                              \ ", 13, 10
+                        BYTE "|   |                                                              |", 13, 10 
+                        BYTE " \__| ************************* INVOICE ************************** |", 13, 10, 0
+    invoiceBdLeft       BYTE "    | ", 0
+    invoiceBdRight      BYTE " |", 13, 10, 0
+    invoiceBdBottom     BYTE "    |   ___________________________________________________________|___", 13, 10
+                        BYTE "    |  /                                                              /", 13, 10
+                        BYTE "    \_/______________________________________________________________/ ", 13, 10, 0
+    addressMsg1         BYTE "Pan-tastic Mee House                                        ", 0
+    addressMsg2         BYTE "Lot 27-1, Jalan Genting Kelang,                             ", 0
+    addressMsg3         BYTE "Taman Bunga Raya                                            ", 0
+    addressMsg4         BYTE "53000 Kuala Lumpur                                          ", 0
+    invoiceNoMsg        BYTE "Invoice No: ", 0
+    invoiceNoFillMsg    BYTE "                                            ", 0
+    receiptHeaderMsg    BYTE "Order                                             Price     ", 0
     totalPriceMsg       BYTE "Subtotal:                                         ", 0
     discountedAmountMsg BYTE "Discount:                                         ", 0
     takeawayChargeMsg   BYTE "Take Away Charge:                                 ", 0
     finalPriceMsg       BYTE "Grand Total:                                      ", 0
     RMMsg               BYTE "RM ", 0
-    thankYouMsg         BYTE "Thank you, have a nice day :D", 0
+    thankYouMsg         BYTE "Once payment is done, please wait for your meal at the counter.", 13, 10, "Thank you and have a nice day :D", 0
 
 
 .code
@@ -251,6 +260,8 @@ init PROC
 ;===============================PART 1.1: REGISTER
 register PROC
     call ClrScr
+    mov edx, OFFSET registerTitleMsg
+    call WriteString
     registerUsernameLoop:
         ; Input username during registration
         mov edx, OFFSET registerPromptUser
@@ -287,7 +298,6 @@ register PROC
         ; Display error message and re-prompt the user for a valid username
         mov edx, OFFSET usernameTooShortMsg
         call WriteString
-        call Crlf
         jmp registerUsernameLoop
     
     adminTerminate:
@@ -325,7 +335,6 @@ register PROC
         ; Display error message and re-prompt the user for a valid password
         mov edx, OFFSET passwordTooShortMsg
         call WriteString
-        call Crlf
         call ReadChar
         jmp registerPasswordLoop
 
@@ -333,7 +342,7 @@ register PROC
         ; Registration is complete, display success message
         mov edx, OFFSET registrationSuccess
         call WriteString
-        call Crlf
+        call ReadChar
         ret
     register ENDP
 
@@ -363,6 +372,8 @@ CheckForSpaces PROC
 login PROC
     startlogin:
         call ClrScr
+        mov edx, OFFSET loginTitleMsg
+        call WriteString
         ; Prompt for username
         mov edx, OFFSET usernamePrompt
         call WriteString
@@ -422,16 +433,17 @@ login PROC
     loginSuccess:
         ; Display success message
         mov edx, OFFSET loginSuccessMsg
-        call WriteChar
+        call WriteString
+        call ReadChar
         call Crlf
         ret
 
     loginFailed:
         ; Display failure message
         mov edx, OFFSET loginFailedMsg
-        call WriteChar
+        call WriteString
+        call ReadChar
         call Crlf
-        call ReadString
         jmp startlogin
     login ENDP
 
@@ -699,7 +711,7 @@ orderLoop PROC
         ; Handle invalid input
         mov edx, OFFSET invalidInputMsg
         call WriteString
-        call Crlf
+        call ReadChar
         jmp orderLoopStart        ; Loop again if input is invalid
 
     ValidMealInput:
@@ -793,7 +805,6 @@ DisplayMealMenu PROC
     call Crlf
     mov edx, OFFSET menuTitle
     call WriteString
-    call Crlf
     mov edx, OFFSET foodA
     call WriteString
     mov edx, OFFSET foodB
@@ -1058,12 +1069,71 @@ displayInvoice PROC
     call WriteString
     call Crlf
 
+    ; GENERATE INVOICE IMAGE 
     mov edx, OFFSET invoiceBdTop
     call WriteString
 
     mov edx, OFFSET invoiceBdLeft
     call WriteString
-    mov edx, OFFSET receiptHeader
+    call printLineBlank
+    mov edx, OFFSET invoiceBdRight
+    call WriteString
+
+    mov edx, OFFSET invoiceBdLeft
+    call WriteString
+    mov edx, OFFSET addressMsg1
+    call WriteString
+    mov edx, OFFSET invoiceBdRight
+    call WriteString
+
+    mov edx, OFFSET invoiceBdLeft
+    call WriteString
+    mov edx, OFFSET addressMsg2
+    call WriteString
+    mov edx, OFFSET invoiceBdRight
+    call WriteString
+
+    mov edx, OFFSET invoiceBdLeft
+    call WriteString
+    mov edx, OFFSET addressMsg3
+    call WriteString
+    mov edx, OFFSET invoiceBdRight
+    call WriteString
+
+    mov edx, OFFSET invoiceBdLeft
+    call WriteString
+    mov edx, OFFSET addressMsg4
+    call WriteString
+    mov edx, OFFSET invoiceBdRight
+    call WriteString
+
+    mov edx, OFFSET invoiceBdLeft
+    call WriteString
+    call printLineBlank
+    mov edx, OFFSET invoiceBdRight
+    call WriteString
+
+    mov edx, OFFSET invoiceBdLeft
+    call WriteString
+    mov edx, OFFSET invoiceNoMsg
+    call WriteString
+    mov eax, invoiceNo
+    call WriteDec
+    mov edx, OFFSET invoiceNoFillMsg
+    call WriteString
+    mov edx, OFFSET invoiceBdRight
+    call WriteString
+
+
+    mov edx, OFFSET invoiceBdLeft
+    call WriteString
+    call printLineBlank
+    mov edx, OFFSET invoiceBdRight
+    call WriteString
+
+    mov edx, OFFSET invoiceBdLeft
+    call WriteString
+    mov edx, OFFSET receiptHeaderMsg
     call WriteString
     mov edx, OFFSET invoiceBdRight
     call WriteString
@@ -1173,8 +1243,17 @@ displayInvoice PROC
     call printSpaceGap
     mov edx, OFFSET invoiceBdRight
     call WriteString
+
+    mov edx, OFFSET invoiceBdLeft
+    call WriteString
+    call printLineBlank
+    mov edx, OFFSET invoiceBdRight
+    call WriteString
+
     mov edx, OFFSET invoiceBdBottom
     call WriteString
+
+    inc invoiceNo
 
     call Crlf
     call Crlf
@@ -1182,7 +1261,7 @@ displayInvoice PROC
     call WriteString
 
     noInvoice:
-    mov edx, OFFSET enterToContMsg
+    mov edx, OFFSET enterToExitMsg
     call WriteString
     call ReadChar
 
@@ -1319,6 +1398,18 @@ printLine PROC
 
     ret                     ; Return to the calling procedure
     printLine ENDP
+
+printLineBlank PROC
+    ; Set up the loop counter and character
+    mov al, spacebar               ; Load the line character into AL
+    mov ecx, lineCharAmount         ; Load the line count into ECX
+
+    print_loop:
+        call WriteChar          ; Call WriteChar to print the character
+    loop print_loop             ; Decrement ECX and loop until ECX reaches 0
+
+    ret                     ; Return to the calling procedure
+    printLineBlank ENDP
 
 ;------------------------------------------INPUT YES/NO
 ; INPUT:    EDX         - the address of the string (prompt).
