@@ -1108,7 +1108,6 @@ displayInvoice PROC
     mov esi, orderNo
     mov eax, priceStrLen     ; Get the length of the price string
     mov ebx, 10              ; Set the max width for display
-
     call printSpaceGap
 
     mov edx, OFFSET invoiceBdRight
@@ -1130,6 +1129,9 @@ displayInvoice PROC
     call WriteString
     mov eax, totalPrice
     call printPriceStr
+    mov eax, priceStrLen     ; Get the length of the price string
+    mov ebx, 10              ; Set the max width for display
+    call printSpaceGap
     mov edx, OFFSET invoiceBdRight
     call WriteString
 
@@ -1139,6 +1141,9 @@ displayInvoice PROC
     call WriteString
     mov eax, discountedPrice
     call printPriceStr
+    mov eax, priceStrLen     ; Get the length of the price string
+    mov ebx, 10              ; Set the max width for display
+    call printSpaceGap
     mov edx, OFFSET invoiceBdRight
     call WriteString
 
@@ -1149,6 +1154,9 @@ displayInvoice PROC
     mov eax, totalTakeAway
     mov edi, OFFSET totalTakeAway 
     call printPriceStr
+    mov eax, priceStrLen     ; Get the length of the price string
+    mov ebx, 10              ; Set the max width for display
+    call printSpaceGap
     mov edx, OFFSET invoiceBdRight
     call WriteString
 
@@ -1164,6 +1172,9 @@ displayInvoice PROC
     call WriteString
     mov eax, finalPrice
     call printPriceStr
+    mov eax, priceStrLen     ; Get the length of the price string
+    mov ebx, 10              ; Set the max width for display
+    call printSpaceGap
     mov edx, OFFSET invoiceBdRight
     call WriteString
     mov edx, OFFSET invoiceBdBottom
@@ -1214,13 +1225,11 @@ getOrderPriceThenPrint PROC
     ; Set priceStrLen (length of the price string)
     lea esi, displayPriceStr
     call StringLength         ; Get the length of the price string
-    mov priceStrLen, eax      ; Store the length in priceStrLen
 
     ret
 
     zeroPrice:
         ; Handle cases where the price is zero
-        mov priceStrLen, 0        ; Set the priceStrLen to 0
         ret
     getOrderPriceThenPrint ENDP
 
@@ -1451,6 +1460,7 @@ printPriceStr PROC
         xor edx, edx                 ; Clear EDX for division
         div ecx                      ; EAX / 10, quotient in EAX, remainder in EDX
         add dl, '0'                  ; Convert remainder (digit) to ASCII
+        inc priceStrLen
         mov [edi], dl                ; Store ASCII character in buffer
         dec edi                      ; Move back to fill the next character
 
@@ -1461,7 +1471,6 @@ printPriceStr PROC
     inc edi                          ; Move pointer to the start of the string (EDI)
     mov edx, edi                     ; Load the pointer into EDX for WriteString
     call WriteString                 ; Output the formatted price
-    inc priceStrLen
     pop eax
     ret
     printPriceStr ENDP
