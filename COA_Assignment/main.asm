@@ -20,6 +20,7 @@ SetConsoleOutputCP PROTO :DWORD   ; For printing character with ASCII code beyon
 ;------------------------------------------COMMONLY USED
     dashAmount          DWORD 60
     dash                BYTE '-'
+    inputYN             BYTE 2 DUP(?)   
     displayPriceStr     BYTE 9 DUP(0)
     isProgramLooping    BYTE 1                      ; bool
 ;------------------------------------------REGISTRATION/LOGIN
@@ -68,31 +69,31 @@ SetConsoleOutputCP PROTO :DWORD   ; For printing character with ASCII code beyon
     invalidYN           BYTE "    INVALID INPUT: Please enter 'Y' or 'N'.", 13, 10, 0
     enterToContMsg      BYTE 13, 13, 10, "Enter anything to continue...", 0
 ;------------------------------------------COMPANY LOGO
-    logoImg1            BYTE  "A",13,10,0
-    logoImg2            BYTE  "A",13,10,0
-    logoImg3            BYTE  "A",13,10,0
-    logoImg4            BYTE  "A",13,10,0
-    logoImg5            BYTE  "A",13,10,0
-    logoImg6            BYTE  "A",13,10,0
-    logoImg7            BYTE  "A",13,10,0
-    logoImg8            BYTE  "A",13,10,0
-    logoImg9            BYTE  "A",13,10,0
-    logoImg10           BYTE  "A",13,10,0
-    logoImg11           BYTE  "A",13,10,0
-    logoImg12           BYTE  "A",13,10,0
-    logoImg13           BYTE  "A",13,10,0
-    logoImg14           BYTE  "A",13,10,0
-    logoImg15           BYTE  "A",13,10,0
-    logoImg16           BYTE  "A",13,10,0
-    logoImg17           BYTE  "A",13,10,0
-    logoImg18           BYTE  "A",13,10,0
-    logoImg19           BYTE  "A",13,10,0
-    logoImg20           BYTE  "A",13,10,0
-    logoImg21           BYTE  "A",13,10,0
-    logoImg22           BYTE  "A",13,10,0
-    logoImg23           BYTE  "A",13,10,0
-    logoImg24           BYTE  "A",13,10,0
-    logoImg25           BYTE  "A",13,10,0
+    logoImg1            BYTE  "                       ⢀⣤⣦⣤⣤⣤⣤⣤⣶⣶⡄                ", 13, 10, 0
+    logoImg2            BYTE  "                       ⣸⡿⠛⢻⠛⢻⠛⢻⣿⡟⠁                ", 13, 10, 0
+    logoImg3            BYTE  "                      ⢀⣿⡇ ⡿ ⣼ ⢸⣿⡅                 ", 13, 10, 0
+    logoImg4            BYTE  "                      ⠘⣿⡇ ⣿ ⢹ ⢸⣿⡇           ⢀⣀⣠⣤⣤⡀", 13, 10, 0
+    logoImg5            BYTE  "                       ⠸⣿⡀⠸⡆⠘⣇ ⢿⣷    ⣀⣠⣤⣶⣶⣾⣿⠿⠿⠛⠋⢻⡆", 13, 10, 0
+    logoImg6            BYTE  "                        ⣿⡇ ⣿ ⢿⣄⣸⣿⣦⣤⣴⠿⠿⠛⠛⠉⠁⢀⣀⣀⣀⣄⣤⣼⣿", 13, 10, 0
+    logoImg7            BYTE  "                       ⢀⣿⡇ ⡿ ⣼⣿⣿⣯⣿⣦⣤⣤⣶⣶⣶⣿⢿⠿⠟⠿⠛⠛⠛⠛⠋", 13, 10, 0
+    logoImg8            BYTE  "                       ⢸⣿⠁⣸⠃⢠⡟⢻⣿⣿⣿⣿⣿⣭⣭⣭⣵⣶⣤⣀⣄⣠⣤⣤⣴⣶⣦", 13, 10, 0
+    logoImg9            BYTE  "                      ⢠⣿⡇ ⣿ ⣸ ⢸⣿⣶⣦⣤⣤⣄⣀⣀⣀  ⠉⠈⠉⠈⠉⠉⢽⣿", 13, 10, 0
+    logoImg10           BYTE  "                     ⣀⣸⣿⡇ ⣿ ⢸ ⢸⣿⡿⣿⣿⣿⣿⡟⠛⠻⠿⠿⠿⣿⣶⣶⣶⣶⣿⣿", 13, 10, 0
+    logoImg11           BYTE  "                ⢀⣤⣶⣿⡿⣿⣿⣿⣷ ⠹⡆⠘⣇⠈⣿⡟⠛⠛⠛⠾⣿⡳⣄      ⠈⠉⠉⠁", 13, 10, 0
+    logoImg12           BYTE  "               ⣰⣿⢟⡭⠒⢀⣐⣲⣿⣿⡇ ⣷ ⢿ ⢸⣏⣈⣁⣉⣳⣬⣻⣿⣷⣀        ", 13, 10, 0
+    logoImg13           BYTE  "           ⣀⣤⣾⣿⡿⠟⠛⠛⠿⣿⣋⣡⠤⢺⡇ ⡿ ⣼ ⢸⣿⠟⠋⣉⢉⡉⣉⠙⠻⢿⣯⣿⣦⣄    ", 13, 10, 0
+    logoImg14           BYTE  "         ⢠⣾⡿⢋⣽⠋⣠⠊⣉⠉⢲⣈⣿⣧⣶⣿⠁⢠⣇⣠⣯⣀⣾⠧⠖⣁⣠⣤⣤⣤⣭⣷⣄⠙⢿⡙⢿⣷⡀  ", 13, 10, 0
+    logoImg15           BYTE  "         ⢸⣿⣄⠸⣧⣼⣁⡎⣠⡾⠛⣉ ⠄⣈⣉⠻⢿⣋⠁⠌⣉⠻⣧⡾⢋⡡⠔⠒⠒⠢⢌⣻⣶⣾⠇⣸⣿⡇  ", 13, 10, 0
+    logoImg16           BYTE  "         ⣹⣿⣿⣷⣦⣍⣛⠻⠿⠶⢾⣤⣤⣦⣤⣬⣷⣬⣿⣦⣤⣬⣷⣼⣿⣧⣴⣾⠿⠿⠿⢛⣛⣩⣴⣾⣿⣿⡇  ", 13, 10, 0
+    logoImg17           BYTE  "         ⣸⣿⣟⡾⣽⣻⢿⡿⣷⣶⣦⣤⣤⣤⣬⣭⣉⣍⣉⣉⣩⣩⣭⣭⣤⣤⣤⣴⣶⣶⣿⡿⣿⣟⣿⣽⣿⣿⡇  ", 13, 10, 0
+    logoImg18           BYTE  "         ⢸⣿⡍⠉⠛⠛⠿⠽⣷⣯⣿⣽⣻⣻⣟⢿⣻⢿⡿⣿⣟⣿⣻⢟⣿⣻⢯⣿⣽⣾⣷⠿⠗⠛⠉⠁⢸⣿⡇  ", 13, 10, 0
+    logoImg19           BYTE  "         ⠘⣿⣧       ⠈⠉⠉⠉⠉⠛⠙⠛⠛⠛⠛⠋⠛⠋⠉⠉⠉⠉⠁       ⣿⡿   ", 13, 10, 0
+    logoImg20           BYTE  "          ⠹⣿⣆        ⣴⣿⣷          ⣴⣿⣦⡀      ⣼⣿⠇   ", 13, 10, 0
+    logoImg21           BYTE  "           ⠹⣿⣆       ⠻⠿⠟   ⠿⣦⣤⠞   ⠻⠿⠟     ⢀⣼⣿⠋    ", 13, 10, 0
+    logoImg22           BYTE  "            ⠘⢿⣷⣶⣶⣤⣤⣤⣀⣀⣀⡀⣀ ⡀   ⡀⣀⡀⣀⣀⣀⣠⣤⣤⣴⣶⣶⣿⡿⠃     ", 13, 10, 0
+    logoImg23           BYTE  "              ⠙⢿⣿⣾⡙⠯⠿⠽⢿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠿⠿⠿⠙⢋⣿⣿⡿⠋       ", 13, 10, 0
+    logoImg24           BYTE  "                ⠙⠻⢿⣶⣤⣀⣀           ⣀⣀⣤⣾⣿⠿⠋         ", 13, 10, 0
+    logoImg25           BYTE  "                   ⠉⠙⠻⠿⠿⠷⣶⣶⣶⣶⣶⣶⣶⠿⠿⠿⠿⠛⠉⠁           ", 13, 10, 0
 ;------------------------------------------REGISTER
     registerTitleMsg    BYTE "REGISTER", 13, 10, "  Create an new account to continue", 13, 13, 10, 0
     registerPromptUser  BYTE "  Create a username (up to 20 characters): ", 0
@@ -191,6 +192,7 @@ main PROC
                 mov al, backtoRegister
                 cmp al, 1
                 je regiLogin
+                jmp orderProgram
         orderProgram:
             call init
             call inputCustInfo
@@ -389,7 +391,7 @@ login PROC
             mov edx, OFFSET backToRegisterMsg
             call WriteString
             mov backtoRegister, 1
-            call ReadChar
+            call ReadString
             ret
 
         adminTerminate:
@@ -417,25 +419,22 @@ login PROC
             mov edi, OFFSET registerPassword
             call StrCompare
         cmp eax, 0
-        je loginFailed    ; If username and password match the registered ones, login is successful
+        je loginFailed          ; If username and password match the registered ones, login is successful
+        jmp loginSuccess        ; If username doesn't match, fail
         
-        jmp loginSuccess      ; If username doesn't match, fail
-        
-
-
     loginSuccess:
         ; Display success message
         mov edx, OFFSET successMsg
-        call WriteString
+        call WriteChar
         call Crlf
         ret
 
     loginFailed:
         ; Display failure message
         mov edx, OFFSET failLoginMsg
-        call WriteString
+        call WriteChar
         call Crlf
-        call ReadChar
+        call ReadString
         jmp startlogin
     login ENDP
 
@@ -463,15 +462,15 @@ inputCustInfo PROC
         lea esi, inputCustName
         lea edi, OFFSET BACK_CMD
         call StrCompare
-        cmp eax, 1
-        je goBackToRegister
+        cmp eax, 0             ; EAX = 0 if strings are equal
+        je goBackToRegister     ; Jump to register if user entered '-111'
 
         ; Check the length of the input
         mov esi, OFFSET inputCustName
         call StringLength        ; Get the length of input string into EAX
         cmp eax, 50              ; Check if length is greater than 50
         jg nameTooLong          
-        cmp eax, 0               ; Check if length is 0 or
+        cmp eax, 0               ; Check if length is 0 or negative
         jle nameNull           
         jmp check_characters
 
@@ -489,13 +488,13 @@ inputCustInfo PROC
             mov edx, OFFSET backToRegisterMsg
             call WriteString
             mov backtoRegister, 1
-            call ReadChar
+            call ReadChar                ; Wait for any input to continue
             ret
 
         check_characters:
             ; Check the characters of the input
             call CheckNameCharacters
-            cmp eax, 1               ; EAX == 0 means contain invalid characters
+            cmp eax, 1               ; EAX == 1 means valid characters
             je nameInputValid        ; If valid, proceed to next step
 
             ; INVALID characters
@@ -512,8 +511,9 @@ inputCustInfo PROC
             ret
 
         nameInputInvalid:
-            jmp input_loop_start
+            jmp input_loop_start      ; Loop back to input start
     inputCustInfo ENDP
+
 
 ; Character check function (Valid characters: A-Z, a-z)
 CheckNameCharacters PROC
@@ -561,7 +561,7 @@ dine_or_takeaway_check PROC
         call WriteString
 
         ; Read a single character input
-        call ReadChar
+        call ReadString
         mov [inputDT], al          ; Store the input character
         call WriteChar              ; Echo the character (optional)
         call Crlf                   ; Move to the next line
@@ -1308,7 +1308,6 @@ printLogo PROC
     call WriteString
     mov edx, offset logoImg25
     call WriteString
-    pop eax
     ret
     printLogo ENDP
 
@@ -1334,8 +1333,12 @@ inputYesOrNo PROC
         call WriteString
         push edx  ; Save the edx register
 
+        mov edx, OFFSET inputYN
         mov ecx, 2      ; Expect 1 character plus null terminator
-        call ReadChar
+        call ReadString
+        ; Now, ensure we are checking only the first character
+        mov esi, OFFSET inputYN  ; Load the address of the input buffer
+        lodsb                    ; Load the first character into AL from inputYN
 
         ; Check if AL contains 'Y', 'y', 'N', or 'n'
         cmp al, 'Y'
