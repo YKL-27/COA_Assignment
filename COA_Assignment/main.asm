@@ -19,6 +19,8 @@ SetConsoleOutputCP PROTO :DWORD   ; For printing character with ASCII code beyon
     TERMINATE_CMD       BYTE ">admin:terminate", 0  ; Secret command for admin to terminate the program entirely
 ;------------------------------------------COMMONLY USED
     isProgramLooping    BYTE 1                      ; bool
+    holdPassword        BYTE 20 DUP(0)              ; User's input password (up to 4 characters + null
+    holdPasswordLen     DWORD 0
     lineCharAmount      DWORD 60
     inputYN             BYTE 2 DUP(?)   
     displayPriceStr     BYTE 9 DUP(0)
@@ -105,7 +107,7 @@ SetConsoleOutputCP PROTO :DWORD   ; For printing character with ASCII code beyon
     registerPromptPass  BYTE "Create a password: ", 0
     registrationSuccess BYTE 13, 10, "Registred successful!", 13, 10, 0
     usernameTooShortMsg BYTE "    INVALID INPUT: Username must be between 1 and 20 characters without spaces.", 13, 10, 0
-    passwordTooShortMsg BYTE "    INVALID INPUT: Password must be between 1 and 20 characters without spaces.", 13, 10, 0
+    passwordTooShortMsg BYTE 13, 10, "    INVALID INPUT: Password must be between 1 and 20 characters without spaces.", 13, 10, 0
     terminateMsg        BYTE 13, 13, 10, "Termination Program Entered, closing program...", 13, 10, 0
 ;------------------------------------------LOGIN
     loginTitleMsg       BYTE "---------------------------LOGIN----------------------------", 13, 10 
@@ -312,10 +314,19 @@ register PROC
     registerPasswordLoop:
         mov edx, OFFSET registerPromptPass
         call WriteString
-        mov edx, OFFSET registerPassword   ; Store input in registerPassword buffer
-        mov ecx, 20                        ; Max length of 20
-        call ReadString
+        call inputPasswordMasked
+        cmp holdPasswordLen, 0
+        je checkpw
+        mov ecx, holdPasswordLen
+        mov esi, 0
+        strcpy:
+            mov dl, [holdPassword+esi]
+            mov [registerPassword+esi], dl
+            inc esi
+        loop strcpy
+        mov [registerPassword+esi], 0
 
+        checkpw:
         ; Check for spaces in the password
         lea esi, registerPassword
         call CheckForSpaces
@@ -416,9 +427,19 @@ login PROC
             ; Prompt for password
             mov edx, OFFSET passwordPrompt
             call WriteString
-            mov edx, OFFSET password
-            mov ecx, 20  
-            call ReadString
+            call inputPasswordMasked
+            cmp holdPasswordLen, 0
+            je checkcred
+            mov ecx, holdPasswordLen
+            mov esi, 0
+            strcpy:
+                mov dl, [holdPassword+esi]
+                mov [password+esi], dl
+                inc esi
+            loop strcpy
+            mov [password+esi], 0
+
+        checkcred:
         ; Compare entered username and password with registered credentials
         mov esi, OFFSET username
         mov edi, OFFSET registerUsername
@@ -1577,6 +1598,38 @@ printPriceStr PROC
     pop eax
     ret
     printPriceStr ENDP
+
+
+;------------------------------------------MASK PASSWORD
+inputPasswordMasked PROC
+    try_again:
+        ; Clear the input buffer
+        lea edi, holdPassword
+        mov ebx, 5
+        mov eax, 0
+        rep stosb
+        mov holdPasswordLen, 0
+
+        ; Input password (masking the actual input)
+        lea edi, holdPassword      ; edi points to the input password storage
+        mov ebx, 0                  ; Counter to track the number of characters input
+
+    input_loop:
+        call ReadChar               ; Read a single character from user input
+        cmp al, 13                  ; Check if Enter key (ASCII 13) is pressed
+        je done
+        mov [edi], al               ; Store the input character
+        inc edi                     ; Move to the next character position
+        inc holdPasswordLen
+        mov al, '*'                 ; Mask the input character with ''
+        call WriteChar              ; Display '*'
+        inc ebx                     ; Increment the input character count
+        cmp ebx, 20                  ; Check if 4 characters are entered
+        jl input_loop               ; If less than 4 characters, continue input
+
+    done:
+    ret
+    inputPasswordMasked ENDP
 
 ;------------------------------------------CLEAR BUFFER
 clearBuffer PROC
