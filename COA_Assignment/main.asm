@@ -13,16 +13,15 @@ SetConsoleOutputCP PROTO :DWORD   ; For printing character with ASCII code beyon
     FOOD_PRICE          DWORD 850, 1000             ; Prices for Food A (RM8.50), Food B (RM10.00) in cents
     SIDEDISH_PRICE      DWORD 0, 120, 240, 300      ; Prices for No Addon (RM0.00), Side A (RM1.20), Side B (RM2.40), Side A+B ($RM.00) in cents
     TAKEAWAY_CHARGE     DWORD 20                    ; Extra charges for takeaway (RM0.20) in cent
-    PROMO_CODE          BYTE "eat2024", 0           ; Enter promo code to get discount (Case-sensitive)
     DISCOUNT_PERCENT    DWORD 10                    ; Discount percentage (10%) as a whole number
+    PROMO_CODE          BYTE "eat2024", 0           ; Enter promo code to get discount (Case-sensitive)
     BACK_CMD            BYTE "-111", 0              ; Command to go back
     TERMINATE_CMD       BYTE ">admin:terminate", 0  ; Secret command for admin to terminate the program entirely
 ;------------------------------------------COMMONLY USED
-    dashAmount          DWORD 60
-    dash                BYTE '-'
+    isProgramLooping    BYTE 1                      ; bool
+    lineCharAmount      DWORD 60
     inputYN             BYTE 2 DUP(?)   
     displayPriceStr     BYTE 9 DUP(0)
-    isProgramLooping    BYTE 1                      ; bool
 ;------------------------------------------REGISTRATION/LOGIN
     backtoRegister      BYTE 0                      ; bool
     username            BYTE 20 DUP(?)              ; Buffer for input username
@@ -57,14 +56,15 @@ SetConsoleOutputCP PROTO :DWORD   ; For printing character with ASCII code beyon
     totalTakeAway       DWORD 0
     discountedPrice     DWORD 0
     finalPrice          DWORD 0
-;~~~INVOICE 
+;------------------------------------------INVOICE
     foodStrLen          DWORD 0
     priceStrLen         DWORD 0
-    gapSpace            BYTE "."
-    invoiceNo           DWORD 0
+    invoiceID           BYTE 0
+    orderNo             DWORD 0
 
 ;==============================DISPLAY MESSAGES
 ;------------------------------------------COMMONLY USED
+    lineChar            BYTE '-'
     welcomeMsg          BYTE "--------------Welcome to Pan-tastic Mee House!--------------", 13, 10, 0
     invalidYN           BYTE "    INVALID INPUT: Please enter 'Y' or 'N'.", 13, 10, 0
     enterToContMsg      BYTE 13, 13, 10, "Enter anything to continue...", 0
@@ -105,9 +105,8 @@ SetConsoleOutputCP PROTO :DWORD   ; For printing character with ASCII code beyon
 ;------------------------------------------LOGIN
     usernamePrompt      BYTE "Enter username (or -111 to go back): ", 0
     passwordPrompt      BYTE "Enter password:                      ", 0
-    successMsg          BYTE "Login successful!", 13, 10, 0 
-    failLoginMsg        BYTE "Invalid credentials!", 13, 10, 0 
-    startupMsg          BYTE "Launching Food Ordering Program... ", 13, 10, 0
+    loginSuccessMsg     BYTE "Login successful!", 13, 10, 0 
+    loginFailedMsg      BYTE "Invalid credentials!", 13, 10, 0 
 ;------------------------------------------ENTER CUSTOMER INFO
 ;~~~ENTER NAME
     inputNameMsg        BYTE "Enter your name (up to 50 characters or enter -111 to go back to register menu):  ", 0
@@ -150,9 +149,7 @@ SetConsoleOutputCP PROTO :DWORD   ; For printing character with ASCII code beyon
 ;~~~CONFIRM ORDER AND LOOP ORDER
     confirmOrderMsg     BYTE "Do you want to confirm this order (Y = Yes): ", 0
     contOrderMsg        BYTE "Do you want to keep ordering? (Y = Yes)    : ", 0
-;~~~INVOICE
-    invoiceID           BYTE 0
-    orderNo             DWORD 0
+;------------------------------------------INVOICE
     dearMsg             BYTE "Dear ", 0
     receiptMsg          BYTE ", here is your invoice:", 13, 10, 0   
     invoiceBdTop        BYTE "   _____________________________________________________________  ", 13, 10
@@ -387,7 +384,7 @@ login PROC
         cmp eax, 0
         je contLogin
 
-        goBackToRegister:               ; Display the message that we're returning to registration
+        goBackToRegister:                       ; Display the message that we're returning to registration
             mov edx, OFFSET backToRegisterMsg
             call WriteString
             mov backtoRegister, 1
@@ -424,14 +421,14 @@ login PROC
         
     loginSuccess:
         ; Display success message
-        mov edx, OFFSET successMsg
+        mov edx, OFFSET loginSuccessMsg
         call WriteChar
         call Crlf
         ret
 
     loginFailed:
         ; Display failure message
-        mov edx, OFFSET failLoginMsg
+        mov edx, OFFSET loginFailedMsg
         call WriteChar
         call Crlf
         call ReadString
@@ -444,7 +441,7 @@ inputCustInfo PROC
     call ClrScr
     call Crlf
     call printLogo
-    mov edx, offset welcomeMsg
+    mov edx, OFFSET welcomeMsg
     call WriteString
 
     input_loop_start:
@@ -462,7 +459,7 @@ inputCustInfo PROC
         lea esi, inputCustName
         lea edi, OFFSET BACK_CMD
         call StrCompare
-        cmp eax, 0             ; EAX = 0 if strings are equal
+        cmp eax, 1             ; EAX = 0 if strings are equal
         je goBackToRegister     ; Jump to register if user entered '-111'
 
         ; Check the length of the input
@@ -560,25 +557,25 @@ dine_or_takeaway_check PROC
         mov edx, OFFSET dineOrTakeMsg
         call WriteString
 
-        ; Read a single character input
+        ; Read the input (expecting 1 character)
+        mov edx, OFFSET inputDT
+        mov ecx, 2      ; Read only one character plus null terminator
         call ReadString
-        mov [inputDT], al          ; Store the input character
-        call WriteChar              ; Echo the character (optional)
-        call Crlf                   ; Move to the next line
 
         ; Check if the input is 'T', 't', 'D', or 'd'
         call CheckDineTake
 
         cmp eax, 1
-        jne dine_input_loop          ; If invalid, re-enter the loop
+        jne dine_input_loop  ; If invalid, re-enter the loop
 
         ret
     dine_or_takeaway_check ENDP
-    
+
 
 ; Check if input is 'D', 'd', 'T', or 't'
 CheckDineTake PROC
-    mov al, [inputDT]             ; Load the input character into AL
+    mov esi, OFFSET inputDT
+    lodsb           ; Load the first character from the buffer into AL
 
     ; Check for 'D', 'd'
     cmp al, 'D'
@@ -596,8 +593,7 @@ CheckDineTake PROC
         ; If input is invalid, output invalid message
         mov edx, OFFSET invalidDineTakeMsg
         call WriteString
-        call Crlf
-        mov eax, 0                    ; Set return value to 0 (invalid)
+        mov eax, 0      ; Set return value to 0 (invalid)
         ret
 
     setTakeAway:
@@ -606,7 +602,7 @@ CheckDineTake PROC
         jmp validDTInput
 
     validDTInput:
-        mov eax, 1                    ; Set return value to 1 (valid)
+        mov eax, 1      ; Set return value to 1 (valid)
         ret
     CheckDineTake ENDP
 
@@ -712,7 +708,7 @@ orderLoop PROC
     ;----------------------------------------------display SideDishMenu and get valid selection
     GetSideDishSelection:
         call Crlf
-        call printDash
+        call printLine
         call Crlf
         call Crlf
         call DisplaySideDishMenu
@@ -745,7 +741,7 @@ orderLoop PROC
     ;----------------------------------------------display selection & confirm
     ; Print "You selected: "
     call Crlf
-    call printDash
+    call printLine
     call Crlf
     call Crlf
     mov edx, OFFSET resultMsg
@@ -1074,7 +1070,7 @@ displayInvoice PROC
 
     mov edx, OFFSET invoiceBdLeft
     call WriteString
-    call printDash
+    call printLine
     mov edx, OFFSET invoiceBdRight
     call WriteString
 
@@ -1119,7 +1115,7 @@ displayInvoice PROC
 
     mov edx, OFFSET invoiceBdLeft
     call WriteString
-    call printDash
+    call printLine
     mov edx, OFFSET invoiceBdRight
     call WriteString
 
@@ -1162,7 +1158,7 @@ displayInvoice PROC
 
     mov edx, OFFSET invoiceBdLeft
     call WriteString
-    call printDash
+    call printLine
     mov edx, OFFSET invoiceBdRight
     call WriteString
 
@@ -1312,17 +1308,17 @@ printLogo PROC
     printLogo ENDP
 
 ;------------------------------------------PRINT HORIZONTAL SEPERATION LINE
-printDash PROC
+printLine PROC
     ; Set up the loop counter and character
-    mov al, dash                ; Load the dash character into AL
-    mov ecx, dashAmount         ; Load the dash count into ECX
+    mov al, lineChar                ; Load the line character into AL
+    mov ecx, lineCharAmount         ; Load the line count into ECX
 
     print_loop:
         call WriteChar          ; Call WriteChar to print the character
     loop print_loop             ; Decrement ECX and loop until ECX reaches 0
 
     ret                     ; Return to the calling procedure
-    printDash ENDP
+    printLine ENDP
 
 ;------------------------------------------INPUT YES/NO
 ; INPUT:    EDX         - the address of the string (prompt).
