@@ -58,6 +58,7 @@ SetConsoleOutputCP PROTO :DWORD   ; For printing character with ASCII code beyon
     finalPrice          DWORD 0
 ;~~~INVOICE 
     foodStrLen          DWORD 0
+    priceStrLen         DWORD 0
     gapSpace            BYTE "."
     invoiceNo           DWORD 0
 
@@ -67,31 +68,31 @@ SetConsoleOutputCP PROTO :DWORD   ; For printing character with ASCII code beyon
     invalidYN           BYTE "    INVALID INPUT: Please enter 'Y' or 'N'.", 13, 10, 0
     enterToContMsg      BYTE 13, 13, 10, "Enter anything to continue...", 0
 ;------------------------------------------COMPANY LOGO
-    logoImg1            BYTE  "                       ⢀⣤⣦⣤⣤⣤⣤⣤⣶⣶⡄                ", 13, 10, 0
-    logoImg2            BYTE  "                       ⣸⡿⠛⢻⠛⢻⠛⢻⣿⡟⠁                ", 13, 10, 0
-    logoImg3            BYTE  "                      ⢀⣿⡇ ⡿ ⣼ ⢸⣿⡅                 ", 13, 10, 0
-    logoImg4            BYTE  "                      ⠘⣿⡇ ⣿ ⢹ ⢸⣿⡇           ⢀⣀⣠⣤⣤⡀", 13, 10, 0
-    logoImg5            BYTE  "                       ⠸⣿⡀⠸⡆⠘⣇ ⢿⣷    ⣀⣠⣤⣶⣶⣾⣿⠿⠿⠛⠋⢻⡆", 13, 10, 0
-    logoImg6            BYTE  "                        ⣿⡇ ⣿ ⢿⣄⣸⣿⣦⣤⣴⠿⠿⠛⠛⠉⠁⢀⣀⣀⣀⣄⣤⣼⣿", 13, 10, 0
-    logoImg7            BYTE  "                       ⢀⣿⡇ ⡿ ⣼⣿⣿⣯⣿⣦⣤⣤⣶⣶⣶⣿⢿⠿⠟⠿⠛⠛⠛⠛⠋", 13, 10, 0
-    logoImg8            BYTE  "                       ⢸⣿⠁⣸⠃⢠⡟⢻⣿⣿⣿⣿⣿⣭⣭⣭⣵⣶⣤⣀⣄⣠⣤⣤⣴⣶⣦", 13, 10, 0
-    logoImg9            BYTE  "                      ⢠⣿⡇ ⣿ ⣸ ⢸⣿⣶⣦⣤⣤⣄⣀⣀⣀  ⠉⠈⠉⠈⠉⠉⢽⣿", 13, 10, 0
-    logoImg10           BYTE  "                     ⣀⣸⣿⡇ ⣿ ⢸ ⢸⣿⡿⣿⣿⣿⣿⡟⠛⠻⠿⠿⠿⣿⣶⣶⣶⣶⣿⣿", 13, 10, 0
-    logoImg11           BYTE  "                ⢀⣤⣶⣿⡿⣿⣿⣿⣷ ⠹⡆⠘⣇⠈⣿⡟⠛⠛⠛⠾⣿⡳⣄      ⠈⠉⠉⠁", 13, 10, 0
-    logoImg12           BYTE  "               ⣰⣿⢟⡭⠒⢀⣐⣲⣿⣿⡇ ⣷ ⢿ ⢸⣏⣈⣁⣉⣳⣬⣻⣿⣷⣀        ", 13, 10, 0
-    logoImg13           BYTE  "           ⣀⣤⣾⣿⡿⠟⠛⠛⠿⣿⣋⣡⠤⢺⡇ ⡿ ⣼ ⢸⣿⠟⠋⣉⢉⡉⣉⠙⠻⢿⣯⣿⣦⣄    ", 13, 10, 0
-    logoImg14           BYTE  "         ⢠⣾⡿⢋⣽⠋⣠⠊⣉⠉⢲⣈⣿⣧⣶⣿⠁⢠⣇⣠⣯⣀⣾⠧⠖⣁⣠⣤⣤⣤⣭⣷⣄⠙⢿⡙⢿⣷⡀  ", 13, 10, 0
-    logoImg15           BYTE  "         ⢸⣿⣄⠸⣧⣼⣁⡎⣠⡾⠛⣉ ⠄⣈⣉⠻⢿⣋⠁⠌⣉⠻⣧⡾⢋⡡⠔⠒⠒⠢⢌⣻⣶⣾⠇⣸⣿⡇  ", 13, 10, 0
-    logoImg16           BYTE  "         ⣹⣿⣿⣷⣦⣍⣛⠻⠿⠶⢾⣤⣤⣦⣤⣬⣷⣬⣿⣦⣤⣬⣷⣼⣿⣧⣴⣾⠿⠿⠿⢛⣛⣩⣴⣾⣿⣿⡇  ", 13, 10, 0
-    logoImg17           BYTE  "         ⣸⣿⣟⡾⣽⣻⢿⡿⣷⣶⣦⣤⣤⣤⣬⣭⣉⣍⣉⣉⣩⣩⣭⣭⣤⣤⣤⣴⣶⣶⣿⡿⣿⣟⣿⣽⣿⣿⡇  ", 13, 10, 0
-    logoImg18           BYTE  "         ⢸⣿⡍⠉⠛⠛⠿⠽⣷⣯⣿⣽⣻⣻⣟⢿⣻⢿⡿⣿⣟⣿⣻⢟⣿⣻⢯⣿⣽⣾⣷⠿⠗⠛⠉⠁⢸⣿⡇  ", 13, 10, 0
-    logoImg19           BYTE  "         ⠘⣿⣧       ⠈⠉⠉⠉⠉⠛⠙⠛⠛⠛⠛⠋⠛⠋⠉⠉⠉⠉⠁       ⣿⡿   ", 13, 10, 0
-    logoImg20           BYTE  "          ⠹⣿⣆        ⣴⣿⣷          ⣴⣿⣦⡀      ⣼⣿⠇   ", 13, 10, 0
-    logoImg21           BYTE  "           ⠹⣿⣆       ⠻⠿⠟   ⠿⣦⣤⠞   ⠻⠿⠟     ⢀⣼⣿⠋    ", 13, 10, 0
-    logoImg22           BYTE  "            ⠘⢿⣷⣶⣶⣤⣤⣤⣀⣀⣀⡀⣀ ⡀   ⡀⣀⡀⣀⣀⣀⣠⣤⣤⣴⣶⣶⣿⡿⠃     ", 13, 10, 0
-    logoImg23           BYTE  "              ⠙⢿⣿⣾⡙⠯⠿⠽⢿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠿⠿⠿⠙⢋⣿⣿⡿⠋       ", 13, 10, 0
-    logoImg24           BYTE  "                ⠙⠻⢿⣶⣤⣀⣀           ⣀⣀⣤⣾⣿⠿⠋         ", 13, 10, 0
-    logoImg25           BYTE  "                   ⠉⠙⠻⠿⠿⠷⣶⣶⣶⣶⣶⣶⣶⠿⠿⠿⠿⠛⠉⠁           ", 13, 10, 0
+    logoImg1            BYTE  "A",13,10,0
+    logoImg2            BYTE  "A",13,10,0
+    logoImg3            BYTE  "A",13,10,0
+    logoImg4            BYTE  "A",13,10,0
+    logoImg5            BYTE  "A",13,10,0
+    logoImg6            BYTE  "A",13,10,0
+    logoImg7            BYTE  "A",13,10,0
+    logoImg8            BYTE  "A",13,10,0
+    logoImg9            BYTE  "A",13,10,0
+    logoImg10           BYTE  "A",13,10,0
+    logoImg11           BYTE  "A",13,10,0
+    logoImg12           BYTE  "A",13,10,0
+    logoImg13           BYTE  "A",13,10,0
+    logoImg14           BYTE  "A",13,10,0
+    logoImg15           BYTE  "A",13,10,0
+    logoImg16           BYTE  "A",13,10,0
+    logoImg17           BYTE  "A",13,10,0
+    logoImg18           BYTE  "A",13,10,0
+    logoImg19           BYTE  "A",13,10,0
+    logoImg20           BYTE  "A",13,10,0
+    logoImg21           BYTE  "A",13,10,0
+    logoImg22           BYTE  "A",13,10,0
+    logoImg23           BYTE  "A",13,10,0
+    logoImg24           BYTE  "A",13,10,0
+    logoImg25           BYTE  "A",13,10,0
 ;------------------------------------------REGISTER
     registerTitleMsg    BYTE "REGISTER", 13, 10, "  Create an new account to continue", 13, 13, 10, 0
     registerPromptUser  BYTE "  Create a username (up to 20 characters): ", 0
@@ -149,14 +150,29 @@ SetConsoleOutputCP PROTO :DWORD   ; For printing character with ASCII code beyon
     confirmOrderMsg     BYTE "Do you want to confirm this order (Y = Yes): ", 0
     contOrderMsg        BYTE "Do you want to keep ordering? (Y = Yes)    : ", 0
 ;~~~INVOICE
+    invoiceID           BYTE 0
+    orderNo             DWORD 0
     dearMsg             BYTE "Dear ", 0
-    receiptMsg          BYTE ", here is your invoice:", 13, 10, 0    
-    RMMsg               BYTE "RM ", 0
-    receiptHeader       BYTE "Name                                              Price", 0
+    receiptMsg          BYTE ", here is your invoice:", 13, 10, 0   
+    invoiceBdTop        BYTE "   _____________________________________________________________  ", 13, 10
+                        BYTE " / \                                                            \ ", 13, 10
+                        BYTE "|   |                                                            |", 13, 10 
+                        BYTE " \__|                                                            |", 13, 10, 0
+    invoiceBdLeft       BYTE "    |", 0
+    invoiceBdRight      BYTE "|", 13, 10, 0
+    invoiceBdBottom     BYTE "    |   _________________________________________________________|___", 13, 10
+                        BYTE "    |  /                                                            /", 13, 10
+                        BYTE "    \_/____________________________________________________________/ ", 13, 10, 0
+    addressMsg          BYTE "Pan-tastic Mee House", 13, 10
+                        BYTE "Lot 27-1, Jalan Genting Kelang,", 13, 10
+                        BYTE "Taman Bunga Raya", 13, 10
+                        BYTE "53000 Kuala Lumpur", 13, 10, 0
+    receiptHeader       BYTE "Name                                              Price     ", 0
     totalPriceMsg       BYTE "Subtotal:                                         ", 0
     discountedAmountMsg BYTE "Discount:                                         ", 0
     takeawayChargeMsg   BYTE "Take Away Charge:                                 ", 0
     finalPriceMsg       BYTE "Grand Total:                                      ", 0
+    RMMsg               BYTE "RM ", 0
     thankYouMsg         BYTE "Thank you, have a nice day :D", 0
 
 
@@ -244,7 +260,7 @@ register PROC
         mov ecx, 20
         call ReadString
 
-         ; Secret code for admin to terminate program
+        ; Secret code for admin to terminate program
         mov esi, OFFSET registerUsername 
         mov edi, OFFSET TERMINATE_CMD
         call StrCompare
@@ -698,6 +714,7 @@ orderLoop PROC
         call Crlf
         call printDash
         call Crlf
+        call Crlf
         call DisplaySideDishMenu
         ; Display the meal selection prompt again
         mov edx, OFFSET inputOrder  ; Set the buffer to store the input
@@ -729,6 +746,7 @@ orderLoop PROC
     ; Print "You selected: "
     call Crlf
     call printDash
+    call Crlf
     call Crlf
     mov edx, OFFSET resultMsg
     call WriteString
@@ -916,8 +934,7 @@ calcTotalPrice PROC
         call getSidePrice
 
         ; Store the total price (currFoodPrice) in priceList
-        mov eax, currFoodPrice   ; Move currFoodPrice into register
-        ;call dumpregs 
+        mov eax, currFoodPrice   ; Move currFoodPrice into register 
         mov edi, esi 
         shl edi, 2 
         mov [priceList + edi], eax 
@@ -935,7 +952,7 @@ calcTotalPrice PROC
 
         noTakeAwayCharge:
         ; Move to the next order
-        add esi, 2                  ; Move to next order index
+        inc esi                  ; Move to next order index
     loop calcEachFood
 
     jmp doneCalc
@@ -1045,75 +1062,112 @@ displayInvoice PROC
     call WriteString
     call Crlf
 
-    call printDash
+    mov edx, OFFSET invoiceBdTop
+    call WriteString
+
+    mov edx, OFFSET invoiceBdLeft
+    call WriteString
     mov edx, OFFSET receiptHeader
     call WriteString
-    call Crlf
-    call printDash
+    mov edx, OFFSET invoiceBdRight
+    call WriteString
 
-    mov ecx, orderListLen    ; Load the number of orders into ecx
-    mov esi, 0               ; Start at the first order
+    mov edx, OFFSET invoiceBdLeft
+    call WriteString
+    call printDash
+    mov edx, OFFSET invoiceBdRight
+    call WriteString
+
+    mov ecx, orderListLen       ; Load the number of orders into ecx
+    mov esi, 0                  ; Start at the first order
     displayEachOrder:
-        push ecx             ; Save the loop counter
-        push esi             ; Save the index for this iteration
+    mov orderNo, esi
+    push ecx                ; Save the loop counter
+    
 
-        call getFood         ; Get food information
-        call getSide         ; Get side dish information
-        call displaySelection; Display the selected order
+    mov edx, OFFSET invoiceBdLeft
+    call WriteString
 
-        ; Calculate the spacing based on the food name length
-        mov eax, foodStrLen   ; Get the length of the food string
-        cmp eax, 0            ; If no food string, skip the order
-        jz donePrintSpace     ; Jump to done if no food string
+    call getFood            ; Get food information
+    call getSide            ; Get side dish information
+    call displaySelection   ; Display the selected order
 
-        mov ebx, 50           ; Set the max width for display
-        sub ebx, eax          ; Calculate spaces to print
+    ; Calculate the spacing based on the food name length
+    mov esi, orderNo
+    mov eax, foodStrLen     ; Get the length of the food string
+    mov ebx, 50             ; Set the max width for display
+    call printSpaceGap
 
-        printSpace:
-            cmp ebx, 0            ; Check if spaces are left to print
-            jz donePrintSpace     ; Exit if none left
-            mov al, gapSpace      ; Print space
-            call WriteChar
-            dec ebx               ; Decrement space count
-            jmp printSpace
+    ; Ensure esi is properly saved and restored around the price procedure
+    push eax                ; Save eax before calling the price function
+    mov esi, orderNo
+    call getOrderPriceThenPrint              ; Restore esi after price retrieval
+    pop eax                 ; Restore eax after price retrieval
 
-        donePrintSpace:
-            pop esi               ; Restore the index
-            push esi
-            call getOrderPrice; Display the order price
-            call Crlf             ; New line
-            pop esi
-            add esi, 2           ; Move to the next order (assuming 2-byte entries)
-            pop ecx               ; Restore the loop counter
-    loop displayEachOrder ; Decrement ecx and loop if non-zero
+    ; Calculate the spacing for the price string
+    mov esi, orderNo
+    mov eax, priceStrLen     ; Get the length of the price string
+    mov ebx, 10              ; Set the max width for display
+
+    call printSpaceGap
+
+    mov edx, OFFSET invoiceBdRight
+    call WriteString
+    pop ecx                ; Restore the loop counter
+    mov esi, orderNo
+    inc esi
+    loop displayEachOrder       ; Loop until all orders are processed
+
+    mov edx, OFFSET invoiceBdLeft
+    call WriteString
     call printDash
+    mov edx, OFFSET invoiceBdRight
+    call WriteString
 
+    mov edx, OFFSET invoiceBdLeft
+    call WriteString
     mov edx, OFFSET totalPriceMsg
     call WriteString
     mov eax, totalPrice
     call printPriceStr
-    call Crlf
+    mov edx, OFFSET invoiceBdRight
+    call WriteString
 
+    mov edx, OFFSET invoiceBdLeft
+    call WriteString
     mov edx, OFFSET discountedAmountMsg
     call WriteString
     mov eax, discountedPrice
     call printPriceStr
-    call Crlf
+    mov edx, OFFSET invoiceBdRight
+    call WriteString
 
+    mov edx, OFFSET invoiceBdLeft
+    call WriteString
     mov edx, OFFSET takeawayChargeMsg
     call WriteString
     mov eax, totalTakeAway
     mov edi, OFFSET totalTakeAway 
     call printPriceStr
-    call Crlf
+    mov edx, OFFSET invoiceBdRight
+    call WriteString
 
+    mov edx, OFFSET invoiceBdLeft
+    call WriteString
     call printDash
+    mov edx, OFFSET invoiceBdRight
+    call WriteString
+
+    mov edx, OFFSET invoiceBdLeft
+    call WriteString
     mov edx, OFFSET finalPriceMsg
     call WriteString
     mov eax, finalPrice
     call printPriceStr
-    call Crlf
-    call printDash
+    mov edx, OFFSET invoiceBdRight
+    call WriteString
+    mov edx, OFFSET invoiceBdBottom
+    call WriteString
 
     call Crlf
     call Crlf
@@ -1145,23 +1199,46 @@ getSide PROC
     getSide ENDP
 
 ;------------------------------------------DISPLAY PRICE
-getOrderPrice PROC
-    ; Calculate the correct index in priceList (esi is the order index)
-
-    mov edi, esi             ; edi holds the index in priceList
-    shl edi, 2               ; Multiply edi by 4 to scale the index for DWORD access
+getOrderPriceThenPrint PROC
+    ; Ensure esi is multiplied by 4 (DWORD indexing) before accessing the price
+    mov edi, orderNo            ; edi holds the index in priceList
+    shl edi, 2              ; Multiply edi by 4 to access DWORD entries in priceList
 
     mov eax, [priceList + edi]  ; EAX now contains the price in cents
     cmp eax, 0               ; Ensure the price is not zero
     je zeroPrice             ; Handle zero price case separately
 
-    mov edi, OFFSET displayPriceStr  ; Prepare the buffer
-    call printPriceStr        ; Convert the integer in EAX to a string and store in buffer
+    ; Convert price to string and display it
+    mov edi, OFFSET displayPriceStr  ; Load the address of the price display buffer
+    call printPriceStr        ; Print the price string
+    ; Set priceStrLen (length of the price string)
+    lea esi, displayPriceStr
+    call StringLength         ; Get the length of the price string
+    mov priceStrLen, eax      ; Store the length in priceStrLen
+
     ret
 
     zeroPrice:
+        ; Handle cases where the price is zero
+        mov priceStrLen, 0        ; Set the priceStrLen to 0
         ret
-    getOrderPrice ENDP
+    getOrderPriceThenPrint ENDP
+
+printSpaceGap PROC
+    sub ebx, eax
+    printSpace:
+        ; EBX holds the number of spaces to print
+        cmp ebx, 0            ; Check if there are spaces to print
+        jz donePrintSpace     ; Exit if no spaces are left to print
+
+        mov al, " "           ; Load space character
+        call WriteChar        ; Print the space
+        dec ebx
+        jmp printSpace
+
+    donePrintSpace:
+        ret
+    printSpaceGap ENDP
 
 
 ;==============================CUSTOM FUNCTIONS
@@ -1222,6 +1299,7 @@ printLogo PROC
     call WriteString
     mov edx, offset logoImg25
     call WriteString
+    pop eax
     ret
     printLogo ENDP
 
@@ -1235,7 +1313,6 @@ printDash PROC
         call WriteChar          ; Call WriteChar to print the character
     loop print_loop             ; Decrement ECX and loop until ECX reaches 0
 
-    call Crlf
     ret                     ; Return to the calling procedure
     printDash ENDP
 
@@ -1338,7 +1415,9 @@ StringLength PROC
 ;------------------------------------------PRINT PRICE (NNNN CENT --> RM NN.NN)
 ; INPUT:    EAX   - INT value (cent).
 printPriceStr PROC
-    ;display "RM"
+    push eax
+    mov priceStrLen, 3
+    ;display "RM "
     mov edx, OFFSET RMMsg
     call WriteString
 
@@ -1365,6 +1444,7 @@ printPriceStr PROC
     ; Insert decimal point
     mov BYTE PTR [edi], '.'
     dec edi
+    add priceStrLen, 3
 
     ; Now convert the remaining part (integer portion)
     IntToStrLoop:
@@ -1381,7 +1461,8 @@ printPriceStr PROC
     inc edi                          ; Move pointer to the start of the string (EDI)
     mov edx, edi                     ; Load the pointer into EDX for WriteString
     call WriteString                 ; Output the formatted price
-
+    inc priceStrLen
+    pop eax
     ret
     printPriceStr ENDP
 
