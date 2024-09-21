@@ -19,7 +19,7 @@ SetConsoleOutputCP PROTO :DWORD   ; For printing character with ASCII code beyon
     TERMINATE_CMD       BYTE ">admin:terminate", 0  ; Secret command for admin to terminate the program entirely
 ;------------------------------------------COMMONLY USED
     isProgramLooping    BYTE 1                      ; bool
-    holdPassword        BYTE 20 DUP(0)              ; User's input password (up to 4 characters + null
+    holdPassword        BYTE 20 DUP(0)              ; User's input password (up to 4 characters + null)
     holdPasswordLen     DWORD 0
     lineCharAmount      DWORD 60
     inputYN             BYTE 2 DUP(?)   
@@ -70,7 +70,7 @@ SetConsoleOutputCP PROTO :DWORD   ; For printing character with ASCII code beyon
     spacebar            BYTE ' '
     welcomeMsg          BYTE "--------------Welcome to Pan-tastic Mee House!--------------", 13, 10, 0
     invalidYN           BYTE "    INVALID INPUT: Please enter 'Y' or 'N'.", 13, 10, 0
-    enterToContMsg     BYTE 13, 10, 13, 10, "Enter anything to continue...", 0
+    enterToContMsg      BYTE 13, 10, 13, 10, "Enter anything to continue...", 0
     enterToExitMsg      BYTE 13, 10, 13, 10, 13, 10, 13, 10, "Enter anything to exit...", 0
 ;------------------------------------------COMPANY LOGO
     logoImg1            BYTE  "                       ⢀⣤⣦⣤⣤⣤⣤⣤⣶⣶⡄                ", 13, 10, 0
@@ -116,10 +116,13 @@ SetConsoleOutputCP PROTO :DWORD   ; For printing character with ASCII code beyon
     usernamePrompt      BYTE "Enter username: ", 0
     passwordPrompt      BYTE "Enter password: ", 0
     loginSuccessMsg     BYTE 13, 10, "Login successful!", 13, 10, 0 
-    loginFailedMsg      BYTE "Invalid credentials!", 13, 10, 0 
+    loginFailedMsg      BYTE 13, 10, "Invalid credentials!", 13, 10, 0 
 ;------------------------------------------ENTER CUSTOMER INFO
 ;~~~ENTER NAME
-    inputNameMsg        BYTE "Enter your name", 13, 10, "* Max 50 characters", 13, 10, "* Enter -111 to log out", 13, 10, ">>> ", 0
+    inputNameMsg        BYTE "Enter your name", 13, 10
+                        BYTE "* Max 50 alphabet characters", 13, 10
+                        BYTE "* Enter -111 to log out", 13, 10
+                        BYTE ">>> ", 0
     backToRegisterMsg   BYTE "Returning to registration, enter any key to continue...", 13, 10, 0
     errorNameMsg        BYTE "Invalid input. Please enter a valid name or -111 to go back.", 13, 10, 0
     invalidCharMsg      BYTE "    INVALID INPUT: Name contain invalid character.", 13, 10, 0
@@ -349,6 +352,8 @@ register PROC
         mov edx, OFFSET passwordTooShortMsg
         call WriteString
         mov edx, OFFSET enterToContMsg
+        call WriteString
+        call ReadChar
         jmp registerPasswordLoop
 
     storeRegisterData:
@@ -461,7 +466,6 @@ login PROC
         call WriteString
         mov edx, OFFSET enterToContMsg
         call WriteString
-        call Crlf
         call ReadChar
         ret
 
@@ -471,7 +475,6 @@ login PROC
         call WriteString
         mov edx, OFFSET enterToContMsg
         call WriteString
-        call Crlf
         call ReadChar
         jmp startlogin
     login ENDP
