@@ -28,10 +28,11 @@ SetConsoleOutputCP PROTO :DWORD   ; For printing character with ASCII code beyon
     backtoRegister      BYTE 0                      ; bool
     username            BYTE 20 DUP(?)              ; Buffer for input username
     password            BYTE 20 DUP(?)              ; Buffer for input password
-    registerUsername    BYTE 20 DUP(?)              ; Buffer for username, 20 characters max
-    registerPassword    BYTE 20 DUP(?)              ; Buffer for password, 20 characters max
+    registerUsername    BYTE 25 DUP(?)              ; Buffer for username, 20 characters max, add 5 more to check if exceed 20
+    registerPassword    BYTE 25 DUP(?)              ; Buffer for password, 20 characters max, add 5 more to check if exceed 20
     registeredUsername  BYTE 20 DUP(?)              ; Buffer for registered username
     registeredPassword  BYTE 20 DUP(?)              ; Buffer for registered password 
+    nameLen             DWORD 0
 ;------------------------------------------ENTER CUSTOMER INFO
     inputCustName       BYTE 129 DUP(?)            ; Buffer to hold input (128 characters + null terminator)
     inputDT             BYTE 2 DUP(?)              ; DineIn / TakeAway
@@ -61,7 +62,7 @@ SetConsoleOutputCP PROTO :DWORD   ; For printing character with ASCII code beyon
 ;------------------------------------------INVOICE
     foodStrLen          DWORD 0
     priceStrLen         DWORD 0
-    invoiceNo           DWORD 1000
+    invoiceNo           DWORD 123000
     orderNo             DWORD 0
 
 ;==============================DISPLAY MESSAGES
@@ -102,28 +103,28 @@ SetConsoleOutputCP PROTO :DWORD   ; For printing character with ASCII code beyon
     registerTitleMsg    BYTE "--------------------------REGISTER--------------------------", 13, 10
                         BYTE "    Create an new account to continue", 13, 10
                         BYTE "    * Maximum 20 characters", 13, 10
-                        BYTE "    * No spaces allowed", 13, 10, 13, 10, 0
-    registerPromptUser  BYTE "Create a username: ", 0
-    registerPromptPass  BYTE "Create a password: ", 0
-    registrationSuccess BYTE 13, 10, "Registred successful!", 13, 10, 0
+                        BYTE "    * No spaces allowed", 13, 10, 0
+    registerPromptUser  BYTE 13, 10, "Create a username: ", 0
+    registerPromptPass  BYTE 13, 10, "Create a password: ", 0
+    registrationSuccess BYTE 13, 10, 13, 10, "Registred successful!", 13, 10, 0
     usernameTooShortMsg BYTE "    INVALID INPUT: Username must be between 1 and 20 characters without spaces.", 13, 10, 0
     passwordTooShortMsg BYTE 13, 10, "    INVALID INPUT: Password must be between 1 and 20 characters without spaces.", 13, 10, 0
-    terminateMsg        BYTE 13, 13, 10, "Termination Program Entered, closing program...", 13, 10, 0
+    terminateMsg        BYTE 13, 10, 13, 10, "Termination Program Entered, closing program...", 13, 10, 0
 ;------------------------------------------LOGIN
     loginTitleMsg       BYTE "---------------------------LOGIN----------------------------", 13, 10 
                         BYTE "    Enter your crendentials to start ordering", 13, 10
-                        BYTE "    * Enter -111 to go back to registration", 13, 10, 13, 10, 0
-    usernamePrompt      BYTE "Enter username: ", 0
-    passwordPrompt      BYTE "Enter password: ", 0
-    loginSuccessMsg     BYTE 13, 10, "Login successful!", 13, 10, 0 
-    loginFailedMsg      BYTE 13, 10, "Invalid credentials!", 13, 10, 0 
+                        BYTE "    * Enter -111 to go back to registration", 13, 10, 0
+    usernamePrompt      BYTE 13, 10, "Enter username: ", 0
+    passwordPrompt      BYTE 13, 10, "Enter password: ", 0
+    loginSuccessMsg     BYTE 13, 10, 13, 10, "Login successful!", 13, 10, 0 
+    loginFailedMsg      BYTE 13, 10, 13, 10, "Invalid credentials!", 13, 10, 0 
 ;------------------------------------------ENTER CUSTOMER INFO
 ;~~~ENTER NAME
     inputNameMsg        BYTE "Enter your name", 13, 10
                         BYTE "* Max 50 alphabet characters", 13, 10
                         BYTE "* Enter -111 to log out", 13, 10
                         BYTE ">>> ", 0
-    backToRegisterMsg   BYTE "Returning to registration, enter any key to continue...", 13, 10, 0
+    backToRegisterMsg   BYTE 13, 10, "Returning to registration, enter any key to continue...", 13, 10, 0
     errorNameMsg        BYTE "Invalid input. Please enter a valid name or -111 to go back.", 13, 10, 0
     invalidCharMsg      BYTE "    INVALID INPUT: Name contain invalid character.", 13, 10, 0
     nameBlankMsg        BYTE "    INVALID INPUT: No name was entered.", 13, 10, 0
@@ -134,7 +135,7 @@ SetConsoleOutputCP PROTO :DWORD   ; For printing character with ASCII code beyon
 ;~~~ENTER PROMO CODE (OPTIONAL)
     promoMsg            BYTE "Do you have promo code to enter? (Y/N): ", 0
     promoCodeMsg        BYTE "Promo Code: ", 0
-    invalidPromoCodeMsg BYTE "Invalid promo code. Do you wish to retry? (Y/B): ", 0
+    invalidPromoCodeMsg BYTE "    Invalid promo code. Do you wish to retry? (Y/N): ", 0
     promoSuccessMsg     BYTE "Promo Code used successfully!", 0
 
 ;------------------------------------------SELECT FOOD
@@ -151,7 +152,7 @@ SetConsoleOutputCP PROTO :DWORD   ; For printing character with ASCII code beyon
     setWithAB           BYTE "[4] Set with Dumplings & Soya Milk    + RM 3.00", 13, 10, 0
 ;~~~SELECTION PROMPT
     selectionPrompt     BYTE ">> Selection: ", 0
-    invalidInputMsg     BYTE "Invalid selection, please try again.", 13, 10, 0
+    invalidInputMsg     BYTE "    Invalid selection, please try again.", 13, 10, 0
 ;~~~SELECTED RESULT
     resultMsg           BYTE "You selected: ", 13, 10, "  > ", 0
     setMsg              BYTE "Set ", 0
@@ -180,7 +181,7 @@ SetConsoleOutputCP PROTO :DWORD   ; For printing character with ASCII code beyon
     addressMsg3         BYTE "Taman Bunga Raya                                            ", 0
     addressMsg4         BYTE "53000 Kuala Lumpur                                          ", 0
     invoiceNoMsg        BYTE "Invoice No: ", 0
-    invoiceNoFillMsg    BYTE "                                            ", 0
+    invoiceNoFillMsg    BYTE "                                          ", 0
     receiptHeaderMsg    BYTE "Order                                             Price     ", 0
     totalPriceMsg       BYTE "Subtotal:                                         ", 0
     discountedAmountMsg BYTE "Discount:                                         ", 0
@@ -191,36 +192,6 @@ SetConsoleOutputCP PROTO :DWORD   ; For printing character with ASCII code beyon
 
 
 .code
-main PROC
-    ; Initialize once and avoid re-execution
-    mainProgram:
-        regiLogin:
-            mov backtoRegister, 0
-            call register
-                cmp isProgramLooping, 0
-                je terminateProgram
-            call login
-                cmp isProgramLooping, 0
-                je terminateProgram
-                mov al, backtoRegister
-                cmp al, 1
-                je regiLogin
-                jmp orderProgram
-        orderProgram:
-            call init
-            call inputCustInfo
-                mov al, backtoRegister
-                cmp al, 1
-                je regiLogin
-            call orderLoop
-            call calcTotalPrice
-            call calcFinalPrice
-            call displayInvoice
-    jmp mainProgram
-
-    terminateProgram:
-        ; Exit cleanly
-        invoke ExitProcess, 0
 
 ;==============================INITIALISE: RESET VARAIBLES FOR NEXT CUSTOMER TO ORDER
 init PROC
@@ -609,8 +580,8 @@ dine_or_takeaway_check PROC
         ; Check if the input is 'T', 't', 'D', or 'd'
         call CheckDineTake
 
-        cmp eax, 1
-        jne dine_input_loop  ; If invalid, re-enter the loop
+        cmp eax, 0
+        je dine_input_loop  ; If invalid, re-enter the loop
 
         ret
     dine_or_takeaway_check ENDP
@@ -694,15 +665,17 @@ check_promo_code PROC
         cmp eax, 1
         je valid_promo_code
 
-        ; Invalid promo code, re-enter loop
+        ; Invalid promo code
         mov edx, OFFSET invalidPromoCodeMsg
-        call WriteString
-        ; Read input if no exit
+        ; Ask for retry or exit (Y/N)
+        call inputYesOrNo
         cmp eax, 0
         je stopEnterPromo
         jmp promo_code_loop
-
-        stopEnterPromo:
+    stopEnterPromo:
+        mov edx, OFFSET enterToContMsg
+        call WriteString
+        call ReadChar
         ret
 
     valid_promo_code:
@@ -710,6 +683,9 @@ check_promo_code PROC
         mov usingPromo, 1
         mov edx, OFFSET promoSuccessMsg   ; Display "Promo Code used successfully"
         call WriteString
+        mov edx, OFFSET enterToContMsg
+        call WriteString
+        call ReadChar
         ret
     check_promo_code ENDP
 
@@ -1643,5 +1619,48 @@ clearBuffer PROC
     ret
     clearBuffer ENDP
 
+main PROC
+    ; Initialize once and avoid re-execution
+    mainProgram:
+        regiLogin:
+            mov backtoRegister, 0
+
+            ; Call register process
+            call register
+            cmp isProgramLooping, 0
+            je terminateProgram
+
+            ; Call login process
+            call login
+            cmp isProgramLooping, 0
+            je terminateProgram
+
+            ; Check if back to registration is requested
+            cmp backtoRegister, 1
+            je regiLogin
+
+        orderProgram:
+            ; Initialize customer order
+            call init
+
+            ; Get customer information
+            call inputCustInfo
+            cmp backtoRegister, 1
+            je regiLogin
+
+            ; Process order loop
+            call orderLoop
+
+            ; Perform price calculation and display invoice
+            call calcTotalPrice
+            call calcFinalPrice
+            call displayInvoice
+
+            ; Loop back to the beginning for next customer
+            jmp mainProgram
+
+    terminateProgram:
+        ; Exit cleanly
+        invoke ExitProcess, 0
 main ENDP
 END main
