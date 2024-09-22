@@ -1,11 +1,11 @@
 INCLUDE Irvine32.inc
-includelib kernel32.lib      ; Additional library for Windows API functions
+includelib kernel32.lib             ; Additional library for Windows API functions
 
 .model flat, stdcall
 ExitProcess proto, dwExitCode:dword
 .stack 4096
 
-SetConsoleOutputCP PROTO :DWORD   ; For printing character with ASCII code beyond regular range
+SetConsoleOutputCP PROTO :DWORD     ; For printing character with ASCII code beyond regular range
 
 .data
 ;==============================VARIABLES
@@ -192,7 +192,6 @@ SetConsoleOutputCP PROTO :DWORD   ; For printing character with ASCII code beyon
 
 
 .code
-
 ;==============================INITIALISE: RESET VARAIBLES FOR NEXT CUSTOMER TO ORDER
 init PROC
     xor eax, eax
@@ -259,7 +258,7 @@ register PROC
         ; Check for spaces in the username
         lea esi, registerUsername
         call CheckForSpaces
-        cmp eax, 1                      ; If space is found, it's invalid
+        cmp eax, 1                          ; If space is found, it's invalid
         je invalidUsername
 
         ; Validate length of entered username
@@ -304,7 +303,7 @@ register PROC
         ; Check for spaces in the password
         lea esi, registerPassword
         call CheckForSpaces
-        cmp eax, 1                      ; If space is found, it's invalid
+        cmp eax, 1                          ; If space is found, it's invalid
         je invalidPassword
 
         ; Validate length of entered password
@@ -340,7 +339,7 @@ register PROC
 ;----------------------------------------------CHECK FOR SPACES IN STRING
 CheckForSpaces PROC
     push esi
-    mov eax, 0                  ; Assume no space found
+    mov eax, 0                      ; Assume no space found
 
     checkLoop:
         lodsb                       ; Load the next byte into AL
@@ -553,7 +552,7 @@ CheckNameCharacters PROC
 
         valid_character:
             inc esi                ; Move to the next character
-    loop check_loop        ; Continue checking until null terminator
+    loop check_loop                 ; Continue checking until null terminator
 
     valid_input:
             mov eax, 1             ; All characters are valid
@@ -698,8 +697,8 @@ orderLoop PROC
         call ClrScr
         call DisplayMealMenu
         ; Display the meal selection prompt again
-        mov edx, OFFSET inputOrder  ; Set the buffer to store the input
-        mov ecx, 2                  ; Limit to 1 character + null terminator
+        mov edx, OFFSET inputOrder   ; Set the buffer to store the input
+        mov ecx, 2                   ; Limit to 1 character + null terminator
         call ReadString              ; Read the string input from the user
         
         ; Get the first character from the input buffer
@@ -720,7 +719,7 @@ orderLoop PROC
         mov edx, OFFSET invalidInputMsg
         call WriteString
         call ReadChar
-        jmp orderLoopStart        ; Loop again if input is invalid
+        jmp orderLoopStart          ; Loop again if input is invalid
 
     ValidMealInput:
         mov mealChoice, al          ; Store valid input in mealChoice
@@ -733,8 +732,8 @@ orderLoop PROC
         call Crlf
         call DisplaySideDishMenu
         ; Display the meal selection prompt again
-        mov edx, OFFSET inputOrder  ; Set the buffer to store the input
-        mov ecx, 2                  ; Limit to 1 character + null terminator
+        mov edx, OFFSET inputOrder   ; Set the buffer to store the input
+        mov ecx, 2                   ; Limit to 1 character + null terminator
         call ReadString              ; Read the string input from the user
         ; Get the first character from the input buffer
         mov al, inputOrder           ; Move the first character to AL
@@ -788,7 +787,7 @@ orderLoop PROC
 
         ; Ensure orderListLen does not exceed 100
         cmp orderListLen, 100
-        jae orderListFull    ; Handle full order list scenario
+        jae orderListFull     ; Handle full order list scenario
 
         inc orderListLen      ; Increment order count only when confirmed
         jmp contOrder
@@ -1055,9 +1054,9 @@ calcFinalPrice PROC
     mul ebx               ; Multiply by discount percentage (in this case, 10)
     
     mov ecx, 100          
-    div ecx               ; Divide by 100 to get the discounted amount
+    div ecx                   ; Divide by 100 to get the discounted amount
     mov discountedPrice, eax  ; Save the discount value
-    sub finalPrice, eax    ; Subtract the discount from the final price
+    sub finalPrice, eax       ; Subtract the discount from the final price
 
     skipDiscount:
         ; Add takeaway charges (if any)
@@ -1082,7 +1081,7 @@ displayInvoice PROC
     call WriteString
     call Crlf
 
-    ; GENERATE INVOICE IMAGE 
+    ;---------------------------------GENERATE INVOICE IMAGE 
     mov edx, OFFSET invoiceBdTop
     call WriteString
 
@@ -1161,7 +1160,7 @@ displayInvoice PROC
     mov esi, 0                  ; Start at the first order
     displayEachOrder:
     mov orderNo, esi
-    push ecx                ; Save the loop counter
+    push ecx                    ; Save the loop counter
     
 
     mov edx, OFFSET invoiceBdLeft
@@ -1301,18 +1300,18 @@ getSide PROC
 getOrderPriceThenPrint PROC
     ; Ensure esi is multiplied by 4 (DWORD indexing) before accessing the price
     mov edi, orderNo            ; edi holds the index in priceList
-    shl edi, 2              ; Multiply edi by 4 to access DWORD entries in priceList
+    shl edi, 2                  ; Multiply edi by 4 to access DWORD entries in priceList
 
     mov eax, [priceList + edi]  ; EAX now contains the price in cents
-    cmp eax, 0               ; Ensure the price is not zero
-    je zeroPrice             ; Handle zero price case separately
+    cmp eax, 0                  ; Ensure the price is not zero
+    je zeroPrice                ; Handle zero price case separately
 
     ; Convert price to string and display it
     mov edi, OFFSET displayPriceStr  ; Load the address of the price display buffer
-    call printPriceStr        ; Print the price string
+    call printPriceStr               ; Print the price string
     ; Set priceStrLen (length of the price string)
     lea esi, displayPriceStr
-    call StringLength         ; Get the length of the price string
+    call StringLength               ; Get the length of the price string
 
     ret
 
@@ -1590,7 +1589,7 @@ inputPasswordMasked PROC
         mov holdPasswordLen, 0
 
         ; Input password (masking the actual input)
-        lea edi, holdPassword      ; edi points to the input password storage
+        lea edi, holdPassword       ; edi points to the input password storage
         mov ebx, 0                  ; Counter to track the number of characters input
 
     input_loop:
