@@ -1580,33 +1580,47 @@ printPriceStr PROC
 
 ;------------------------------------------MASK PASSWORD
 inputPasswordMasked PROC
-    try_again:
-        ; Clear the input buffer
-        lea edi, holdPassword
-        mov ebx, 5
-        mov eax, 0
-        rep stosb
-        mov holdPasswordLen, 0
-
-        ; Input password (masking the actual input)
-        lea edi, holdPassword       ; edi points to the input password storage
-        mov ebx, 0                  ; Counter to track the number of characters input
+    ; Initialize
+    lea edi, holdPassword      ; EDI points to the input password storage
+    mov ebx, 0                 ; Counter to track the number of characters input
+    xor eax, eax               ; Clear EAX register
 
     input_loop:
-        call ReadChar               ; Read a single character from user input
-        cmp al, 13                  ; Check if Enter key (ASCII 13) is pressed
-        je done
-        mov [edi], al               ; Store the input character
-        inc edi                     ; Move to the next character position
-        inc holdPasswordLen
-        mov al, '*'                 ; Mask the input character with ''
-        call WriteChar              ; Display '*'
-        inc ebx                     ; Increment the input character count
-        cmp ebx, 20                  ; Check if 4 characters are entered
-        jl input_loop               ; If less than 4 characters, continue input
+        call ReadChar           ; Read a single character from user input
+        cmp al, 13              ; Check if Enter key (ASCII 13) is pressed
+        je done_input           ; If Enter is pressed, end input
 
-    done:
-    ret
+        cmp al, 8               ; Check if Backspace key (ASCII 8) is pressed
+        je handle_backspace
+
+        ; Store the input character if not backspace
+        mov [edi], al           ; Store the input character
+        inc edi                 ; Move to the next character position
+        inc ebx                 ; Increment the input character count
+        mov al, '*'             ; Mask the input character with '*'
+        call WriteChar          ; Display '*'
+
+        cmp ebx, 20             ; Check if the password length is valid (max 20 characters)
+        jl input_loop           ; If less than 20 characters, continue input
+
+    done_input:
+        mov holdPasswordLen, ebx ; Save the length of the input
+        ret
+
+    handle_backspace:
+        cmp ebx, 0              ; Ensure there's at least one character to delete
+        je input_loop           ; If no characters, ignore the backspace
+
+        dec edi                 ; Move back in the buffer (remove last character)
+        dec ebx                 ; Decrease input count
+        mov al, 8               ; Backspace character to erase the previous '*'
+        call WriteChar          ; Erase '*'
+        mov al, ' '             ; Write a space to clear the '*'
+        call WriteChar          ; Clear the '*'
+        mov al, 8               ; Write another backspace to move the cursor back
+        call WriteChar
+        jmp input_loop          ; Continue processing input
+
     inputPasswordMasked ENDP
 
 ;------------------------------------------CLEAR BUFFER
